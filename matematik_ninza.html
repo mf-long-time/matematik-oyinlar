@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matematik Ninza — Math Ninja Fruit Cutter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-crimson: #be123c;
+      --accent-yellow: #eab308;
+      --neon-cyan: #06b6d4;
+      --success-green: #10b981;
+      --glass-bg: rgba(15, 23, 42, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: #0f0515;
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Dojo slider background styling */
+    .dojo-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at bottom, #2d0b3d 0%, #0c0211 100%);
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .shoji-screen {
+      position: absolute;
+      top: 5%;
+      left: 5%;
+      width: 90%;
+      height: 90%;
+      border: 3px solid rgba(255, 255, 255, 0.03);
+      background: repeating-linear-gradient(to right, transparent, transparent 19%, rgba(255,255,255,0.01) 19%, rgba(255,255,255,0.01) 20%),
+                  repeating-linear-gradient(to bottom, transparent, transparent 19%, rgba(255,255,255,0.01) 19%, rgba(255,255,255,0.01) 20%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Screens setup */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Menu Panels */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 40px;
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(190, 18, 60, 0.15);
+      backdrop-filter: blur(15px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .logo-area {
+      margin-bottom: 30px;
+    }
+
+    .logo-title {
+      font-size: 3.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-crimson) 0%, var(--accent-yellow) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(190, 18, 60, 0.25);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--primary-crimson);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 15px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(190, 18, 60, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .opt-card.active {
+      background: linear-gradient(135deg, rgba(190, 18, 60, 0.2) 0%, rgba(234, 179, 8, 0.2) 100%);
+      border-color: var(--primary-crimson);
+      box-shadow: 0 0 20px rgba(190, 18, 60, 0.25);
+    }
+
+    .opt-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-crimson) 0%, var(--accent-yellow) 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(190, 18, 60, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 12px 30px rgba(190, 18, 60, 0.5);
+    }
+
+    /* Setup Header Controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--primary-crimson);
+    }
+
+    /* Gameplay Screen Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(10, 2, 15, 0.9);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Quest Panel */
+    .quest-bubble {
+      background: linear-gradient(135deg, rgba(190, 18, 60, 0.15) 0%, rgba(234, 179, 8, 0.15) 100%);
+      border: 1px solid rgba(190, 18, 60, 0.3);
+      padding: 12px 24px;
+      border-radius: 20px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(190, 18, 60, 0.15);
+      animation: pulseBorder 2s infinite alternate;
+      text-align: center;
+    }
+
+    @keyframes pulseBorder {
+      0% { border-color: rgba(190, 18, 60, 0.3); }
+      100% { border-color: rgba(234, 179, 8, 0.6); }
+    }
+
+    /* Play Tracks Layout */
+    .tracks-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tracks-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    /* HUD Bar */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      z-index: 40;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(15, 2, 20, 0.5), transparent);
+    }
+
+    .hud-label {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary-crimson);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 5px;
+      font-size: 1.4rem;
+    }
+
+    .heart {
+      color: #ef4444;
+      filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .heart.lost {
+      color: #475569;
+      filter: none;
+      transform: scale(0.8);
+    }
+
+    /* Dojo battlefield */
+    .battle-field {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+
+    /* Main canvas for rendering lines, splats, and flying halves */
+    .ninja-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+
+    /* Slicing input trigger overlays */
+    .slice-trigger-area {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+      background: transparent;
+    }
+
+    /* Keyboard lane helpers on bottom corners */
+    .keybind-helper-badge {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 30;
+      opacity: 0.45;
+    }
+
+    /* Damage flash overlay */
+    .damage-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-flash.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeTrack 0.4s ease-in-out;
+    }
+
+    @keyframes shakeTrack {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Game Over Panel Layout */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #ef4444;
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.2rem;
+      color: #cbd5e1;
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dojo backdrop screens -->
+  <div class="dojo-backdrop">
+    <div class="shoji-screen"></div>
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="setup-header-btns">
+    <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+    <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+  </div>
+
+  <!-- SETUP/MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Matematik Ninza</h1>
+        <p class="logo-subtitle">Qilichlar chaqnashi va tezkor arifmetik kesish</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Mevalarni to'g'ri kesib rekord qo'y</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Ninza jangchilar musobaqasi</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Ranglar & olma hisoblash</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Qo'shish va ayirish</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Karra jadvali & ko'paytirish</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10+ Yosh</div>
+            <div class="opt-card-desc">Bo'lish, tub sonlar</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">⚔️ Dojo Eshiklarini Ochish</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Menyu</button>
+      
+      <div class="quest-bubble" id="shared-quest">Meva kesishni boshlang...</div>
+      
+      <div class="game-info">
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+      </div>
+    </div>
+
+    <!-- Active game tracks container -->
+    <div class="tracks-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Ball: 0 / 15</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="battle-field" id="field-p1">
+          <canvas class="ninja-canvas" id="canvas-p1"></canvas>
+          <div class="slice-trigger-area" id="trigger-p1"></div>
+          
+          <span class="keybind-helper-badge">A/S/D - Yo'lak kesish | Sichqoncha - Sudrash</span>
+          <div class="damage-flash" id="flash-p1"></div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Ball: 0 / 15</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="battle-field" id="field-p2">
+          <canvas class="ninja-canvas" id="canvas-p2"></canvas>
+          <div class="slice-trigger-area" id="trigger-p2"></div>
+
+          <span class="keybind-helper-badge">←/↓/→ - Yo'lak kesish | Sichqoncha - Sudrash</span>
+          <div class="damage-flash" id="flash-p2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Siz Yutdingiz!</h2>
+      <div class="game-stats" id="gameover-details">
+        Muvaffaqiyatli kesishlar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Boshlash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'swipe') {
+        // Ninja sword whoosh sweep down frequency
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.15);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'slice') {
+        // Wet squishy slice sound
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(350, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'explode') {
+        // Bomb blast white noise
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.linearRampToValueAtTime(20, now + 0.45);
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Game variables
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('ninja_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Track active players state
+    const players = [
+      {
+        score: 0,
+        lives: 3,
+        active: true,
+        // Game lists
+        fruits: [], // array of flying fruits/bombs
+        slices: [], // array of currently flying split fruit halves
+        particles: [], // juice splats
+        trail: [], // history of 10 points mouse trail
+        isDrawing: false,
+        spawnTimer: 0,
+        // DOM nodes
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        triggerDom: null
+      },
+      {
+        score: 0,
+        lives: 3,
+        active: false,
+        fruits: [],
+        slices: [],
+        particles: [],
+        trail: [],
+        isDrawing: false,
+        spawnTimer: 0,
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        triggerDom: null
+      }
+    ];
+
+    let currentQuest = {
+      text: "",
+      validator: null
+    };
+
+    // Fruits metadata containing visual representations
+    const FRUIT_TYPES = [
+      { emoji: '🍉', color: '#10b981', juiceColor: '#10b981', text: 'Tarvuz', name: 'watermelon' },
+      { emoji: '🍎', color: '#ef4444', juiceColor: '#ef4444', text: 'Olma', name: 'apple' },
+      { emoji: '🍌', color: '#eab308', juiceColor: '#eab308', text: 'Banan', name: 'banana' },
+      { emoji: '🍊', color: '#f97316', juiceColor: '#f97316', text: 'Apelsin', name: 'orange' },
+      { emoji: '🥥', color: '#f8fafc', juiceColor: '#e2e8f0', text: 'Kokus', name: 'coconut' }
+    ];
+
+    const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+
+    function getLaunchFrequency() {
+      if (speedLevel === 'slow') return 300; // frames between spawns
+      if (speedLevel === 'fast') return 140;
+      return 200; // medium
+    }
+
+    function getPhysicsParams() {
+      if (speedLevel === 'slow') return { vy: -3.8, grav: 0.009 };
+      if (speedLevel === 'fast') return { vy: -9.5, grav: 0.10 };
+      return { vy: -8.0, grav: 0.07 }; // medium
+    }
+
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+
+    function updateSpeedBtn() {
+      const speedLabels = {
+        'slow': '🐌 Tezlik: Sekin',
+        'medium': '⚡ Tezlik: O\'rtacha',
+        'fast': '🚀 Tezlik: Tez'
+      };
+      speedBtn.textContent = speedLabels[speedLevel];
+    }
+    updateSpeedBtn();
+
+    speedBtn.addEventListener('click', () => {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('ninja_speed_level', speedLevel);
+      updateSpeedBtn();
+    });
+
+    function updateMuteBtn() {
+      muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+    }
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      updateMuteBtn();
+      if (!isMuted) playSound('click');
+    });
+
+    // Menu Card handlers
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    // Start navigation
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Quest validator generator
+    function generateTask() {
+      if (ageGroup === '4-5') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const colorMeta = FRUIT_TYPES[Math.floor(Math.random() * FRUIT_TYPES.length)];
+          return {
+            text: `⚔️ Topshiriq: Faqat ${colorMeta.text.toUpperCase()} mevalarni kes!`,
+            validator: (val, colorName) => colorName === colorMeta.name
+          };
+        } else {
+          const targetNum = Math.floor(Math.random() * 5) + 1;
+          return {
+            text: `⚔️ Topshiriq: Faqat [ ${targetNum} ] yozilgan mevalarni kes!`,
+            validator: (val) => val === targetNum
+          };
+        }
+      }
+      else if (ageGroup === '6-7') {
+        const rand = Math.random();
+        if (rand < 0.33) {
+          return {
+            text: `⚔️ Topshiriq: Faqat JUFT sonli mevalarni kes!`,
+            validator: (val) => typeof val === 'number' && val % 2 === 0
+          };
+        } else if (rand < 0.66) {
+          return {
+            text: `⚔️ Topshiriq: Faqat TOQ sonli mevalarni kes!`,
+            validator: (val) => typeof val === 'number' && val % 2 !== 0
+          };
+        } else {
+          const targetSum = Math.floor(Math.random() * 10) + 4; // 4-13
+          return {
+            text: `⚔️ Topshiriq: Javobi [ ${targetSum} ] bo'lgan mevalarni kes!`,
+            validator: (val, color, exprVal) => exprVal === targetSum
+          };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const divisor = [2, 3, 5, 10][Math.floor(Math.random() * 4)];
+          return {
+            text: `⚔️ Topshiriq: Faqat [ ${divisor} ] ga bo'linadigan sonlarni kes!`,
+            validator: (val) => typeof val === 'number' && val % divisor === 0
+          };
+        } else {
+          const targetProd = [12, 16, 18, 20, 24, 30, 36, 40][Math.floor(Math.random() * 8)];
+          return {
+            text: `⚔️ Topshiriq: Javobi [ ${targetProd} ] bo'lgan ko'paytmani kes!`,
+            validator: (val, color, exprVal) => exprVal === targetProd
+          };
+        }
+      }
+      else {
+        // 10+ yosh
+        const rand = Math.random();
+        if (rand < 0.5) {
+          return {
+            text: `⚔️ Topshiriq: Faqat TUB sonli mevalarni kes!`,
+            validator: (val) => typeof val === 'number' && PRIMES.includes(val)
+          };
+        } else {
+          const b = Math.floor(Math.random() * 5) + 2;
+          return {
+            text: `⚔️ Topshiriq: Qoldiqsiz [ ÷ ${b} ] bo'linadigan sonlarni kes!`,
+            validator: (val) => typeof val === 'number' && val % b === 0
+          };
+        }
+      }
+    }
+
+    // Generate value/label for a spawned fruit
+    function generateFruitValue() {
+      const type = FRUIT_TYPES[Math.floor(Math.random() * FRUIT_TYPES.length)];
+      
+      if (ageGroup === '4-5') {
+        const num = Math.floor(Math.random() * 5) + 1;
+        return { display: num, val: num, typeMeta: type, exprVal: num };
+      }
+      else if (ageGroup === '6-7') {
+        if (Math.random() < 0.4) {
+          const num = Math.floor(Math.random() * 15) + 1;
+          return { display: num, val: num, typeMeta: type, exprVal: num };
+        } else {
+          const a = Math.floor(Math.random() * 7) + 1;
+          const b = Math.floor(Math.random() * 7) + 1;
+          return { display: `${a}+${b}`, val: `${a}+${b}`, typeMeta: type, exprVal: a + b };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        if (Math.random() < 0.4) {
+          const num = Math.floor(Math.random() * 40) + 1;
+          return { display: num, val: num, typeMeta: type, exprVal: num };
+        } else {
+          const a = Math.floor(Math.random() * 7) + 2;
+          const b = Math.floor(Math.random() * 6) + 2;
+          return { display: `${a}×${b}`, val: `${a}×${b}`, typeMeta: type, exprVal: a * b };
+        }
+      }
+      else {
+        // 10+ yosh
+        const num = Math.floor(Math.random() * 70) + 2;
+        return { display: num, val: num, typeMeta: type, exprVal: num };
+      }
+    }
+
+    // Launch a fruit or bomb upward parabolically
+    function spawnFruit(pIdx) {
+      const p = players[pIdx];
+      const w = p.canvas.width;
+      const h = p.canvas.height;
+
+      const launch = getPhysicsVelocity();
+
+      // 15% chance to spawn a Bomb 💣
+      const isBomb = Math.random() < 0.15;
+      
+      // Select horizontal starting lane position (1/4 to 3/4 width)
+      const startX = w * 0.2 + Math.random() * (w * 0.6);
+      const startY = h + 40;
+
+      // Calculate horizontal velocity to steer towards center
+      const centerX = w / 2;
+      const startVx = (centerX - startX) * 0.015 + (Math.random() * 2 - 1);
+      const startVy = launch.vy + (Math.random() * 2 - 1);
+
+      if (isBomb) {
+        p.fruits.push({
+          isBomb: true,
+          x: startX,
+          y: startY,
+          vx: startVx,
+          vy: startVy,
+          rotation: Math.random() * Math.PI,
+          rotVel: Math.random() * 0.08 - 0.04,
+          radius: 35,
+          sliced: false
+        });
+      } 
+      else {
+        const valData = generateFruitValue();
+        p.fruits.push({
+          isBomb: false,
+          x: startX,
+          y: startY,
+          vx: startVx,
+          vy: startVy,
+          rotation: Math.random() * Math.PI,
+          rotVel: Math.random() * 0.08 - 0.04,
+          radius: 35,
+          sliced: false,
+          // metadata
+          emoji: valData.typeMeta.emoji,
+          color: valData.typeMeta.color,
+          juiceColor: valData.typeMeta.juiceColor,
+          name: valData.typeMeta.name,
+          val: valData.val,
+          exprVal: valData.exprVal,
+          display: valData.display
+        });
+      }
+    }
+
+    function initPlayers() {
+      players.forEach((p, idx) => {
+        p.canvas = document.getElementById(`canvas-p${idx + 1}`);
+        p.ctx = p.canvas ? p.canvas.getContext('2d') : null;
+        p.scoreLabel = document.getElementById(`score-label-p${idx + 1}`);
+        p.livesContainer = document.getElementById(`lives-p${idx + 1}`);
+        p.fieldDom = document.getElementById(`field-p${idx + 1}`);
+        p.triggerDom = document.getElementById(`trigger-p${idx + 1}`);
+      });
+    }
+
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active && p.canvas && p.fieldDom) {
+          p.canvas.width = p.fieldDom.offsetWidth;
+          p.canvas.height = p.fieldDom.offsetHeight;
+        }
+      });
+    }
+
+    // Start Game logic
+    function startGame() {
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      initPlayers();
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      // Generate task
+      currentQuest = generateTask();
+      document.getElementById('shared-quest').textContent = currentQuest.text;
+
+      // Reset Players
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+        
+        p.score = 0;
+        p.lives = 3;
+        p.fruits = [];
+        p.slices = [];
+        p.particles = [];
+        p.trail = [];
+        p.isDrawing = false;
+        p.spawnTimer = 0;
+
+        p.scoreLabel.textContent = `Ball: 0 / 15`;
+        updateLivesUI(idx);
+      });
+
+      setTimeout(() => {
+        resizeCanvases();
+        
+        // Spawn first immediate wave
+        players.forEach((p, idx) => {
+          if (p.active) spawnFruit(idx);
+        });
+
+      }, 150);
+
+      initAudio();
+      startGameLoop();
+    }
+
+    function updateLivesUI(pIdx) {
+      const hearts = players[pIdx].livesContainer.querySelectorAll('.heart');
+      hearts.forEach((h, i) => {
+        if (i < players[pIdx].lives) {
+          h.classList.remove('lost');
+        } else {
+          h.classList.add('lost');
+        }
+      });
+    }
+
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const track = document.getElementById(`player-${pIdx + 1}-section`);
+      
+      flash.classList.add('active');
+      track.classList.add('shake');
+      setTimeout(() => flash.classList.remove('active'), 200);
+      setTimeout(() => track.classList.remove('shake'), 400);
+    }
+
+    function spawnJuiceParticles(pIdx, x, y, color) {
+      const count = 25;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 6 + 3;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity - 1, // slight upwards splash bias
+          color: color || '#ef4444',
+          alpha: 1,
+          size: Math.random() * 8 + 4
+        });
+      }
+    }
+
+    // Process a sliced fruit or bomb
+    function processFruitSlice(pIdx, fruit) {
+      if (isGameOver || fruit.sliced) return;
+      fruit.sliced = true;
+
+      if (fruit.isBomb) {
+        // SLICED A BOMB! Explode and lose a life!
+        playSound('explode');
+        spawnJuiceParticles(pIdx, fruit.x, fruit.y, '#e2e8f0'); // white smoky blast
+        triggerDamageEffect(pIdx);
+
+        players[pIdx].lives = Math.max(0, players[pIdx].lives - 1);
+        updateLivesUI(pIdx);
+      } 
+      else {
+        // SLICED A FRUIT! Splat halves into slices array
+        playSound('slice');
+        spawnJuiceParticles(pIdx, fruit.x, fruit.y, fruit.juiceColor);
+
+        // Push two split halves flying apart dynamically
+        players[pIdx].slices.push({
+          emoji: fruit.emoji,
+          x: fruit.x,
+          y: fruit.y,
+          vx: -3.5,
+          vy: fruit.vy - 1,
+          rot: fruit.rotation,
+          rotVel: -0.06,
+          side: 'left',
+          alpha: 1
+        });
+
+        players[pIdx].slices.push({
+          emoji: fruit.emoji,
+          x: fruit.x,
+          y: fruit.y,
+          vx: 3.5,
+          vy: fruit.vy - 1,
+          rot: fruit.rotation,
+          rotVel: 0.06,
+          side: 'right',
+          alpha: 1
+        });
+
+        // Validate answer match
+        const matched = currentQuest.validator(fruit.val, fruit.name, fruit.exprVal);
+
+        if (matched) {
+          players[pIdx].score += 1;
+          players[pIdx].scoreLabel.textContent = `Ball: ${players[pIdx].score} / 15`;
+        } else {
+          // Sliced WRONG math fruit! Lose life
+          playSound('click');
+          players[pIdx].lives = Math.max(0, players[pIdx].lives - 1);
+          updateLivesUI(pIdx);
+          triggerDamageEffect(pIdx);
+        }
+      }
+
+      checkGameStatus();
+    }
+
+    // Mathematical line-segment to circle collision intersection check
+    function checkSegmentIntersection(pIdx, x1, y1, x2, y2) {
+      const p = players[pIdx];
+
+      p.fruits.forEach(fruit => {
+        if (fruit.sliced) return;
+
+        // Vector segments
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const lenSq = dx * dx + dy * dy;
+        if (lenSq === 0) return; // single point segment
+
+        // Vector projection parameter t
+        const t = Math.max(0, Math.min(1, ((fruit.x - x1) * dx + (fruit.y - y1) * dy) / lenSq));
+        
+        // Closest point on segment to circle center
+        const closestX = x1 + t * dx;
+        const closestY = y1 + t * dy;
+
+        // Distance from closest point to circle center
+        const dist = Math.hypot(fruit.x - closestX, fruit.y - closestY);
+
+        if (dist <= fruit.radius) {
+          processFruitSlice(pIdx, fruit);
+        }
+      });
+    }
+
+    // Keyboard slice triggers (laser swipe across vertical column/lane)
+    function triggerKeyboardLaneSlice(pIdx, lane) {
+      const p = players[pIdx];
+      if (isGameOver) return;
+
+      playSound('swipe');
+
+      const w = p.canvas.width;
+      const h = p.canvas.height;
+      const laneWidth = w / 3;
+
+      const minX = lane * laneWidth;
+      const maxX = (lane + 1) * laneWidth;
+
+      // Draw vertical neon slash beam in trail array
+      p.trail = [];
+      const steps = 15;
+      for (let i = 0; i < steps; i++) {
+        p.trail.push({
+          x: minX + laneWidth / 2 + (Math.random() * 10 - 5),
+          y: (h / steps) * i,
+          alpha: 1.0
+        });
+      }
+
+      // Check intersection for all fruits within this X column range
+      p.fruits.forEach(fruit => {
+        if (!fruit.sliced && fruit.x >= minX && fruit.x <= maxX) {
+          processFruitSlice(pIdx, fruit);
+        }
+      });
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        } else if (players[0].score >= 15) {
+          endGame('won');
+        }
+      } else {
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          if (players[0].score > players[1].score) endGame('p1');
+          else if (players[1].score > players[0].score) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2');
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1');
+        }
+        else if (players[0].score >= 15) {
+          endGame('p1');
+        }
+        else if (players[1].score >= 15) {
+          endGame('p2');
+        }
+      }
+    }
+
+    function endGame(status) {
+      isGameOver = true;
+      cancelAnimationFrame(mainGameLoop);
+
+      // Clean remaining fruits
+      players.forEach(p => {
+        if (p.active) {
+          p.fruits = [];
+          p.slices = [];
+        }
+      });
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      if (status === 'won') {
+        title.className = 'win-text';
+        title.textContent = 'G\'alaba! Ninza Maqomi!';
+        details.innerHTML = `Siz topshiriq mevalarini mukammal kesib chiqdingiz!<br>Ball: <strong>${players[0].score}</strong>`;
+        startConfetti();
+      } else if (status === 'lost') {
+        title.className = 'lose-text';
+        title.textContent = 'O\'yin Tugadi';
+        details.innerHTML = `Mudofaa dojosidagi barcha jonlaringiz tugadi.<br>Ball: <strong>${players[0].score}</strong>`;
+        stopConfetti();
+      } else if (status === 'p1') {
+        title.className = 'win-text';
+        title.textContent = '1-O\'yinchi G\'olib!';
+        details.innerHTML = `P1 mevalarni aniqroq kesish bo'yicha g'olib bo'ldi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else if (status === 'p2') {
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `P2 mevalarni aniqroq kesish bo'yicha g'olib bo'ldi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else {
+        title.className = 'win-text';
+        title.textContent = 'Durang!';
+        details.innerHTML = `Har ikki jangchi ham kuchli bellashdi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        stopConfetti();
+      }
+    }
+
+    // Main animation loop
+    function startGameLoop() {
+      function tick() {
+        if (isGameOver) return;
+
+        const launch = getPhysicsVelocity();
+        const spawnLimit = getLaunchFrequency();
+
+        players.forEach((p, idx) => {
+          if (!p.active) return;
+
+          const w = p.canvas.width;
+          const h = p.canvas.height;
+
+          // 1. Spawning waves timer
+          p.spawnTimer++;
+          if (p.spawnTimer >= spawnLimit) {
+            p.spawnTimer = 0;
+            // Spawn 1 fruit, and 50% chance to spawn an extra fruit
+            spawnFruit(idx);
+            if (Math.random() < 0.5) spawnFruit(idx);
+          }
+
+          // 2. Physics update: Active flying fruits & bombs
+          for (let i = p.fruits.length - 1; i >= 0; i--) {
+            const fruit = p.fruits[i];
+            
+            // Gravity parabolic fall
+            fruit.vy += launch.grav;
+            fruit.x += fruit.vx;
+            fruit.y += fruit.vy;
+            fruit.rotation += fruit.rotVel;
+
+            // Remove if falls off the bottom screen boundary
+            if (fruit.y > h + 60) {
+              p.fruits.splice(i, 1);
+            }
+          }
+
+          // 3. Physics update: Split flying fruit halves slices
+          for (let i = p.slices.length - 1; i >= 0; i--) {
+            const sl = p.slices[i];
+            sl.vy += 0.22; // split gravity fall
+            sl.x += sl.vx;
+            sl.y += sl.vy;
+            sl.rot += sl.rotVel;
+            sl.alpha -= 0.015;
+
+            if (sl.y > h + 60 || sl.alpha <= 0) {
+              p.slices.splice(i, 1);
+            }
+          }
+
+          // 4. Update canvas splash particles
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx;
+            part.y += part.vy;
+            part.vy += 0.15; // gravity fall
+            part.alpha -= 0.02;
+
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+              continue;
+            }
+          }
+
+          // 5. Fade out draw trails history
+          p.trail.forEach((pt, tIdx) => {
+            pt.alpha -= 0.08;
+          });
+          p.trail = p.trail.filter(pt => pt.alpha > 0);
+
+          // 6. RENDER Canvas components
+          const ctx = p.ctx;
+          ctx.clearRect(0, 0, w, h);
+
+          // Render active flying fruits
+          p.fruits.forEach(fruit => {
+            if (fruit.sliced) return;
+
+            ctx.save();
+            ctx.translate(fruit.x, fruit.y);
+            ctx.rotate(fruit.rotation);
+            
+            // Draw math text bubble above fruit center
+            ctx.font = "bold 1.25rem Fredoka";
+            const textWidth = ctx.measureText(fruit.isBomb ? "💣" : fruit.display).width;
+            
+            ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+            ctx.strokeStyle = fruit.isBomb ? "#ffffff" : fruit.color;
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.roundRect(-textWidth/2 - 8, -68, textWidth + 16, 32, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.textAlign = "center";
+            ctx.fillText(fruit.isBomb ? "💣" : fruit.display, 0, -45);
+
+            // Draw fruit circle backing or emoji
+            ctx.font = "3.2rem Fredoka";
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = fruit.isBomb ? "#ffffff" : fruit.color;
+            ctx.fillText(fruit.isBomb ? "💣" : fruit.emoji, 0, 10);
+            ctx.restore();
+          });
+
+          // Render split flying fruit halves slices (Canvas clip math!)
+          p.slices.forEach(sl => {
+            ctx.save();
+            ctx.globalAlpha = sl.alpha;
+            ctx.translate(sl.x, sl.y);
+            ctx.rotate(sl.rot);
+
+            ctx.font = "3.2rem Fredoka";
+            ctx.beginPath();
+            
+            // Clip the drawing based on left or right side split
+            if (sl.side === 'left') {
+              ctx.rect(-60, -60, 60, 120);
+            } else {
+              ctx.rect(0, -60, 60, 120);
+            }
+            ctx.clip();
+            ctx.fillText(sl.emoji, 0, 10);
+            ctx.restore();
+          });
+
+          // Render juice splat particles
+          p.particles.forEach(part => {
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          });
+
+          // Render glowing neon draw trail line
+          if (p.trail.length >= 2) {
+            ctx.save();
+            ctx.strokeStyle = varColorHex(idx);
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = varColorHex(idx);
+            ctx.beginPath();
+            ctx.moveTo(p.trail[0].x, p.trail[0].y);
+            
+            for (let i = 1; i < p.trail.length; i++) {
+              ctx.lineTo(p.trail[i].x, p.trail[i].y);
+            }
+            ctx.stroke();
+            ctx.restore();
+          }
+
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    function varColorHex(pIdx) {
+      return pIdx === 0 ? '#06b6d4' : '#ec4899';
+    }
+
+    // Touch click overlays slash gesture inputs
+    function setupInteraction() {
+      const bindSlices = (pIdx) => {
+        const p = players[pIdx];
+        const trigger = p.triggerDom;
+        if (!trigger) return;
+
+        let prevPoint = null;
+
+        const onStart = (e) => {
+          e.preventDefault();
+          p.isDrawing = true;
+          prevPoint = getPointFromEvent(e, trigger);
+          p.trail = [];
+          playSound('swipe');
+        };
+
+        const onMove = (e) => {
+          if (!p.isDrawing) return;
+          e.preventDefault();
+          
+          const currentPoint = getPointFromEvent(e, trigger);
+          if (prevPoint && currentPoint) {
+            p.trail.push({ x: currentPoint.x, y: currentPoint.y, alpha: 1.0 });
+            if (p.trail.length > 10) p.trail.shift();
+
+            // Check collision segment intersections
+            checkSegmentIntersection(pIdx, prevPoint.x, prevPoint.y, currentPoint.x, currentPoint.y);
+          }
+          prevPoint = currentPoint;
+        };
+
+        const onEnd = () => {
+          p.isDrawing = false;
+          prevPoint = null;
+        };
+
+        trigger.addEventListener('mousedown', onStart);
+        trigger.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+
+        trigger.addEventListener('touchstart', onStart, { passive: false });
+        trigger.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onEnd);
+      };
+
+      bindSlices(0);
+      bindSlices(1);
+    }
+
+    function getPointFromEvent(e, container) {
+      const rect = container.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    }
+
+    // Keyboard hotkeys controls
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver) return;
+
+      // P1 keys: A (left lane), S (middle lane), D (right lane)
+      if (players[0].active) {
+        if (e.key.toLowerCase() === 'a') triggerKeyboardLaneSlice(0, 0);
+        else if (e.key.toLowerCase() === 's') triggerKeyboardLaneSlice(0, 1);
+        else if (e.key.toLowerCase() === 'd') triggerKeyboardLaneSlice(0, 2);
+      }
+
+      // P2 keys: ArrowLeft (left lane), ArrowDown (middle lane), ArrowRight (right lane)
+      if (players[1].active) {
+        if (e.key === 'ArrowLeft') triggerKeyboardLaneSlice(1, 0);
+        else if (e.key === 'ArrowDown') triggerKeyboardLaneSlice(1, 1);
+        else if (e.key === 'ArrowRight') triggerKeyboardLaneSlice(1, 2);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti Engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#be123c', '#eab308', '#06b6d4', '#10b981', '#facc15'];
+      for (let i = 0; i < 100; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.04 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 12;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 10 - 5;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    // Initialize references safely on load and DOMContentLoaded
+    function safeInit() {
+      initPlayers();
+      setupInteraction();
+    }
+    window.addEventListener('load', safeInit);
+    document.addEventListener('DOMContentLoaded', safeInit);
+  </script>
+</body>
+</html>

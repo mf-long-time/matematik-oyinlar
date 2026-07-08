@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belgilar Poygasi — Space Gate Inequality Racer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-cyan: #06b6d4;
+      --accent-magenta: #d946ef;
+      --accent-yellow: #fbbf24;
+      --success-green: #10b981;
+      --danger-red: #ef4444;
+      --glass-bg: rgba(15, 23, 42, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: #02040a;
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Space backdrop */
+    .space-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #0b0f19 0%, #020306 100%);
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .grid-lines {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0.02;
+      background-image: linear-gradient(0deg, transparent 24%, rgba(6, 182, 212, .5) 25%, rgba(6, 182, 212, .5) 26%, transparent 27%, transparent 74%, rgba(6, 182, 212, .5) 75%, rgba(6, 182, 212, .5) 76%, transparent 77%), linear-gradient(90deg, transparent 24%, rgba(6, 182, 212, .5) 25%, rgba(6, 182, 212, .5) 26%, transparent 27%, transparent 74%, rgba(6, 182, 212, .5) 75%, rgba(6, 182, 212, .5) 76%, transparent 77%);
+      background-size: 60px 60px;
+    }
+
+    /* Screen manager */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Menu container */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 40px;
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 45px rgba(219, 70, 239, 0.12);
+      backdrop-filter: blur(15px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .logo-area {
+      margin-bottom: 25px;
+    }
+
+    .logo-title {
+      font-size: 3.0rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-magenta) 0%, var(--primary-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(217, 70, 239, 0.2);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.05rem;
+      color: #cbd5e1;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 22px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent-magenta);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 14px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(217, 70, 239, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .opt-card.active {
+      background: linear-gradient(135deg, rgba(217, 70, 239, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+      border-color: var(--accent-magenta);
+      box-shadow: 0 0 18px rgba(217, 70, 239, 0.25);
+    }
+
+    .opt-card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-magenta) 0%, var(--primary-cyan) 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(217, 70, 239, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(217, 70, 239, 0.45);
+    }
+
+    /* Setup Header Controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-magenta);
+    }
+
+    /* Gameplay Screen Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(5, 11, 20, 0.9);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Gameplay Lanes Grid */
+    .tracks-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tracks-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    /* HUD Bar */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 25px;
+      z-index: 40;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(5, 11, 20, 0.5), transparent);
+    }
+
+    .hud-label {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary-cyan);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 5px;
+      font-size: 1.3rem;
+    }
+
+    .shield-energy-cell {
+      color: var(--accent-magenta);
+      filter: drop-shadow(0 0 5px rgba(219, 70, 239, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .shield-energy-cell.lost {
+      color: #475569;
+      filter: none;
+      transform: scale(0.8);
+    }
+
+    /* Interactive space field */
+    .battle-field {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .reactor-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      cursor: crosshair;
+    }
+
+    /* Keyboard binds instructions badge */
+    .keyboard-badge {
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #cbd5e1;
+      padding: 8px 20px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 30;
+      text-align: center;
+      opacity: 0.85;
+      backdrop-filter: blur(10px);
+    }
+
+    /* Action banners */
+    .action-overlay-banner {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      z-index: 45;
+      font-size: 4.5rem;
+      font-weight: 900;
+      color: var(--success-green);
+      text-shadow: 0 0 25px var(--success-green), 0 0 45px #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .action-overlay-banner.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.0);
+    }
+
+    /* Flash triggers */
+    .damage-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-flash.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeTrack 0.4s ease-in-out;
+    }
+
+    @keyframes shakeTrack {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Game Over Modal styling */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--danger-red);
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.2rem;
+      color: #cbd5e1;
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background neon grid layers -->
+  <div class="space-backdrop">
+    <div class="grid-lines"></div>
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- SETUP/MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="setup-header-btns">
+      <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+      <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+    </div>
+
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Belgilar Poygasi</h1>
+        <p class="logo-subtitle">Tengsizlik darvozalari bo'ylab kosmik poyga</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Kosmik darvozalardan o'tib marraga erishing</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Tengsizlik poygasida split-screen jang</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Visual yulduzlar sonini solishtirish</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Qo'shish va ayirish darvozalari</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Ko'paytirish va bo'lish amallari</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10 Yosh</div>
+            <div class="opt-card-desc">Qavsli amallarni solishtirish</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">🚀 Poygani Boshlash</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Menyu</button>
+      
+      <div class="game-info">
+        <button id="game-speed-btn" class="btn-icon" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">⚡ O'rtacha</button>
+        <button id="game-mute-btn" class="btn-icon" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">🔊 On</button>
+        <span class="divider">|</span>
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+      </div>
+    </div>
+
+    <!-- Active game tracks wrapper -->
+    <div class="tracks-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Marragacha: 10</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="shield-energy-cell">❤️</span>
+            <span class="shield-energy-cell">❤️</span>
+            <span class="shield-energy-cell">❤️</span>
+          </div>
+        </div>
+
+        <div class="battle-field" id="field-p1">
+          <canvas class="reactor-canvas" id="canvas-p1"></canvas>
+          <div class="action-overlay-banner" id="banner-p1">MUVAFFAQIYATLI!</div>
+          <div class="keyboard-badge" id="key-badge-p1">A, S, D yoki ekrandagi yo'laklarni bosib kemani boshqaring</div>
+          <div class="damage-flash" id="flash-p1"></div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Marragacha: 10</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="shield-energy-cell">❤️</span>
+            <span class="shield-energy-cell">❤️</span>
+            <span class="shield-energy-cell">❤️</span>
+          </div>
+        </div>
+
+        <div class="battle-field" id="field-p2">
+          <canvas class="reactor-canvas" id="canvas-p2"></canvas>
+          <div class="action-overlay-banner" id="banner-p2">MUVAFFAQIYATLI!</div>
+          <div class="keyboard-badge" id="key-badge-p2">←, ↓, → yoki ekrandagi yo'laklarni bosib boshqaring</div>
+          <div class="damage-flash" id="flash-p2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Poyga Yakunlandi!</h2>
+      <div class="game-stats" id="gameover-details">
+        To'g'ri o'tilgan kiber darvozalar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Boshlash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+    let engineOsc = null;
+    let engineGain = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function startEngineSound() {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      if (engineOsc) return;
+
+      engineOsc = audioCtx.createOscillator();
+      engineGain = audioCtx.createGain();
+      
+      engineOsc.type = 'triangle';
+      engineOsc.frequency.setValueAtTime(80, audioCtx.currentTime);
+      
+      engineGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      
+      engineOsc.connect(engineGain);
+      engineGain.connect(audioCtx.destination);
+      engineOsc.start();
+    }
+
+    function setEnginePitch(pitch) {
+      if (engineOsc && !isMuted) {
+        engineOsc.frequency.setTargetAtTime(pitch, audioCtx.currentTime, 0.1);
+      }
+    }
+
+    function stopEngineSound() {
+      if (engineOsc) {
+        try {
+          engineOsc.stop();
+        } catch(e) {}
+        engineOsc = null;
+        engineGain = null;
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'pass') {
+        // Star gate pass chime sweep
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        osc.frequency.exponentialRampToValueAtTime(1300, now + 0.18);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.18);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } else if (type === 'crash') {
+        // Shield collision impact explosion
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.linearRampToValueAtTime(20, now + 0.35);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'slide') {
+        // Ship lane steer slide sound
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.linearRampToValueAtTime(400, now + 0.08);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Config settings
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('gate_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Track active players state
+    const players = [
+      {
+        scoreToGo: 10,
+        lives: 3,
+        active: true,
+        // Ship y positioning
+        shipLane: 1, // 0: Top, 1: Middle, 2: Bottom
+        shipY: 0,
+        targetShipY: 0,
+        // Approaching gate parameters
+        gateX: 1.1, // fraction of width
+        leftVal: 0,
+        rightVal: 0,
+        leftExpr: "",
+        rightExpr: "",
+        leftCoins: [], // visual coins for 4-5 yosh
+        rightCoins: [],
+        correctOp: 'eq', // 'lt', 'eq', 'gt'
+        correctLane: 1, // lane index of correct gate
+        gateColors: [],
+        collisionProcessed: false,
+        particles: [],
+        stars: [], // background scrolling starfield
+        // DOM nodes
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        bannerDom: null,
+      },
+      {
+        scoreToGo: 10,
+        lives: 3,
+        active: false,
+        shipLane: 1,
+        shipY: 0,
+        targetShipY: 0,
+        gateX: 1.1,
+        leftVal: 0,
+        rightVal: 0,
+        leftExpr: "",
+        rightExpr: "",
+        leftCoins: [],
+        rightCoins: [],
+        correctOp: 'eq',
+        correctLane: 1,
+        gateColors: [],
+        collisionProcessed: false,
+        particles: [],
+        stars: [],
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        bannerDom: null,
+      }
+    ];
+
+    // Calculate dynamic scrolling gate speed
+    function getGateMoveSpeed() {
+      let baseSpeed = 0.0022; // fraction of width per frame (medium)
+      if (speedLevel === 'slow') baseSpeed = 0.0004;   // slow
+      else if (speedLevel === 'fast') baseSpeed = 0.0033;   // fast
+
+      // Apply age group multiplier
+      if (ageGroup === '4-5') {
+        baseSpeed *= 0.50; // slow visual counting
+      } else if (ageGroup === '6-7') {
+        baseSpeed *= 0.75;
+      } else if (ageGroup === '8-9') {
+        baseSpeed *= 0.85;
+      } else if (ageGroup === '10') {
+        baseSpeed *= 0.55; // parentheses buffers
+      }
+      return baseSpeed;
+    }
+
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+    const gameSpeedBtn = document.getElementById('game-speed-btn');
+    const gameMuteBtn = document.getElementById('game-mute-btn');
+
+    function syncSettingsUI() {
+      const speedLabels = {
+        'slow': '🐌 Sekin',
+        'medium': '⚡ O\'rtacha',
+        'fast': '🚀 Tez'
+      };
+
+      if (speedBtn) speedBtn.textContent = `⚡ Tezlik: ${speedLabels[speedLevel]}`;
+      if (gameSpeedBtn) gameSpeedBtn.textContent = `⚡ ${speedLabels[speedLevel]}`;
+
+      if (muteBtn) muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+      if (gameMuteBtn) gameMuteBtn.textContent = isMuted ? '🔇 Off' : '🔊 On';
+    }
+    syncSettingsUI();
+
+    function toggleSpeed() {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('gate_speed_level', speedLevel);
+      syncSettingsUI();
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      syncSettingsUI();
+      if (!isMuted) {
+        playSound('click');
+        startEngineSound();
+      } else {
+        stopEngineSound();
+      }
+    }
+
+    if (speedBtn) speedBtn.addEventListener('click', toggleSpeed);
+    if (gameSpeedBtn) gameSpeedBtn.addEventListener('click', toggleSpeed);
+
+    if (muteBtn) muteBtn.addEventListener('click', toggleMute);
+    if (gameMuteBtn) gameMuteBtn.addEventListener('click', toggleMute);
+
+    // Menu handlers
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    // Navigation triggers
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      stopEngineSound();
+      cancelAnimationFrame(mainGameLoop);
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Equation generator (Strictly no square roots!)
+    function generateEquationValue() {
+      if (ageGroup === '4-5') {
+        const val = Math.floor(Math.random() * 5) + 1; // 1 to 5
+        return { val: val, expr: String(val) };
+      }
+      else if (ageGroup === '6-7') {
+        const rand = Math.random();
+        if (rand < 0.35) {
+          const val = Math.floor(Math.random() * 10) + 2;
+          return { val: val, expr: String(val) };
+        } else if (rand < 0.68) {
+          const a = Math.floor(Math.random() * 7) + 2;
+          const b = Math.floor(Math.random() * 6) + 1;
+          return { val: a + b, expr: `${a} + ${b}` };
+        } else {
+          const a = Math.floor(Math.random() * 8) + 6;
+          const b = Math.floor(Math.random() * 5) + 1;
+          return { val: a - b, expr: `${a} - ${b}` };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        const rand = Math.random();
+        if (rand < 0.35) {
+          const a = Math.floor(Math.random() * 6) + 2;
+          const b = Math.floor(Math.random() * 5) + 2;
+          return { val: a * b, expr: `${a} × ${b}` };
+        } else {
+          const b = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+          const val = Math.floor(Math.random() * 5) + 2;
+          return { val: val, expr: `${val * b} ÷ ${b}` };
+        }
+      }
+      else {
+        // 10 yosh (strictly NO square roots)
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const a = Math.floor(Math.random() * 6) + 8;
+          const b = Math.floor(Math.random() * 5) + 2;
+          const c = Math.floor(Math.random() * 3) + 2;
+          return { val: (a - b) * c, expr: `(${a} - ${b}) × ${c}` };
+        } else {
+          const a = Math.floor(Math.random() * 4) + 2;
+          const b = Math.floor(Math.random() * 3) + 1;
+          const c = Math.floor(Math.random() * 5) + 4;
+          return { val: (a + b) * c, expr: `(${a} + ${b}) × ${c}` };
+        }
+      }
+    }
+
+    function initPlayers() {
+      players.forEach((p, idx) => {
+        p.canvas = document.getElementById(`canvas-p${idx + 1}`);
+        p.ctx = p.canvas ? p.canvas.getContext('2d') : null;
+        p.scoreLabel = document.getElementById(`score-label-p${idx + 1}`);
+        p.livesContainer = document.getElementById(`lives-p${idx + 1}`);
+        p.fieldDom = document.getElementById(`field-p${idx + 1}`);
+        p.bannerDom = document.getElementById(`banner-p${idx + 1}`);
+      });
+    }
+
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active && p.canvas && p.fieldDom) {
+          p.canvas.width = p.fieldDom.offsetWidth;
+          p.canvas.height = p.fieldDom.offsetHeight;
+        }
+      });
+    }
+
+    function generateCoinsLayout(count) {
+      const list = [];
+      const rowSize = 3;
+      for (let i = 0; i < count; i++) {
+        const row = Math.floor(i / rowSize);
+        const col = i % rowSize;
+        const countInThisRow = Math.min(rowSize, count - row * rowSize);
+        
+        const spacing = 17;
+        const ox = (col - (countInThisRow - 1) / 2) * spacing;
+        const oy = -10 - row * 15;
+
+        list.push({
+          ox: ox,
+          oy: oy,
+          hue: 45 + (i * 30) % 50
+        });
+      }
+      return list;
+    }
+
+    function initStarfield(p) {
+      p.stars = [];
+      const count = 45;
+      for (let i = 0; i < count; i++) {
+        p.stars.push({
+          x: Math.random(),
+          y: Math.random(),
+          size: Math.random() * 2 + 1,
+          speed: Math.random() * 0.005 + 0.002
+        });
+      }
+    }
+
+    function startGame() {
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      initPlayers();
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      // Reset Players parameters
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+        
+        p.scoreToGo = 10;
+        p.lives = 3;
+        p.particles = [];
+        p.collisionProcessed = false;
+        p.shipLane = 1;
+
+        p.scoreLabel.textContent = `Marragacha: 10`;
+        updateLivesUI(idx);
+
+        initStarfield(p);
+
+        p.bannerDom.classList.remove('active');
+      });
+
+      // Bind touch tap lane events
+      bindTouchEvents();
+
+      // Load first gates wave
+      spawnNewGateWave();
+
+      setTimeout(() => {
+        resizeCanvases();
+        
+        // Re-align starting positions
+        players.forEach(p => {
+          if (p.active) {
+            const h = p.canvas.height;
+            p.shipY = h * 0.5;
+            p.targetShipY = h * 0.5;
+          }
+        });
+      }, 150);
+
+      initAudio();
+      startEngineSound();
+      startGameLoop();
+    }
+
+    function updateLivesUI(pIdx) {
+      const cells = players[pIdx].livesContainer.querySelectorAll('.shield-energy-cell');
+      cells.forEach((c, i) => {
+        if (i < players[pIdx].lives) {
+          c.classList.remove('lost');
+        } else {
+          c.classList.add('lost');
+        }
+      });
+    }
+
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const track = document.getElementById(`player-${pIdx + 1}-section`);
+      
+      flash.classList.add('active');
+      track.classList.add('shake');
+      setTimeout(() => flash.classList.remove('active'), 200);
+      setTimeout(() => track.classList.remove('shake'), 400);
+    }
+
+    function spawnGateBreakParticles(pIdx, x, y, color) {
+      const count = 30;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 5 + 3;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity,
+          alpha: 1.0,
+          size: Math.random() * 5 + 3,
+          color: color || '#06b6d4'
+        });
+      }
+    }
+
+    function spawnNewGateWave() {
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+
+        p.gateX = 1.1; // reset to right side
+        p.collisionProcessed = false;
+        p.bannerDom.classList.remove('active');
+
+        // Generate left and right expressions
+        const leftData = generateEquationValue();
+        const rightData = generateEquationValue();
+
+        p.leftVal = leftData.val;
+        p.rightVal = rightData.val;
+        p.leftExpr = leftData.expr;
+        p.rightExpr = rightData.expr;
+
+        // Operators layout logic: 3 lanes correspond to '<', '=', '>'
+        // Left gate: '<', Middle: '=', Right: '>'
+        if (p.leftVal < p.rightVal) {
+          p.correctOp = 'lt';
+          p.correctLane = 0; // top lane
+        } else if (p.leftVal > p.rightVal) {
+          p.correctOp = 'gt';
+          p.correctLane = 2; // bottom lane
+        } else {
+          p.correctOp = 'eq';
+          p.correctLane = 1; // middle lane
+        }
+
+        // Colors: Lane 0 (Lt - neon pink), Lane 1 (Eq - neon cyan), Lane 2 (Gt - neon yellow)
+        p.gateColors = ['#d946ef', '#06b6d4', '#fbbf24'];
+
+        if (ageGroup === '4-5') {
+          p.leftCoins = generateCoinsLayout(p.leftVal);
+          p.rightCoins = generateCoinsLayout(p.rightVal);
+        }
+      });
+    }
+
+    function steerShipToLane(pIdx, laneIdx) {
+      const p = players[pIdx];
+      if (isGameOver || p.collisionProcessed) return;
+
+      p.shipLane = laneIdx;
+      const h = p.canvas.height;
+      const laneY = [h * 0.25, h * 0.5, h * 0.75];
+      p.targetShipY = laneY[laneIdx];
+      playSound('slide');
+    }
+
+    function processGateCollision(pIdx, passedCorrectly) {
+      const p = players[pIdx];
+      if (p.collisionProcessed || isGameOver) return;
+
+      p.collisionProcessed = true;
+
+      const w = p.canvas.width;
+      const h = p.canvas.height;
+      const collisionX = w * 0.16;
+      const collisionY = h * (0.25 + p.shipLane * 0.25);
+
+      if (passedCorrectly) {
+        // SUCCESS
+        playSound('pass');
+        spawnGateBreakParticles(pIdx, collisionX, collisionY, '#10b981');
+        
+        p.bannerDom.classList.add('active');
+
+        p.scoreToGo = Math.max(0, p.scoreToGo - 1);
+        p.scoreLabel.textContent = `Marragacha: ${p.scoreToGo}`;
+
+        if (p.scoreToGo <= 0) {
+          endGame(pIdx === 0 ? 'p1' : 'p2');
+        }
+      } 
+      else {
+        // CRASH
+        triggerDamageEffect(pIdx);
+        playSound('crash');
+        spawnGateBreakParticles(pIdx, collisionX, collisionY, '#ef4444');
+
+        p.lives = Math.max(0, p.lives - 1);
+        updateLivesUI(pIdx);
+        checkGameStatus();
+      }
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        }
+      } else {
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          if (players[0].scoreToGo < players[1].scoreToGo) endGame('p1');
+          else if (players[1].scoreToGo < players[0].scoreToGo) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2');
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1');
+        }
+      }
+    }
+
+    function endGame(status) {
+      isGameOver = true;
+      stopEngineSound();
+      cancelAnimationFrame(mainGameLoop);
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      if (status === 'lost') {
+        title.className = 'lose-text';
+        title.textContent = 'Kema Vayron Bo\'ldi';
+        details.innerHTML = `Lazer to'siqlar kemangiz qalqonini yakson qildi.<br>Qolgan masofa: <strong>${players[0].scoreToGo} ta darvoza</strong>`;
+        stopConfetti();
+      } else if (status === 'p1') {
+        title.className = 'win-text';
+        if (gameMode === 'single') {
+          title.textContent = 'G\'alaba! Sayyoraga Qo\'ndik!';
+          details.innerHTML = `Siz barcha 10 ta kiber darvozalardan bexato o'tib, yangi sayyoraga muvaffaqiyatli qo'ndingiz!`;
+        } else {
+          title.textContent = '1-O\'yinchi G\'olib!';
+          details.innerHTML = `P1 poygada birinchi bo'lib marraga yetib keldi!<br>P1 qoldi: <strong>${players[0].scoreToGo}</strong> | P2 qoldi: <strong>${players[1].scoreToGo}</strong>`;
+        }
+        startConfetti();
+      } else if (status === 'p2') {
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `P2 poygada birinchi bo'lib marraga yetib keldi!<br>P1 qoldi: <strong>${players[0].scoreToGo}</strong> | P2 qoldi: <strong>${players[1].scoreToGo}</strong>`;
+        startConfetti();
+      } else {
+        title.className = 'win-text';
+        title.textContent = 'Durang!';
+        details.innerHTML = `P1: <strong>${players[0].scoreToGo}</strong> | P2: <strong>${players[1].scoreToGo}</strong>`;
+        stopConfetti();
+      }
+    }
+
+    // Direct touch tap to steer ship instantly
+    function bindTouchEvents() {
+      players.forEach((p, idx) => {
+        const canvas = document.getElementById(`canvas-p${idx + 1}`);
+        if (!canvas) return;
+
+        const handleTap = (e) => {
+          if (isGameOver || p.collisionProcessed) return;
+          
+          const rect = canvas.getBoundingClientRect();
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          const relativeY = clientY - rect.top;
+          const height = rect.height;
+
+          // Split height into 3 lanes (Top 36%, Middle 36%, Bottom 36%)
+          let targetLane = 1;
+          if (relativeY < height * 0.38) {
+            targetLane = 0; // Top
+          } else if (relativeY > height * 0.62) {
+            targetLane = 2; // Bottom
+          }
+
+          steerShipToLane(idx, targetLane);
+          e.preventDefault();
+        };
+
+        canvas.addEventListener('mousedown', handleTap);
+        canvas.addEventListener('touchstart', handleTap, {passive: false});
+      });
+    }
+
+    // Main game update & draw loop
+    function startGameLoop() {
+      let lastTime = performance.now();
+
+      function tick(now) {
+        if (isGameOver) return;
+
+        const delta = now - lastTime;
+        lastTime = now;
+
+        const moveSpeed = getGateMoveSpeed();
+
+        // Dynamic pitch modulation for engine noise
+        setEnginePitch(70 + Math.sin(now * 0.005) * 5);
+
+        players.forEach((p, idx) => {
+          if (!p.active) return;
+
+          const w = p.canvas.width;
+          const h = p.canvas.height;
+          const ctx = p.ctx;
+
+          // 1. Scroll starfield background
+          p.stars.forEach(star => {
+            star.x -= star.speed;
+            if (star.x < 0) {
+              star.x = 1.0;
+              star.y = Math.random();
+            }
+          });
+
+          // 2. Smoothly slide spaceship position
+          const dy = p.targetShipY - p.shipY;
+          p.shipY += dy * 0.24;
+
+          // 3. Update gate position
+          p.gateX -= moveSpeed;
+
+          const currentGateX = p.gateX * w;
+          const shipX = w * 0.16;
+
+          // 4. Collision check
+          if (!p.collisionProcessed && currentGateX <= shipX + 15) {
+            if (p.shipLane === p.correctLane) {
+              // Crossed correct gate lane
+              processGateCollision(idx, true);
+            } else {
+              // Hitted wrong lane barrier
+              processGateCollision(idx, false);
+            }
+          }
+
+          // Spawn next gate wave once previous goes offscreen left
+          if (currentGateX <= -150) {
+            spawnNewGateWave();
+          }
+
+          // Update particles
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx;
+            part.y += part.vy;
+            part.vy += 0.12; // gravity fall
+            part.alpha -= 0.02;
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+            }
+          }
+
+          // 5. RENDERING CANVAS
+          ctx.clearRect(0, 0, w, h);
+
+          // Draw starfield
+          ctx.fillStyle = '#ffffff';
+          p.stars.forEach(star => {
+            ctx.globalAlpha = star.speed * 180;
+            ctx.fillRect(star.x * w, star.y * h, star.size, star.size);
+          });
+          ctx.globalAlpha = 1.0;
+
+          // Draw 3 lanes dividing lines
+          ctx.save();
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([8, 6]);
+          [0.37, 0.63].forEach(laneYFrac => {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.beginPath();
+            ctx.moveTo(0, h * laneYFrac);
+            ctx.lineTo(w, h * laneYFrac);
+            ctx.stroke();
+          });
+          ctx.restore();
+
+          // Draw Approaching Space Gate (Kiber Darvozalar)
+          ctx.save();
+          const gateW = 28;
+          const laneH = h * 0.25;
+
+          [0, 1, 2].map(laneIdx => {
+            const gy = h * (0.25 + laneIdx * 0.25);
+            const color = p.gateColors[laneIdx];
+
+            // If collision processed, show correct gate green and wrong gates disabled dark
+            let strokeColor = color;
+            let fillAlpha = 0.04;
+            if (p.collisionProcessed) {
+              if (laneIdx === p.correctLane) {
+                strokeColor = '#10b981';
+                fillAlpha = 0.15;
+              } else {
+                strokeColor = '#334155';
+                fillAlpha = 0.01;
+              }
+            }
+
+            // Draw glowing gate arch
+            ctx.save();
+            ctx.shadowBlur = p.collisionProcessed ? 5 : 18;
+            ctx.shadowColor = strokeColor;
+            ctx.strokeStyle = strokeColor;
+            ctx.fillStyle = strokeColor;
+            ctx.lineWidth = 5;
+
+            // Draw gate barrier fill
+            ctx.globalAlpha = fillAlpha;
+            ctx.fillRect(currentGateX - gateW/2, gy - laneH/2, gateW, laneH);
+            ctx.globalAlpha = 1.0;
+
+            // Top and bottom bars
+            ctx.beginPath();
+            ctx.moveTo(currentGateX - gateW/2, gy - laneH/2);
+            ctx.lineTo(currentGateX + gateW/2, gy - laneH/2);
+            ctx.moveTo(currentGateX - gateW/2, gy + laneH/2);
+            ctx.lineTo(currentGateX + gateW/2, gy + laneH/2);
+            ctx.stroke();
+
+            // Vertical portal line
+            ctx.beginPath();
+            ctx.moveTo(currentGateX, gy - laneH/2);
+            ctx.lineTo(currentGateX, gy + laneH/2);
+            ctx.stroke();
+
+            // Draw operator label on gate vertical post
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "bold 28px 'Fredoka', sans-serif";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowBlur = 0;
+            const opStr = laneIdx === 0 ? '<' : (laneIdx === 1 ? '=' : '>');
+            
+            // Draw high-contrast backdrop backing
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+            ctx.beginPath();
+            ctx.arc(currentGateX, gy, 20, 0, Math.PI*2);
+            ctx.fill();
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Operator character
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(opStr, currentGateX, gy + 1);
+
+            ctx.restore();
+          });
+          ctx.restore();
+
+          // Draw dynamic Equation Quest at the top left/center
+          ctx.save();
+          const questX = w * 0.5;
+          const questY = 40;
+
+          // Draw backing box
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+          ctx.strokeStyle = 'rgba(217, 70, 239, 0.35)';
+          ctx.lineWidth = 2;
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = 'rgba(217, 70, 239, 0.15)';
+
+          if (ageGroup === '4-5') {
+            // Draw visual coins left and right inside quest box
+            const boxW = 230;
+            const boxH = 58;
+            ctx.beginPath();
+            ctx.roundRect(questX - boxW/2, questY - boxH/2, boxW, boxH, 15);
+            ctx.fill();
+            ctx.stroke();
+
+            // Draw center slot dotted circle
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.setLineDash([4, 3]);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(questX, questY, 14, 0, Math.PI*2);
+            ctx.stroke();
+
+            // Draw coins clusters left and right
+            p.leftCoins.forEach(coin => {
+              ctx.save();
+              ctx.fillStyle = `hsl(${coin.hue}, 95%, 60%)`;
+              ctx.beginPath();
+              ctx.arc(questX - 62 + coin.ox, questY + 14 + coin.oy, 7.5, 0, Math.PI*2);
+              ctx.fill();
+              ctx.restore();
+            });
+
+            p.rightCoins.forEach(coin => {
+              ctx.save();
+              ctx.fillStyle = `hsl(${coin.hue}, 95%, 60%)`;
+              ctx.beginPath();
+              ctx.arc(questX + 62 + coin.ox, questY + 14 + coin.oy, 7.5, 0, Math.PI*2);
+              ctx.fill();
+              ctx.restore();
+            });
+          } 
+          else {
+            // Text equation like: "12 - 4 [?] 9"
+            ctx.font = "bold 22px 'Fredoka', sans-serif";
+            const displayText = `${p.leftExpr}   ?   ${p.rightExpr}`;
+            const metrics = ctx.measureText(displayText);
+            const boxW = Math.max(metrics.width + 50, 180);
+            const boxH = 46;
+
+            ctx.beginPath();
+            ctx.roundRect(questX - boxW/2, questY - boxH/2, boxW, boxH, 15);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(displayText, questX, questY);
+          }
+          ctx.restore();
+
+          // Draw Spaceship (Kosmik Kema)
+          ctx.save();
+          ctx.translate(shipX, p.shipY);
+
+          // Ship glow trail flame
+          const flameSize = 10 + Math.random() * 8;
+          ctx.save();
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = '#f97316';
+          ctx.fillStyle = '#f97316';
+          ctx.beginPath();
+          ctx.moveTo(-20, -5);
+          ctx.lineTo(-20 - flameSize, 0);
+          ctx.lineTo(-20, 5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+
+          // Main fighter body
+          ctx.shadowBlur = 18;
+          ctx.shadowColor = idx === 0 ? '#06b6d4' : '#d946ef';
+          ctx.fillStyle = idx === 0 ? '#0891b2' : '#c084fc';
+          ctx.strokeStyle = idx === 0 ? '#22d3ee' : '#e879f9';
+          ctx.lineWidth = 3;
+
+          ctx.beginPath();
+          ctx.moveTo(-16, -10);
+          ctx.lineTo(18, 0);
+          ctx.lineTo(-16, 10);
+          ctx.lineTo(-10, 0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Wing decorations
+          ctx.fillStyle = idx === 0 ? '#22d3ee' : '#e879f9';
+          ctx.beginPath();
+          ctx.moveTo(-12, -8);
+          ctx.lineTo(-18, -16);
+          ctx.lineTo(-6, -8);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(-12, 8);
+          ctx.lineTo(-18, 16);
+          ctx.lineTo(-6, 8);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.restore();
+
+          // Render particles
+          p.particles.forEach(part => {
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI*2);
+            ctx.fill();
+            ctx.restore();
+          });
+
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    // Keyboard bindings listener
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver) return;
+
+      // P1: A (top lane), S (middle lane), D (bottom lane)
+      if (players[0].active && !players[0].collisionProcessed) {
+        const key = e.key.toLowerCase();
+        if (key === 'a') steerShipToLane(0, 0);
+        else if (key === 's') steerShipToLane(0, 1);
+        else if (key === 'd') steerShipToLane(0, 2);
+      }
+
+      // P2: Left, Down, Right Arrow keys
+      if (players[1].active && !players[1].collisionProcessed) {
+        const key = e.key;
+        if (key === 'ArrowLeft') steerShipToLane(1, 0);
+        else if (key === 'ArrowDown') steerShipToLane(1, 1);
+        else if (key === 'ArrowRight') steerShipToLane(1, 2);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti Engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#06b6d4', '#d946ef', '#10b981', '#fbbf24', '#ef4444'];
+      for (let i = 0; i < 100; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.04 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 12;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 10 - 5;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    // Confetti stop
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    function safeInit() {
+      initPlayers();
+    }
+    window.addEventListener('load', safeInit);
+    document.addEventListener('DOMContentLoaded', safeInit);
+  </script>
+</body>
+</html>

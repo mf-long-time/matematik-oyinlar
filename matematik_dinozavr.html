@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matematik Dinozavr — Math Dino Runner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-cyan: #06b6d4;
+      --accent-magenta: #d946ef;
+      --success-green: #10b981;
+      --primary-orange: #f97316;
+      --glass-bg: rgba(15, 23, 42, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: #050b14;
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Parallax neon jurassic backdrop */
+    .stadium-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #0d0c1d 0%, #1a0f30 100%);
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .lava-glow-ground {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(to top, rgba(217, 70, 239, 0.03) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Screens setup */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Menu panels */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 40px;
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(6, 182, 212, 0.15);
+      backdrop-filter: blur(15px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .logo-area {
+      margin-bottom: 30px;
+    }
+
+    .logo-title {
+      font-size: 3.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--accent-magenta) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(6, 182, 212, 0.25);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--primary-cyan);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 15px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(6, 182, 212, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .opt-card.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(217, 70, 239, 0.2) 100%);
+      border-color: var(--primary-cyan);
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
+    }
+
+    .opt-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--accent-magenta) 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 12px 30px rgba(6, 182, 212, 0.5);
+    }
+
+    /* Setup Header Controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--primary-cyan);
+    }
+
+    /* Gameplay Screen Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(5, 11, 20, 0.9);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Quest Panel */
+    .quest-bubble {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(217, 70, 239, 0.15) 100%);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 12px 24px;
+      border-radius: 20px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(6, 182, 212, 0.15);
+      animation: pulseBorder 2s infinite alternate;
+      text-align: center;
+    }
+
+    /* Play Tracks Layout */
+    .tracks-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tracks-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    /* HUD Bar */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      z-index: 40;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(5, 11, 20, 0.5), transparent);
+    }
+
+    .hud-label {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary-cyan);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 5px;
+      font-size: 1.4rem;
+    }
+
+    .heart {
+      color: #ef4444;
+      filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .heart.lost {
+      color: #475569;
+      filter: none;
+      transform: scale(0.8);
+    }
+
+    /* Dino runner track canvas container */
+    .battle-field {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .runner-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+
+    /* Cards/Buttons Choice panel at bottom of field */
+    .choice-container {
+      position: absolute;
+      bottom: 35px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px;
+      z-index: 30;
+    }
+
+    .choice-card {
+      background: rgba(15, 23, 42, 0.85);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      backdrop-filter: blur(10px);
+    }
+
+    .choice-card:hover {
+      transform: translateY(-4px) scale(1.03);
+      border-color: var(--primary-cyan);
+      box-shadow: 0 15px 30px rgba(6, 182, 212, 0.25);
+    }
+
+    .choice-card:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    /* Key indicators overlay */
+    .keyboard-badge {
+      position: absolute;
+      bottom: 135px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #cbd5e1;
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 30;
+      text-align: center;
+      opacity: 0.75;
+    }
+
+    /* Success score splash animation */
+    .action-overlay-banner {
+      position: absolute;
+      top: 35%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      z-index: 45;
+      font-size: 4.5rem;
+      font-weight: 900;
+      color: var(--primary-cyan);
+      text-shadow: 0 0 25px var(--primary-cyan), 0 0 45px #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .action-overlay-banner.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.0);
+    }
+
+    /* Damage flash overlay */
+    .damage-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-flash.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeTrack 0.4s ease-in-out;
+    }
+
+    @keyframes shakeTrack {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Game Over Panel Layout */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #ef4444;
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.2rem;
+      color: #cbd5e1;
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Layer -->
+  <div class="stadium-backdrop">
+    <div class="lava-glow-ground"></div>
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- SETUP/MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="setup-header-btns">
+      <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+      <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+    </div>
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Matematik Dinozavr</h1>
+        <p class="logo-subtitle">Paralaks neon yugurish va lazer zarbalari poygasi</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Kaktuslarni lazer bilan portlatib sakra</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Dinozavrlar o'rtasida split-screen poyga</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Olma sanash & ranglar</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Qo'shish va ayirish</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Karra jadvali & bo'lish</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10+ Yosh</div>
+            <div class="opt-card-desc">Ildizlar va aralash amallar</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">🦖 Yugurishni Boshlash</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Menyu</button>
+      
+      <div class="quest-bubble" id="shared-quest">To'siq yetib kelguncha misolni yeching!</div>
+      
+      <div class="game-info">
+        <button id="game-speed-btn" class="btn-icon" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">⚡ Tezlik</button>
+        <button id="game-mute-btn" class="btn-icon" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">🔊 On</button>
+        <span class="divider">|</span>
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+      </div>
+    </div>
+
+    <!-- Active game tracks container -->
+    <div class="tracks-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">To'siqlar: 0 / 10</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="battle-field" id="field-p1">
+          <canvas class="runner-canvas" id="canvas-p1"></canvas>
+          
+          <div class="choice-container" id="choices-p1">
+            <div class="choice-card" onclick="triggerDinoAnswer(0, 0)">-</div>
+            <div class="choice-card" onclick="triggerDinoAnswer(0, 1)">-</div>
+            <div class="choice-card" onclick="triggerDinoAnswer(0, 2)">-</div>
+          </div>
+
+          <div class="action-overlay-banner" id="banner-p1">BEXATO!</div>
+          <div class="keyboard-badge" id="key-badge-p1">A, S, D tugmalari yoki variant kartasini bosing</div>
+          
+          <div class="damage-flash" id="flash-p1"></div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">To'siqlar: 0 / 10</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="battle-field" id="field-p2">
+          <canvas class="runner-canvas" id="canvas-p2"></canvas>
+          
+          <div class="choice-container" id="choices-p2">
+            <div class="choice-card" onclick="triggerDinoAnswer(1, 0)">-</div>
+            <div class="choice-card" onclick="triggerDinoAnswer(1, 1)">-</div>
+            <div class="choice-card" onclick="triggerDinoAnswer(1, 2)">-</div>
+          </div>
+
+          <div class="action-overlay-banner" id="banner-p2">BEXATO!</div>
+          <div class="keyboard-badge" id="key-badge-p2">←, ↓, → yo'nalishlari yoki variant kartasini bosing</div>
+
+          <div class="damage-flash" id="flash-p2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Siz Yutdingiz!</h2>
+      <div class="game-stats" id="gameover-details">
+        Muvaffaqiyatli o'tilgan to'siqlar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Boshlash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'jump') {
+        // Jump pitch sweep upward
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(260, now);
+        osc.frequency.exponentialRampToValueAtTime(620, now + 0.16);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.16);
+        osc.start(now);
+        osc.stop(now + 0.16);
+      } else if (type === 'laser') {
+        // Futuristic T-Rex laser breath sweep down
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(900, now);
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.25);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      } else if (type === 'hit') {
+        // Satisfying cactus vaporize explosion sound
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.linearRampToValueAtTime(30, now + 0.2);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } else if (type === 'crash') {
+        // Dino crash bump thud
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(110, now);
+        osc.frequency.linearRampToValueAtTime(30, now + 0.3);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Game variables
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('dino_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Track active players state
+    const players = [
+      {
+        score: 0,
+        lives: 3,
+        active: true,
+        // Dino coordinates
+        dinoX: 0,
+        dinoY: 0,
+        dinoState: 'running', // 'running', 'jumping', 'blasting', 'crashed'
+        dinoFrame: 0,
+        jumpProgress: 0,
+        laserProgress: 0,
+        crashTimer: 0,
+        // Obstacles
+        obstacleX: 0,
+        obstacleType: 0, // 0 (cactus), 1 (flying dino)
+        obstacleWidth: 35,
+        obstacleHeight: 50,
+        obstacleActive: true,
+        // Parallax layers
+        bgOffset1: 0,
+        bgOffset2: 0,
+        // Particles
+        particles: [],
+        choices: [],
+        correctChoiceIndex: -1,
+        selectedChoiceIndex: -1,
+        answeredThisWave: false,
+        // DOM nodes
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        bannerDom: null,
+        choicesDom: null
+      },
+      {
+        score: 0,
+        lives: 3,
+        active: false,
+        dinoX: 0,
+        dinoY: 0,
+        dinoState: 'running',
+        dinoFrame: 0,
+        jumpProgress: 0,
+        laserProgress: 0,
+        crashTimer: 0,
+        obstacleX: 0,
+        obstacleType: 0,
+        obstacleWidth: 35,
+        obstacleHeight: 50,
+        obstacleActive: true,
+        bgOffset1: 0,
+        bgOffset2: 0,
+        particles: [],
+        choices: [],
+        correctChoiceIndex: -1,
+        selectedChoiceIndex: -1,
+        answeredThisWave: false,
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        bannerDom: null,
+        choicesDom: null
+      }
+    ];
+
+    let currentQuest = {
+      text: "",
+      correct: 0
+    };
+
+    function getDinoSpeed() {
+      let base = 4.8;
+      if (speedLevel === 'slow') base = 1.0;
+      else if (speedLevel === 'fast') base = 6.8;
+
+      // Adjust speed dynamically based on age group
+      if (ageGroup === '4-5') {
+        base *= 0.40;
+      } else if (ageGroup === '6-7') {
+        base *= 0.70;
+      } else if (ageGroup === '8-9') {
+        base *= 0.85;
+      } else if (ageGroup === '10') {
+        base *= 0.55;
+      }
+
+      return base;
+    }
+
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+    const gameSpeedBtn = document.getElementById('game-speed-btn');
+    const gameMuteBtn = document.getElementById('game-mute-btn');
+
+    function syncSettingsUI() {
+      const speedLabels = {
+        'slow': '🐌 Sekin',
+        'medium': '⚡ O\'rtacha',
+        'fast': '🚀 Tez'
+      };
+
+      if (speedBtn) speedBtn.textContent = `⚡ Tezlik: ${speedLabels[speedLevel]}`;
+      if (gameSpeedBtn) gameSpeedBtn.textContent = `⚡ ${speedLabels[speedLevel]}`;
+
+      if (muteBtn) muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+      if (gameMuteBtn) gameMuteBtn.textContent = isMuted ? '🔇 Off' : '🔊 On';
+    }
+    syncSettingsUI();
+
+    function toggleSpeed() {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('dino_speed_level', speedLevel);
+      syncSettingsUI();
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      syncSettingsUI();
+      if (!isMuted) playSound('click');
+    }
+
+    if (speedBtn) speedBtn.addEventListener('click', toggleSpeed);
+    if (gameSpeedBtn) gameSpeedBtn.addEventListener('click', toggleSpeed);
+
+    if (muteBtn) muteBtn.addEventListener('click', toggleMute);
+    if (gameMuteBtn) gameMuteBtn.addEventListener('click', toggleMute);
+
+    // Menu selections
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    // Navigation triggers
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Quest formula generator
+    function generateTask() {
+      if (ageGroup === '4-5') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const num = Math.floor(Math.random() * 5) + 3; // 3 to 7
+          const apples = '🦖'.repeat(num);
+          return {
+            text: `🦖 Kaktus: [ ${apples} ] dinozavrlarni sana va javobni tanla!`,
+            correct: num
+          };
+        } else {
+          const a = Math.floor(Math.random() * 4) + 1;
+          const b = Math.floor(Math.random() * 3) + 1;
+          return {
+            text: `🦖 Kaktus: [ ${a} + ${b} = ? ] to'g'ri sakrash tugmasini bosing!`,
+            correct: a + b
+          };
+        }
+      }
+      else if (ageGroup === '6-7') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const a = Math.floor(Math.random() * 6) + 4; // 4-9
+          const b = Math.floor(Math.random() * 5) + 2;
+          return {
+            text: `🦖 Kaktus: [ ${a} + ${b} = ? ] to'g'ri variantni bosing!`,
+            correct: a + b
+          };
+        } else {
+          const a = Math.floor(Math.random() * 7) + 8; // 8-14
+          const b = Math.floor(Math.random() * 6) + 2;
+          return {
+            text: `🦖 Kaktus: [ ${a} - ${b} = ? ] to'g'ri variantni bosing!`,
+            correct: a - b
+          };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const a = Math.floor(Math.random() * 7) + 3; // 3-9
+          const b = Math.floor(Math.random() * 5) + 2;
+          return {
+            text: `🦖 Kaktus: [ ${a} × ${b} = ? ] karra javobini yeching!`,
+            correct: a * b
+          };
+        } else {
+          const b = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+          const a = b * (Math.floor(Math.random() * 6) + 3);
+          return {
+            text: `🦖 Kaktus: [ ${a} ÷ ${b} = ? ] to'g'ri variantni bosing!`,
+            correct: a / b
+          };
+        }
+      }
+      else {
+        // 10 yosh
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const a = Math.floor(Math.random() * 8) + 12; // 12-19
+          const b = Math.floor(Math.random() * 7) + 5;  // 5-11
+          const c = Math.floor(Math.random() * 3) + 2;  // 2-4
+          return {
+            text: `🦖 Kaktus: [ (${a} - ${b}) × ${c} = ? ] to'g'ri variantni bosing!`,
+            correct: (a - b) * c
+          };
+        } else {
+          const a = Math.floor(Math.random() * 5) + 3;  // 3-7
+          const b = Math.floor(Math.random() * 4) + 2;  // 2-5
+          const c = Math.floor(Math.random() * 8) + 6;  // 6-13
+          return {
+            text: `🦖 Kaktus: [ (${a} + ${b}) × ${c} = ? ] to'g'ri variantni bosing!`,
+            correct: (a + b) * c
+          };
+        }
+      }
+    }
+
+    // Generate unique choices
+    function generateChoices() {
+      const correct = currentQuest.correct;
+      const list = [correct];
+      while (list.length < 3) {
+        const offset = Math.floor(Math.random() * 10) - 5;
+        const fake = correct + offset;
+        if (fake > 0 && !list.includes(fake)) {
+          list.push(fake);
+        }
+      }
+      return list.sort(() => Math.random() - 0.5);
+    }
+
+    function initPlayers() {
+      players.forEach((p, idx) => {
+        p.canvas = document.getElementById(`canvas-p${idx + 1}`);
+        p.ctx = p.canvas ? p.canvas.getContext('2d') : null;
+        p.scoreLabel = document.getElementById(`score-label-p${idx + 1}`);
+        p.livesContainer = document.getElementById(`lives-p${idx + 1}`);
+        p.fieldDom = document.getElementById(`field-p${idx + 1}`);
+        p.bannerDom = document.getElementById(`banner-p${idx + 1}`);
+        p.choicesDom = document.getElementById(`choices-p${idx + 1}`);
+      });
+    }
+
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active && p.canvas && p.fieldDom) {
+          p.canvas.width = p.fieldDom.offsetWidth;
+          p.canvas.height = p.fieldDom.offsetHeight;
+        }
+      });
+    }
+
+    function startGame() {
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      initPlayers();
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      // Reset Players parameters
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+        
+        p.score = 0;
+        p.lives = 3;
+        p.particles = [];
+        p.dinoState = 'running';
+        p.dinoFrame = 0;
+        p.jumpProgress = 0;
+        p.laserProgress = 0;
+        p.crashTimer = 0;
+        p.answeredThisWave = false;
+
+        p.scoreLabel.textContent = `To'siqlar: 0 / 10`;
+        updateLivesUI(idx);
+
+        p.bannerDom.classList.remove('active');
+      });
+
+      // Generate first quest
+      nextQuestWave();
+
+      setTimeout(() => {
+        resizeCanvases();
+        
+        // Re-align starting positions
+        players.forEach((p, idx) => {
+          if (p.active) {
+            alignDinoAndObstacle(idx);
+          }
+        });
+
+      }, 150);
+
+      initAudio();
+      startGameLoop();
+    }
+
+    function alignDinoAndObstacle(pIdx) {
+      const p = players[pIdx];
+      const w = p.canvas.width;
+      const h = p.canvas.height;
+
+      // Dino baseline positioning on ground
+      p.dinoX = w * 0.15;
+      p.dinoY = h * 0.72; // ground line
+
+      // Initial Obstacle starting at right edge
+      p.obstacleX = w * 1.1;
+      p.obstacleType = Math.random() < 0.35 ? 1 : 0; // 0: cactus, 1: flying dino pterodactyl
+      p.obstacleActive = true;
+    }
+
+    function updateLivesUI(pIdx) {
+      const hearts = players[pIdx].livesContainer.querySelectorAll('.heart');
+      hearts.forEach((h, i) => {
+        if (i < players[pIdx].lives) {
+          h.classList.remove('lost');
+        } else {
+          h.classList.add('lost');
+        }
+      });
+    }
+
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const track = document.getElementById(`player-${pIdx + 1}-section`);
+      
+      flash.classList.add('active');
+      track.classList.add('shake');
+      setTimeout(() => flash.classList.remove('active'), 200);
+      setTimeout(() => track.classList.remove('shake'), 400);
+    }
+
+    function spawnExplosionParticles(pIdx, x, y, color) {
+      const count = 30;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 4 + 3;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity,
+          alpha: 1.0,
+          size: Math.random() * 6 + 3,
+          color: color
+        });
+      }
+    }
+
+    function nextQuestWave() {
+      currentQuest = generateTask();
+      document.getElementById('shared-quest').textContent = currentQuest.text;
+
+      const choices = generateChoices();
+
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+
+        p.choices = choices;
+        p.correctChoiceIndex = choices.indexOf(currentQuest.correct);
+        p.selectedChoiceIndex = -1;
+        p.answeredThisWave = false;
+
+        // Render card buttons texts
+        const cards = p.choicesDom.querySelectorAll('.choice-card');
+        cards.forEach((card, cIdx) => {
+          card.textContent = choices[cIdx];
+        });
+
+        // Hide banner
+        p.bannerDom.classList.remove('active');
+        
+        // Spawn obstacle if previous got vaporized
+        if (!p.obstacleActive) {
+          p.obstacleX = p.canvas.width * 1.15;
+          p.obstacleType = Math.random() < 0.35 ? 1 : 0;
+          p.obstacleActive = true;
+        }
+      });
+    }
+
+    function triggerDinoAnswer(pIdx, choiceIndex) {
+      const p = players[pIdx];
+      if (p.answeredThisWave || isGameOver || p.dinoState === 'crashed') return;
+
+      p.answeredThisWave = true;
+      p.selectedChoiceIndex = choiceIndex;
+
+      const isCorrect = choiceIndex === p.correctChoiceIndex;
+
+      if (isCorrect) {
+        // JUMP AND LAZER COMBO!
+        p.dinoState = 'jumping';
+        p.jumpProgress = 0;
+
+        // Trigger laser breath blast if obstacle is close or flying
+        p.laserProgress = 0;
+        playSound('jump');
+        
+        setTimeout(() => {
+          playSound('laser');
+          // Draw laser line in tick render and vaporize!
+          const targetColor = p.obstacleType === 0 ? '#10b981' : '#f97316';
+          spawnExplosionParticles(pIdx, p.obstacleX, p.canvas.height * (p.obstacleType === 0 ? 0.72 : 0.58), targetColor);
+          p.obstacleActive = false;
+          playSound('hit');
+
+          // Splash Bexato banner
+          p.bannerDom.classList.add('active');
+
+          p.score += 1;
+          p.scoreLabel.textContent = `To'siqlar: ${p.score} / 10`;
+
+          if (p.score >= 10) {
+            endGame(pIdx === 0 ? 'p1' : 'p2');
+          } else {
+            setTimeout(() => {
+              nextQuestWave();
+            }, 1200);
+          }
+        }, 180);
+      } 
+      else {
+        // WRONG CHOICE: Dino stands stunned, wait to crash!
+        triggerDamageEffect(pIdx);
+        playSound('crash');
+
+        p.lives = Math.max(0, p.lives - 1);
+        updateLivesUI(pIdx);
+
+        checkGameStatus();
+        
+        // Stun Dino
+        p.dinoState = 'crashed';
+        p.crashTimer = 25; // 25 frames flash/shake
+      }
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        }
+      } else {
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          if (players[0].score > players[1].score) endGame('p1');
+          else if (players[1].score > players[0].score) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2');
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1');
+        }
+      }
+    }
+
+    function endGame(status) {
+      isGameOver = true;
+      cancelAnimationFrame(mainGameLoop);
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      if (status === 'lost') {
+        title.className = 'lose-text';
+        title.textContent = 'O\'yin Tugadi';
+        details.innerHTML = `Dinozavringiz to'siqlarga urilib charchadi.<br>O'tilgan to'siqlar: <strong>${players[0].score}</strong>`;
+        stopConfetti();
+      } else if (status === 'p1') {
+        title.className = 'win-text';
+        if (gameMode === 'single') {
+          title.textContent = 'G\'alaba! Dino Qirol!';
+          details.innerHTML = `Siz 10 ta to'siqdan bexato yugurib o'tdingiz!`;
+        } else {
+          title.textContent = '1-O\'yinchi G\'olib!';
+          details.innerHTML = `P1 marraga birinchi bo'lib yetib keldi!<br>P1 ochko: <strong>${players[0].score}</strong> | P2 ochko: <strong>${players[1].score}</strong>`;
+        }
+        startConfetti();
+      } else if (status === 'p2') {
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `P2 marraga birinchi bo'lib yetib keldi!<br>P1 ochko: <strong>${players[0].score}</strong> | P2 ochko: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else {
+        title.className = 'win-text';
+        title.textContent = 'Durang!';
+        details.innerHTML = `P1: <strong>${players[0].score}</strong> | P2: <strong>${players[1].score}</strong>`;
+        stopConfetti();
+      }
+    }
+
+    // Main animation loop
+    function startGameLoop() {
+      function tick() {
+        if (isGameOver) return;
+
+        const baseSpeed = getDinoSpeed();
+
+        players.forEach((p, idx) => {
+          if (!p.active) return;
+
+          const w = p.canvas.width;
+          const h = p.canvas.height;
+          const groundY = h * 0.72;
+
+          p.dinoFrame++;
+
+          // 1. Parallax background offsets scrolling
+          p.bgOffset1 -= baseSpeed * 0.2;
+          p.bgOffset2 -= baseSpeed * 0.5;
+
+          // 2. Obstacle moving left under speed
+          if (p.obstacleActive) {
+            p.obstacleX -= baseSpeed;
+            
+            // Crash threshold check (if dino reaches obstacle without correct jump)
+            const crashRange = p.dinoX + 35;
+            if (p.obstacleX <= crashRange && p.obstacleX > p.dinoX - 20) {
+              // Check if dino is high enough to jump over it
+              const currentDinoHeight = groundY - p.dinoY;
+              const obstacleHeightThreshold = p.obstacleType === 0 ? 30 : 65;
+
+              if (p.dinoState === 'jumping' && currentDinoHeight > obstacleHeightThreshold) {
+                // Safely jumped over!
+              } 
+              else {
+                // BOOM! CRASH
+                p.obstacleActive = false;
+                triggerDamageEffect(idx);
+                playSound('crash');
+
+                p.lives = Math.max(0, p.lives - 1);
+                updateLivesUI(idx);
+                checkGameStatus();
+
+                p.dinoState = 'crashed';
+                p.crashTimer = 25;
+
+                if (!isGameOver) {
+                  setTimeout(() => {
+                    nextQuestWave();
+                  }, 1200);
+                }
+              }
+            }
+
+            // If obstacle exits left border
+            if (p.obstacleX < -60) {
+              p.obstacleActive = false;
+              if (!isGameOver) {
+                nextQuestWave();
+              }
+            }
+          }
+
+          // 3. Dino State mechanics
+          if (p.dinoState === 'jumping') {
+            p.jumpProgress += 0.045; // jump duration velocity
+            if (p.jumpProgress >= 1.0) {
+              p.dinoState = 'running';
+              p.dinoY = groundY;
+            } else {
+              // Parabolic jump path curve
+              const maxJump = h * 0.38;
+              p.dinoY = groundY - Math.sin(p.jumpProgress * Math.PI) * maxJump;
+            }
+          }
+
+          if (p.dinoState === 'crashed') {
+            p.crashTimer--;
+            if (p.crashTimer <= 0) {
+              p.dinoState = 'running';
+              p.dinoY = groundY;
+            }
+          }
+
+          // 4. Update canvas confetti particles
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx;
+            part.y += part.vy;
+            part.vy += 0.15; // gravity fall
+            part.alpha -= 0.025;
+
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+            }
+          }
+
+          // 5. RENDER Canvas
+          const ctx = p.ctx;
+          ctx.clearRect(0, 0, w, h);
+
+          // Draw Parallax Mountains background (layer 1)
+          ctx.save();
+          ctx.strokeStyle = 'rgba(217, 70, 239, 0.05)';
+          ctx.lineWidth = 2.5;
+          ctx.shadowBlur = 0;
+
+          const mtW = 350;
+          for (let offset = (p.bgOffset1 % mtW) - mtW; offset < w + mtW; offset += mtW) {
+            ctx.beginPath();
+            ctx.moveTo(offset, groundY);
+            ctx.lineTo(offset + mtW * 0.5, groundY - 140);
+            ctx.lineTo(offset + mtW, groundY);
+            ctx.stroke();
+          }
+          ctx.restore();
+
+          // Draw Parallax Palm trees/obstacles (layer 2)
+          ctx.save();
+          ctx.strokeStyle = 'rgba(6, 182, 212, 0.12)';
+          ctx.lineWidth = 1.5;
+          const treeW = 180;
+          for (let offset = (p.bgOffset2 % treeW) - treeW; offset < w + treeW; offset += treeW) {
+            ctx.beginPath();
+            ctx.moveTo(offset, groundY);
+            ctx.lineTo(offset, groundY - 60);
+            ctx.moveTo(offset - 10, groundY - 45);
+            ctx.lineTo(offset + 10, groundY - 45);
+            ctx.stroke();
+          }
+          ctx.restore();
+
+          // Draw Glowing Neon Floor/Ground Line
+          ctx.save();
+          ctx.strokeStyle = idx === 0 ? '#06b6d4' : '#d946ef';
+          ctx.lineWidth = 6;
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = idx === 0 ? '#06b6d4' : '#d946ef';
+          ctx.beginPath();
+          ctx.moveTo(0, groundY);
+          ctx.lineTo(w, groundY);
+          ctx.stroke();
+          ctx.restore();
+
+          // Draw Neon Cactus or Pterodactyl Obstacle
+          if (p.obstacleActive) {
+            ctx.save();
+            const obsY = p.obstacleType === 0 ? groundY : groundY - 80;
+            ctx.translate(p.obstacleX, obsY);
+            
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = p.obstacleType === 0 ? '#10b981' : '#f97316';
+            ctx.strokeStyle = p.obstacleType === 0 ? '#10b981' : '#f97316';
+            ctx.lineWidth = 3.5;
+
+            if (p.obstacleType === 0) {
+              // Draw Neon Cactus
+              ctx.beginPath();
+              ctx.moveTo(0, 0);
+              ctx.lineTo(0, -50); // main shaft
+              ctx.moveTo(-15, -35);
+              ctx.quadraticCurveTo(-15, -20, 0, -20); // left branch
+              ctx.moveTo(15, -42);
+              ctx.quadraticCurveTo(15, -28, 0, -28); // right branch
+              ctx.stroke();
+            } else {
+              // Draw Neon Pterodactyl flying
+              const wingOffset = Math.sin(p.dinoFrame * 0.2) * 15;
+              ctx.beginPath();
+              ctx.moveTo(-20, 0);
+              ctx.lineTo(0, -8);
+              ctx.lineTo(20, 0); // body
+              ctx.moveTo(0, -8);
+              ctx.lineTo(-5, -8 - wingOffset); // left wing
+              ctx.moveTo(0, -8);
+              ctx.lineTo(5, -8 - wingOffset); // right wing
+              ctx.stroke();
+            }
+            ctx.restore();
+          }
+
+          // Draw Glowing Cute Dino T-Rex 🦖
+          ctx.save();
+          ctx.translate(p.dinoX, p.dinoY);
+          
+          if (p.dinoState === 'crashed') {
+            // Shake/flash knocked back
+            ctx.rotate(0.25);
+            ctx.translate(-8, 5);
+          }
+
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = p.dinoState === 'crashed' ? '#ef4444' : varColorHex(idx);
+          ctx.strokeStyle = p.dinoState === 'crashed' ? '#ef4444' : varColorHex(idx);
+          ctx.lineWidth = 4;
+
+          // Draw T-Rex head body outline
+          ctx.beginPath();
+          ctx.moveTo(-22, -15); // tail base
+          ctx.quadraticCurveTo(-38, -35, -45, -2); // long tail bend
+          ctx.quadraticCurveTo(-25, 10, -10, 0); // under belly
+          
+          // Legs running cycling
+          const leftLegY = p.dinoState === 'running' ? Math.sin(p.dinoFrame * 0.25) * 8 : 0;
+          const rightLegY = p.dinoState === 'running' ? Math.sin(p.dinoFrame * 0.25 + Math.PI) * 8 : 0;
+          ctx.moveTo(-18, 0); ctx.lineTo(-18, 12 + leftLegY); // back leg
+          ctx.moveTo(-8, 0); ctx.lineTo(-8, 12 + rightLegY);  // front leg
+
+          // Upper body and head
+          ctx.moveTo(-15, -12);
+          ctx.lineTo(-10, -32); // neck
+          ctx.lineTo(10, -32); // jaw top
+          ctx.lineTo(10, -22); // mouth mouth front
+          ctx.lineTo(-2, -22); // mouth inner gap
+          ctx.lineTo(-10, -18); // lower neck
+
+          // Small hands
+          ctx.moveTo(-6, -18);
+          ctx.lineTo(2, -14);
+
+          ctx.stroke();
+
+          // Cute glowing eye dot
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(2, -28, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Draw mouth firing laser blast ⚡
+          if (p.dinoState === 'jumping' && p.obstacleActive === false) {
+            ctx.restore();
+            ctx.save();
+            ctx.strokeStyle = '#22d3ee';
+            ctx.lineWidth = 5;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#06b6d4';
+            
+            ctx.beginPath();
+            ctx.moveTo(p.dinoX + 10, p.dinoY - 26);
+            ctx.lineTo(p.obstacleX, p.canvas.height * (p.obstacleType === 0 ? 0.72 : 0.58) - 15);
+            ctx.stroke();
+          }
+
+          ctx.restore();
+
+          // Render hit particles
+          p.particles.forEach(part => {
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          });
+
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    function varColorHex(pIdx) {
+      return pIdx === 0 ? '#06b6d4' : '#d946ef';
+    }
+
+    // Keyboard bindings listener
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver) return;
+
+      // P1: A (opt 1), S (opt 2), D (opt 3)
+      if (players[0].active && !players[0].answeredThisWave && players[0].dinoState !== 'crashed') {
+        if (e.key.toLowerCase() === 'a') triggerDinoAnswer(0, 0);
+        else if (e.key.toLowerCase() === 's') triggerDinoAnswer(0, 1);
+        else if (e.key.toLowerCase() === 'd') triggerDinoAnswer(0, 2);
+      }
+
+      // P2: ArrowLeft, ArrowDown, ArrowRight
+      if (players[1].active && !players[1].answeredThisWave && players[1].dinoState !== 'crashed') {
+        if (e.key === 'ArrowLeft') triggerDinoAnswer(1, 0);
+        else if (e.key === 'ArrowDown') triggerDinoAnswer(1, 1);
+        else if (e.key === 'ArrowRight') triggerDinoAnswer(1, 2);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti Engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#06b6d4', '#d946ef', '#10b981', '#facc15', '#ef4444'];
+      for (let i = 0; i < 100; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.04 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 12;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 10 - 5;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    function safeInit() {
+      initPlayers();
+    }
+    window.addEventListener('load', safeInit);
+    document.addEventListener('DOMContentLoaded', safeInit);
+  </script>
+</body>
+</html>

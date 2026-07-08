@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matematik Baliqchi — Math Fishing Adventure</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-blue: #0ea5e9;
+      --accent-pink: #ec4899;
+      --success-green: #10b981;
+      --coral-orange: #f97316;
+      --glass-bg: rgba(15, 23, 42, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: linear-gradient(to bottom, #0c4a6e 0%, #082f49 100%);
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Underwater aesthetic backdrop */
+    .sea-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    /* Sea anemones and coral shadows */
+    .corals {
+      position: absolute;
+      bottom: -20px;
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(to top, #0f172a 0%, transparent 100%);
+      opacity: 0.5;
+      z-index: 2;
+    }
+
+    /* Screens setup */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Menu container panels */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 40px;
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 40px rgba(14, 165, 233, 0.15);
+      backdrop-filter: blur(15px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .logo-area {
+      margin-bottom: 30px;
+    }
+
+    .logo-title {
+      font-size: 3.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(14, 165, 233, 0.25);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--primary-blue);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 15px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(14, 165, 233, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .opt-card.active {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 20px rgba(14, 165, 233, 0.25);
+    }
+
+    .opt-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-pink) 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 12px 30px rgba(14, 165, 233, 0.5);
+    }
+
+    /* Setup Header Controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--primary-blue);
+    }
+
+    /* Gameplay Screen Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(15, 23, 42, 0.85);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Quest Panel */
+    .quest-bubble {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(236, 72, 153, 0.15) 100%);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+      padding: 12px 24px;
+      border-radius: 20px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(14, 165, 233, 0.15);
+      animation: pulseBorder 2s infinite alternate;
+      text-align: center;
+    }
+
+    @keyframes pulseBorder {
+      0% { border-color: rgba(14, 165, 233, 0.3); }
+      100% { border-color: rgba(236, 72, 153, 0.6); }
+    }
+
+    /* Play Tracks Layout */
+    .tracks-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tracks-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    /* HUD Bar */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      z-index: 40;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(12, 74, 110, 0.5), transparent);
+    }
+
+    .hud-label {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary-blue);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 5px;
+      font-size: 1.4rem;
+    }
+
+    .heart {
+      color: #ef4444;
+      filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .heart.lost {
+      color: #475569;
+      filter: none;
+      transform: scale(0.8);
+    }
+
+    /* Fishing field rendering aquarium */
+    .fishing-field {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      background: #082f49;
+    }
+
+    /* Main canvas for water drawing, claw rope and particles */
+    .fishing-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+
+    /* Fisherman boat element */
+    .boat {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 38px;
+      background: linear-gradient(to bottom, #f97316 0%, #ea580c 100%);
+      border-radius: 0 0 16px 16px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+      z-index: 10;
+    }
+
+    .boat::before {
+      content: '🎣';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.4rem;
+    }
+
+    /* Swim Fish elements */
+    .fish {
+      position: absolute;
+      width: 70px;
+      height: 46px;
+      z-index: 8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 0 8px currentColor);
+      transition: transform 0.2s;
+    }
+
+    /* Custom CSS styled fish shape */
+    .fish-body {
+      position: absolute;
+      width: 50px;
+      height: 30px;
+      background: currentColor;
+      border-radius: 50%;
+      left: 10px;
+    }
+
+    .fish-tail {
+      position: absolute;
+      width: 15px;
+      height: 20px;
+      background: currentColor;
+      clip-path: polygon(0% 50%, 100% 0%, 75% 50%, 100% 100%);
+      left: 0px;
+      animation: wagTail 0.3s ease-in-out infinite alternate;
+    }
+
+    .fish.dir-right .fish-tail {
+      left: 55px;
+      transform: scaleX(-1);
+    }
+    .fish.dir-right .fish-body {
+      left: 10px;
+    }
+
+    @keyframes wagTail {
+      0% { transform: skewY(-10deg); }
+      100% { transform: skewY(10deg); }
+    }
+
+    .fish-label {
+      position: absolute;
+      color: #0f172a;
+      font-size: 0.95rem;
+      font-weight: 700;
+      z-index: 12;
+      pointer-events: none;
+      text-shadow: 0 1px 1px rgba(255,255,255,0.7);
+    }
+
+    /* Catch launch triggers (Touch overlay) */
+    .shoot-trigger {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      outline: none;
+      border: none;
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    /* Keyboard guides overlay badge */
+    .keybind-helper-badge {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 30;
+      opacity: 0.5;
+    }
+
+    /* Damage flash overlays */
+    .damage-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-flash.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeTrack 0.4s ease-in-out;
+    }
+
+    @keyframes shakeTrack {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Game Over Layout */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #ef4444;
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.2rem;
+      color: #cbd5e1;
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sea-background">
+    <div class="corals"></div>
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="setup-header-btns">
+    <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+    <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+  </div>
+
+  <!-- SETUP/MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Matematik Baliqchi</h1>
+        <p class="logo-subtitle">Suv ostidagi arifmetik akvarium sarguzashtlari</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Darvozani topib, baliqlarni tut</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Baliqchilar musobaqasi (Poyga)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Rang va oddiy sanash</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Juft/Toq, hisoblash</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Karra jadvali shossesi</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10+ Yosh</div>
+            <div class="opt-card-desc">Bo'lish, tub sonlar</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">🎣 Qayiqlarga Chiqish</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Menyu</button>
+      
+      <div class="quest-bubble" id="shared-quest">Baliq tutishni boshlaymiz...</div>
+      
+      <div class="game-info">
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+      </div>
+    </div>
+
+    <!-- Active game tracks container -->
+    <div class="tracks-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Ball: 0</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="fishing-field" id="field-p1">
+          <div class="boat" id="boat-p1"></div>
+          <canvas class="fishing-canvas" id="canvas-p1"></canvas>
+          
+          <!-- Touch / click trigger overlay -->
+          <button class="shoot-trigger" id="trigger-p1"></button>
+
+          <span class="keybind-helper-badge">SPACE / S yoki Ekranni bosing</span>
+          <div class="damage-flash" id="flash-p1"></div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Ball: 0</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="fishing-field" id="field-p2">
+          <div class="boat" id="boat-p2"></div>
+          <canvas class="fishing-canvas" id="canvas-p2"></canvas>
+          
+          <!-- Touch / click trigger overlay -->
+          <button class="shoot-trigger" id="trigger-p2"></button>
+
+          <span class="keybind-helper-badge">ARROW DOWN / ENTER yoki Ekranni bosing</span>
+          <div class="damage-flash" id="flash-p2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Siz Yutdingiz!</h2>
+      <div class="game-stats" id="gameover-details">
+        Tutilgan baliqlar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Boshlash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'success') {
+        // Watery splash chime
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(1000, now + 0.18);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.18);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } else if (type === 'crash') {
+        // Wet splash fail buzz
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.linearRampToValueAtTime(50, now + 0.35);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'shoot') {
+        // Winch release buzz
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.linearRampToValueAtTime(300, now + 0.15);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Game states variables
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('fishing_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Track active players state
+    const players = [
+      {
+        score: 0,
+        lives: 3,
+        // Claw hook specs
+        hookX: 0,
+        hookY: 38,
+        hookLength: 30, // current length extended
+        hookAngle: 0, // current rotation angle
+        hookAngleDir: 1, // swinging left or right (1 or -1)
+        hookState: 'swing', // 'swing', 'shoot', 'retract'
+        caughtFish: null, // pointer to fish object locked to claw
+        active: true,
+        // DOM nodes
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        boatDom: null,
+        fishList: [], // array of fish objects locally swimming
+        particles: [],
+        bubbleTimer: 0
+      },
+      {
+        score: 0,
+        lives: 3,
+        hookX: 0,
+        hookY: 38,
+        hookLength: 30,
+        hookAngle: 0,
+        hookAngleDir: 1,
+        hookState: 'swing',
+        caughtFish: null,
+        active: false,
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        boatDom: null,
+        fishList: [],
+        particles: [],
+        bubbleTimer: 0
+      }
+    ];
+
+    let currentQuest = {
+      text: "",
+      validator: null
+    };
+
+    // Color definitions for fish
+    const FISH_COLORS = [
+      { name: 'gold', hex: '#eab308', text: 'Sariq' },
+      { name: 'pink', hex: '#ec4899', text: 'Pushti' },
+      { name: 'cyan', hex: '#06b6d4', text: 'Moviy' }
+    ];
+
+    const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+
+    function getSwimSpeedMultiplier() {
+      if (speedLevel === 'slow') return 0.08;
+      if (speedLevel === 'fast') return 1.35;
+      return 0.85; // medium
+    }
+
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+
+    function updateSpeedBtn() {
+      const speedLabels = {
+        'slow': '🐌 Tezlik: Sekin',
+        'medium': '⚡ Tezlik: O\'rtacha',
+        'fast': '🚀 Tezlik: Tez'
+      };
+      speedBtn.textContent = speedLabels[speedLevel];
+    }
+    updateSpeedBtn();
+
+    speedBtn.addEventListener('click', () => {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('fishing_speed_level', speedLevel);
+      updateSpeedBtn();
+    });
+
+    function updateMuteBtn() {
+      muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+    }
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      updateMuteBtn();
+      if (!isMuted) playSound('click');
+    });
+
+    // Menu Card handlers
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    // Start navigation
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Quest generator
+    function generateTask() {
+      if (ageGroup === '4-5') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const color = FISH_COLORS[Math.floor(Math.random() * FISH_COLORS.length)];
+          return {
+            text: `🎣 Topshiriq: Faqat ${color.text.toUpperCase()} baliqlarni tut!`,
+            validator: (val, colorName) => colorName === color.name
+          };
+        } else {
+          const targetNum = Math.floor(Math.random() * 5) + 1;
+          return {
+            text: `🎣 Topshiriq: Faqat [ ${targetNum} ] yozilgan baliqni tut!`,
+            validator: (val) => val === targetNum
+          };
+        }
+      }
+      else if (ageGroup === '6-7') {
+        const rand = Math.random();
+        if (rand < 0.33) {
+          return {
+            text: `🎣 Topshiriq: Faqat JUFT sonli baliqlarni tut!`,
+            validator: (val) => typeof val === 'number' && val % 2 === 0
+          };
+        } else if (rand < 0.66) {
+          return {
+            text: `🎣 Topshiriq: Faqat TOQ sonli baliqlarni tut!`,
+            validator: (val) => typeof val === 'number' && val % 2 !== 0
+          };
+        } else {
+          const targetSum = Math.floor(Math.random() * 10) + 4; // 4-13
+          return {
+            text: `🎣 Topshiriq: Javobi [ ${targetSum} ] bo'lgan baliqni tut!`,
+            validator: (val, color, exprVal) => exprVal === targetSum
+          };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const divisor = [2, 3, 5, 10][Math.floor(Math.random() * 4)];
+          return {
+            text: `🎣 Topshiriq: Faqat [ ${divisor} ] ga bo'linadigan sonlarni tut!`,
+            validator: (val) => typeof val === 'number' && val % divisor === 0
+          };
+        } else {
+          const targetProd = [12, 16, 18, 20, 24, 30, 36, 40][Math.floor(Math.random() * 8)];
+          return {
+            text: `🎣 Topshiriq: Javobi [ ${targetProd} ] bo'lgan ko'paytmani tut!`,
+            validator: (val, color, exprVal) => exprVal === targetProd
+          };
+        }
+      }
+      else {
+        // 10+ yosh
+        const rand = Math.random();
+        if (rand < 0.5) {
+          return {
+            text: `🎣 Topshiriq: Faqat TUB sonli baliqlarni tut!`,
+            validator: (val) => typeof val === 'number' && PRIMES.includes(val)
+          };
+        } else {
+          const b = Math.floor(Math.random() * 5) + 2;
+          return {
+            text: `🎣 Topshiriq: Qoldiqsiz [ ÷ ${b} ] bo'linadigan sonlarni tut!`,
+            validator: (val) => typeof val === 'number' && val % b === 0
+          };
+        }
+      }
+    }
+
+    // Generate value for a single fish
+    function generateFishValue() {
+      const color = FISH_COLORS[Math.floor(Math.random() * FISH_COLORS.length)];
+      
+      if (ageGroup === '4-5') {
+        const num = Math.floor(Math.random() * 5) + 1;
+        return { display: num, val: num, color: color.name, exprVal: num };
+      }
+      else if (ageGroup === '6-7') {
+        if (Math.random() < 0.4) {
+          const num = Math.floor(Math.random() * 15) + 1;
+          return { display: num, val: num, color: color.name, exprVal: num };
+        } else {
+          const a = Math.floor(Math.random() * 7) + 1;
+          const b = Math.floor(Math.random() * 7) + 1;
+          return { display: `${a}+${b}`, val: `${a}+${b}`, color: color.name, exprVal: a + b };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        if (Math.random() < 0.4) {
+          const num = Math.floor(Math.random() * 40) + 1;
+          return { display: num, val: num, color: color.name, exprVal: num };
+        } else {
+          const a = Math.floor(Math.random() * 7) + 2;
+          const b = Math.floor(Math.random() * 6) + 2;
+          return { display: `${a}×${b}`, val: `${a}×${b}`, color: color.name, exprVal: a * b };
+        }
+      }
+      else {
+        // 10+ yosh
+        const num = Math.floor(Math.random() * 70) + 2;
+        return { display: num, val: num, color: color.name, exprVal: num };
+      }
+    }
+
+    // Spawn HTML fish inside player section
+    function spawnFishDom(pIdx, index) {
+      const p = players[pIdx];
+      const field = p.fieldDom;
+      
+      // Remove previous fish at index if exists
+      if (p.fishList[index]) {
+        p.fishList[index].dom.remove();
+      }
+
+      const valData = generateFishValue();
+
+      const fDom = document.createElement('div');
+      fDom.className = 'fish';
+      
+      // Color fish
+      const colorHex = FISH_COLORS.find(c => c.name === valData.color).hex;
+      fDom.style.color = colorHex;
+
+      // Draw SVG fish inside div for better vector sizing
+      fDom.innerHTML = `
+        <div class="fish-tail"></div>
+        <div class="fish-body"></div>
+        <div class="fish-label">${valData.display}</div>
+      `;
+
+      // Set random swimming direction, height level
+      const dirRight = Math.random() < 0.5;
+      const startX = dirRight ? -80 : field.offsetWidth + 20;
+      
+      // Stagger vertical depth (5 rows)
+      const rowY = 150 + (index * 70) + (Math.random() * 20);
+      
+      fDom.style.left = `${startX}px`;
+      fDom.style.top = `${rowY}px`;
+      
+      if (dirRight) {
+        fDom.classList.add('dir-right');
+      }
+
+      field.appendChild(fDom);
+
+      p.fishList[index] = {
+        dom: fDom,
+        x: startX,
+        y: rowY,
+        w: 70,
+        h: 46,
+        color: valData.color,
+        val: valData.val,
+        exprVal: valData.exprVal,
+        display: valData.display,
+        dirRight: dirRight,
+        speed: (Math.random() * 1.2 + 0.8) * (dirRight ? 1 : -1)
+      };
+    }
+
+    function initPlayers() {
+      players.forEach((p, idx) => {
+        p.canvas = document.getElementById(`canvas-p${idx + 1}`);
+        p.ctx = p.canvas ? p.canvas.getContext('2d') : null;
+        p.scoreLabel = document.getElementById(`score-label-p${idx + 1}`);
+        p.livesContainer = document.getElementById(`lives-p${idx + 1}`);
+        p.fieldDom = document.getElementById(`field-p${idx + 1}`);
+        p.boatDom = document.getElementById(`boat-p${idx + 1}`);
+      });
+    }
+
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active && p.canvas && p.fieldDom) {
+          p.canvas.width = p.fieldDom.offsetWidth;
+          p.canvas.height = p.fieldDom.offsetHeight;
+        }
+      });
+    }
+
+    // Start Game logic
+    function startGame() {
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      initPlayers();
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      // Generate task
+      currentQuest = generateTask();
+      document.getElementById('shared-quest').textContent = currentQuest.text;
+
+      // Reset Players
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+        
+        p.score = 0;
+        p.lives = 3;
+        p.particles = [];
+        p.scoreLabel.textContent = `Ball: 0`;
+        updateLivesUI(idx);
+
+        // Clear existing fish elements in field
+        p.fieldDom.querySelectorAll('.fish').forEach(f => f.remove());
+        p.fishList = [];
+
+        // Center hook coordinate
+        p.hookX = p.fieldDom.offsetWidth / 2;
+        p.hookY = 38;
+        p.hookLength = 30;
+        p.hookAngle = 0;
+        p.hookAngleDir = 1;
+        p.hookState = 'swing';
+        p.caughtFish = null;
+        
+        // Spawn 5 rows of exotic fish
+        for (let i = 0; i < 5; i++) {
+          spawnFishDom(idx, i);
+        }
+      });
+
+      setTimeout(() => {
+        resizeCanvases();
+        
+        // Recenter hook positions properly based on actual width
+        players.forEach((p, idx) => {
+          if (p.active) {
+            p.hookX = p.fieldDom.offsetWidth / 2;
+          }
+        });
+
+      }, 150);
+
+      initAudio();
+      startGameLoop();
+    }
+
+    function updateLivesUI(pIdx) {
+      const hearts = players[pIdx].livesContainer.querySelectorAll('.heart');
+      hearts.forEach((h, i) => {
+        if (i < players[pIdx].lives) {
+          h.classList.remove('lost');
+        } else {
+          h.classList.add('lost');
+        }
+      });
+    }
+
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const track = document.getElementById(`player-${pIdx + 1}-section`);
+      
+      flash.classList.add('active');
+      track.classList.add('shake');
+      setTimeout(() => flash.classList.remove('active'), 200);
+      setTimeout(() => track.classList.remove('shake'), 400);
+    }
+
+    function spawnBubbleParticles(pIdx, x, y, color) {
+      const count = 10;
+      for (let i = 0; i < count; i++) {
+        players[pIdx].particles.push({
+          x: x + (Math.random() * 20 - 10),
+          y: y + (Math.random() * 20 - 10),
+          vx: Math.random() * 2 - 1,
+          vy: -(Math.random() * 2 + 1), // floating upwards
+          color: color || 'rgba(14, 165, 233, 0.45)',
+          alpha: 1,
+          size: Math.random() * 5 + 3
+        });
+      }
+    }
+
+    // Launch hook shooter
+    function shootHook(pIdx) {
+      const p = players[pIdx];
+      if (p.hookState !== 'swing' || isGameOver) return;
+
+      p.hookState = 'shoot';
+      playSound('shoot');
+    }
+
+    // Check collision between hook tip and swimming fish bounding box
+    function checkHookCollisions(pIdx, tipX, tipY) {
+      const p = players[pIdx];
+      if (p.hookState !== 'shoot') return;
+
+      for (let i = 0; i < p.fishList.length; i++) {
+        const fish = p.fishList[i];
+        if (!fish) continue;
+
+        // Dynamic distance-based collision check (more forgiving for children)
+        const centerX = fish.x + (fish.w / 2);
+        const centerY = fish.y + (fish.h / 2);
+        const dist = Math.hypot(tipX - centerX, tipY - centerY);
+
+        if (dist < 42) {
+          // Fish hooked!
+          p.caughtFish = fish;
+          p.hookState = 'retract';
+
+          // Lock index in pool so it stops swimming
+          p.fishList[i] = null;
+
+          // Play catch sound
+          playSound('click');
+          break;
+        }
+      }
+    }
+
+    // Process when fish is pulled all the way back to boat
+    function processFishCatch(pIdx, fish) {
+      const p = players[pIdx];
+      
+      // Remove fish HTML node
+      fish.dom.remove();
+
+      const matched = currentQuest.validator(fish.val, fish.color, fish.exprVal);
+
+      if (matched) {
+        playSound('success');
+        p.score += 1;
+        p.scoreLabel.textContent = `Ball: ${p.score}`;
+
+        // Burst positive feedback bubbles at boat X
+        spawnBubbleParticles(pIdx, p.hookX, p.hookY + 20, '#10b981');
+      } 
+      else {
+        // Wrong fish captured! lose life
+        playSound('crash');
+        p.lives = Math.max(0, p.lives - 1);
+        updateLivesUI(pIdx);
+        triggerDamageEffect(pIdx);
+
+        // Burst negative bubbles
+        spawnBubbleParticles(pIdx, p.hookX, p.hookY + 20, '#ef4444');
+      }
+
+      // Check game condition
+      checkGameStatus();
+
+      // Respawn next fish in same slot
+      const emptySlotIdx = players[pIdx].fishList.indexOf(null);
+      if (emptySlotIdx !== -1 && !isGameOver) {
+        setTimeout(() => {
+          if (!isGameOver) spawnFishDom(pIdx, emptySlotIdx);
+        }, 1500);
+      }
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        } else if (players[0].score >= 10) {
+          endGame('won');
+        }
+      } else {
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          if (players[0].score > players[1].score) endGame('p1');
+          else if (players[1].score > players[0].score) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2');
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1');
+        }
+        else if (players[0].score >= 10) {
+          endGame('p1');
+        }
+        else if (players[1].score >= 10) {
+          endGame('p2');
+        }
+      }
+    }
+
+    function endGame(status) {
+      isGameOver = true;
+      cancelAnimationFrame(mainGameLoop);
+
+      // Remove remaining fish
+      players.forEach(p => {
+        if (p.active) {
+          p.fieldDom.querySelectorAll('.fish').forEach(f => f.remove());
+        }
+      });
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      if (status === 'won') {
+        title.className = 'win-text';
+        title.textContent = 'G\'alaba! Yutdingiz!';
+        details.innerHTML = `Siz suv ostidagi barcha to'g'ri baliqlarni muvaffaqiyatli tutdingiz!<br>Ball: <strong>${players[0].score}</strong>`;
+        startConfetti();
+      } else if (status === 'lost') {
+        title.className = 'lose-text';
+        title.textContent = 'O\'yin Tugadi';
+        details.innerHTML = `Baliqchilik qarmoqlaringiz ziyon ko'rdi.<br>Ball: <strong>${players[0].score}</strong>`;
+        stopConfetti();
+      } else if (status === 'p1') {
+        title.className = 'win-text';
+        title.textContent = '1-O\'yinchi G\'olib!';
+        details.innerHTML = `P1 poygada akvariumdagi baliqlarni ko'proq tutdi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else if (status === 'p2') {
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `P2 poygada akvariumdagi baliqlarni ko'proq tutdi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else {
+        title.className = 'win-text';
+        title.textContent = 'Durang!';
+        details.innerHTML = `Ikkala baliqchi ham shiddatli kurashdilar!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        stopConfetti();
+      }
+    }
+
+    // Main animation and physics tick loop
+    function startGameLoop() {
+      function tick() {
+        if (isGameOver) return;
+
+        const swimMult = getSwimSpeedMultiplier();
+
+        players.forEach((p, idx) => {
+          if (!p.active) return;
+
+          const w = p.fieldDom.offsetWidth;
+          const h = p.fieldDom.offsetHeight;
+
+          // 1. Swing, shoot or retract hook claw logic
+          if (p.hookState === 'swing') {
+            // Swing hook angle back and forth sinusoidally
+            const swingSpeed = 0.035 * swimMult;
+            p.hookAngle += swingSpeed * p.hookAngleDir;
+            if (Math.abs(p.hookAngle) >= 1.2) { // limit swing to ~70 degrees
+              p.hookAngleDir *= -1;
+            }
+          } 
+          else if (p.hookState === 'shoot') {
+            const extendSpeed = 8.5 * swimMult;
+            p.hookLength += extendSpeed;
+
+            // Calculate tip coordinates
+            const tipX = p.hookX + p.hookLength * Math.sin(p.hookAngle);
+            const tipY = p.hookY + p.hookLength * Math.cos(p.hookAngle);
+
+            // Check distance bounding box collisions with fish
+            checkHookCollisions(idx, tipX, tipY);
+
+            // Boundary limits check: if hits walls or bottom
+            if (tipX <= 15 || tipX >= w - 15 || tipY >= h - 15) {
+              p.hookState = 'retract';
+            }
+          } 
+          else if (p.hookState === 'retract') {
+            const retractSpeed = 7.5 * swimMult;
+            p.hookLength = Math.max(30, p.hookLength - retractSpeed);
+
+            // Calculate tip coordinates
+            const tipX = p.hookX + p.hookLength * Math.sin(p.hookAngle);
+            const tipY = p.hookY + p.hookLength * Math.cos(p.hookAngle);
+
+            // If we caught a fish, pull it with the hook tip
+            if (p.caughtFish) {
+              p.caughtFish.x = tipX - (p.caughtFish.w / 2);
+              p.caughtFish.y = tipY - (p.caughtFish.h / 3);
+              
+              // Render new coordinate on HTML element
+              p.caughtFish.dom.style.left = `${p.caughtFish.x}px`;
+              p.caughtFish.dom.style.top = `${p.caughtFish.y}px`;
+            }
+
+            // Once fully reeled back to boat
+            if (p.hookLength <= 30) {
+              p.hookState = 'swing';
+              if (p.caughtFish) {
+                processFishCatch(idx, p.caughtFish);
+                p.caughtFish = null;
+              }
+            }
+          }
+
+          // 2. Swim and render fish objects
+          p.fishList.forEach((fish, fIdx) => {
+            if (!fish) return;
+
+            // Swim forward based on speed settings
+            fish.x += fish.speed * swimMult;
+            fish.dom.style.left = `${fish.x}px`;
+
+            // Bouncing limits or screen wraps
+            if (fish.dirRight && fish.x > w + 20) {
+              // Wrap left
+              fish.x = -80;
+            } else if (!fish.dirRight && fish.x < -90) {
+              // Wrap right
+              fish.x = w + 20;
+            }
+          });
+
+          // 3. Render Canvas (Draw Rope line and Claw Hook hook representation)
+          const ctx = p.ctx;
+          ctx.clearRect(0, 0, p.canvas.width, p.canvas.height);
+
+          // Draw rope line
+          ctx.strokeStyle = '#94a3b8';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(p.hookX, p.hookY);
+          
+          const tipX = p.hookX + p.hookLength * Math.sin(p.hookAngle);
+          const tipY = p.hookY + p.hookLength * Math.cos(p.hookAngle);
+          ctx.lineTo(tipX, tipY);
+          ctx.stroke();
+
+          // Draw neon claw claws
+          ctx.save();
+          ctx.translate(tipX, tipY);
+          ctx.rotate(-p.hookAngle);
+          
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          // Draw left claw hook curve
+          ctx.arc(-8, 5, 10, Math.PI * 0.5, Math.PI * 1.5, false);
+          ctx.stroke();
+
+          ctx.beginPath();
+          // Draw right claw hook curve
+          ctx.arc(8, 5, 10, Math.PI * 0.5, Math.PI * 1.5, true);
+          ctx.stroke();
+          ctx.restore();
+
+          // 4. Generate rising bubble particles periodically
+          p.bubbleTimer++;
+          if (p.bubbleTimer > 35) {
+            p.bubbleTimer = 0;
+            // Spawn bubble at bottom random X
+            spawnBubbleParticles(idx, Math.random() * w, h - 30);
+          }
+
+          // 5. Update canvas particles
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx;
+            part.y += part.vy;
+            part.alpha -= 0.015;
+
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    // Touch click overlays bindings
+    function setupInteraction() {
+      const t1 = document.getElementById('trigger-p1');
+      if (t1) {
+        t1.addEventListener('click', () => {
+          shootHook(0);
+        });
+      }
+      const t2 = document.getElementById('trigger-p2');
+      if (t2) {
+        t2.addEventListener('click', () => {
+          shootHook(1);
+        });
+      }
+    }
+
+    // Keyboard controls
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver) return;
+
+      // P1: SPACE or S
+      if (players[0].active) {
+        if (e.key === ' ' || e.key.toLowerCase() === 's') {
+          shootHook(0);
+        }
+      }
+
+      // P2: ArrowDown or ENTER
+      if (players[1].active) {
+        if (e.key === 'ArrowDown' || e.key === 'Enter') {
+          shootHook(1);
+        }
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti Engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#0ea5e9', '#ec4899', '#10b981', '#f97316', '#facc15'];
+      for (let i = 0; i < 100; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.04 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 12;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 10 - 5;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    // Initialize references safely on load and DOMContentLoaded
+    function safeInit() {
+      initPlayers();
+      setupInteraction();
+    }
+    window.addEventListener('load', safeInit);
+    document.addEventListener('DOMContentLoaded', safeInit);
+  </script>
+</body>
+</html>

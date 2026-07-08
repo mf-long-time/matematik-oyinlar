@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pufakchalarni Portlatish — Matematika O'yini</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-neon: #0ea5e9;
+      --accent-neon: #ec4899;
+      --success-neon: #10b981;
+      --warn-neon: #f59e0b;
+      --glass-bg: rgba(15, 23, 42, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Background Sky & Clouds */
+    .sky-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 100px;
+      filter: blur(10px);
+      animation: floatCloud 40s linear infinite;
+    }
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+    }
+    .cloud.c1 { width: 300px; height: 100px; top: 15%; left: -350px; animation-duration: 45s; }
+    .cloud.c2 { width: 200px; height: 70px; top: 45%; left: -250px; animation-duration: 30s; animation-delay: 5s; }
+    .cloud.c3 { width: 250px; height: 85px; top: 70%; left: -300px; animation-duration: 55s; animation-delay: 10s; }
+
+    @keyframes floatCloud {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(calc(100vw + 400px)); }
+    }
+
+    /* Screen Management */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Title Screen & Menu */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 40px;
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(14, 165, 233, 0.2);
+      backdrop-filter: blur(15px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .logo-area {
+      margin-bottom: 30px;
+    }
+
+    .logo-title {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #38bdf8 0%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #38bdf8;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    /* Option Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 15px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(56, 189, 248, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .opt-card.active {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
+      border-color: #38bdf8;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+    }
+
+    .opt-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9 0%, #c084fc 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 12px 30px rgba(14, 165, 233, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0) scale(0.99);
+    }
+
+    /* Setup Top Buttons */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #38bdf8;
+    }
+
+    /* Gameplay Screen Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Quest Panel */
+    .quest-bubble {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(236, 72, 153, 0.15) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 14px 28px;
+      border-radius: 20px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(56, 189, 248, 0.15);
+      animation: pulseBorder 2s infinite alternate;
+      text-align: center;
+    }
+
+    @keyframes pulseBorder {
+      0% { border-color: rgba(56, 189, 248, 0.3); }
+      100% { border-color: rgba(236, 72, 153, 0.6); }
+    }
+
+    /* Tracks Area */
+    .tracks-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tracks-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Vertical Divider between P1 and P2 in split screen */
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    /* HUD stats (lives and score) */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      z-index: 40;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(15, 23, 42, 0.5), transparent);
+    }
+
+    .hud-label {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #38bdf8;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 5px;
+      font-size: 1.4rem;
+    }
+
+    .heart {
+      color: #ef4444;
+      filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .heart.lost {
+      color: #475569;
+      filter: none;
+      transform: scale(0.8);
+    }
+
+    /* Interactive Balloon Area */
+    .balloon-field {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* Visual Lanes Guides */
+    .lane-guides {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .lane-line {
+      border-right: 1px dashed rgba(255, 255, 255, 0.03);
+    }
+    .lane-line:last-child {
+      border-right: none;
+    }
+
+    /* Popping Zone Guideline at top */
+    .pop-zone-line {
+      position: absolute;
+      top: 80px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(to right, transparent, rgba(56, 189, 248, 0.1), transparent);
+      pointer-events: none;
+    }
+
+    /* Balloon DOM Element */
+    .balloon {
+      position: absolute;
+      width: 100px;
+      height: 120px;
+      border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 1.4rem;
+      box-shadow: inset -10px -10px 20px rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.25);
+      z-index: 20;
+      transition: transform 0.1s ease;
+      animation: floatSway 4s ease-in-out infinite alternate;
+    }
+
+    /* Balloon String */
+    .balloon::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      width: 2px;
+      height: 20px;
+      background: rgba(255,255,255,0.4);
+      transform: translateX(-50%);
+    }
+
+    .balloon:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+
+    @keyframes floatSway {
+      0% { margin-left: -5px; }
+      100% { margin-left: 5px; }
+    }
+
+    /* Keyboard indicator at bottom of lanes */
+    .keyboard-guides {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      text-align: center;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0.5;
+    }
+
+    .key-badge {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #94a3b8;
+      display: inline-block;
+      margin: 0 auto;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* Particle Explosion Overlay Canvas */
+    .particle-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    /* Flash damage and shake overlay */
+    .damage-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-flash.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeTrack 0.4s ease-in-out;
+    }
+
+    @keyframes shakeTrack {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Game Over Modal / Panel */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-neon);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #ef4444;
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.2rem;
+      color: #cbd5e1;
+    }
+
+    /* Confetti Canvas for Winners */
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .logo-title { font-size: 2.2rem; }
+      .opt-card-title { font-size: 0.95rem; }
+      .opt-card-desc { font-size: 0.75rem; }
+      .btn { padding: 12px; font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sky background layer -->
+  <div class="sky-background">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+  </div>
+
+  <!-- Confetti backdrop -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Mute / Home controls in setup -->
+  <div class="setup-header-btns">
+    <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+    <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+  </div>
+
+  <!-- SETUP/MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Pufakcha Portlatish</h1>
+        <p class="logo-subtitle">Qiziqarli Matematik Sarguzasht</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Omon qolish rejimi</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Split-screen poyga</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Rang va oddiy sanash</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Juft/Toq, arifmetika</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Ko'paytirish & karra</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10+ Yosh</div>
+            <div class="opt-card-desc">Tub & kvadrat sonlar</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">🎈 Parvozni Boshlash</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Menyu</button>
+      
+      <!-- Quest panel in center of header -->
+      <div class="quest-bubble" id="shared-quest">Topshiriq yuklanmoqda...</div>
+      
+      <div class="game-info">
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+      </div>
+    </div>
+
+    <!-- Active game tracks container -->
+    <div class="tracks-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Ball: 0</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="balloon-field" id="field-p1">
+          <!-- Guide lines -->
+          <div class="lane-guides">
+            <div class="lane-line"></div>
+            <div class="lane-line"></div>
+            <div class="lane-line"></div>
+          </div>
+          
+          <div class="pop-zone-line"></div>
+          
+          <!-- Key Guides -->
+          <div class="keyboard-guides">
+            <div><span class="key-badge">A</span></div>
+            <div><span class="key-badge">S</span></div>
+            <div><span class="key-badge">D</span></div>
+          </div>
+
+          <canvas class="particle-canvas" id="canvas-p1"></canvas>
+          <div class="damage-flash" id="flash-p1"></div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Ball: 0</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="balloon-field" id="field-p2">
+          <!-- Guide lines -->
+          <div class="lane-guides">
+            <div class="lane-line"></div>
+            <div class="lane-line"></div>
+            <div class="lane-line"></div>
+          </div>
+          
+          <div class="pop-zone-line"></div>
+          
+          <!-- Key Guides -->
+          <div class="keyboard-guides">
+            <div><span class="key-badge">←</span></div>
+            <div><span class="key-badge">↓</span></div>
+            <div><span class="key-badge">→</span></div>
+          </div>
+
+          <canvas class="particle-canvas" id="canvas-p2"></canvas>
+          <div class="damage-flash" id="flash-p2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Siz Yutdingiz!</h2>
+      <div class="game-stats" id="gameover-details">
+        Topilgan pufakchalar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Boshlash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Audio Synthesis engine via Web Audio API
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'pop') {
+        // High frequency balloon pop sound
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'success') {
+        // High happy chime
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      } else if (type === 'error') {
+        // Downward buzz sound
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.linearRampToValueAtTime(90, now + 0.2);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } else if (type === 'click') {
+        // Subtle click sound
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Game Variables
+    let gameMode = 'single'; // 'single' or 'split'
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('balloon_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Track active players state
+    const players = [
+      {
+        score: 0,
+        lives: 3,
+        balloons: [],
+        questAnswer: null, // target check expression/values
+        fieldDom: document.getElementById('field-p1'),
+        scoreLabel: document.getElementById('score-label-p1'),
+        livesContainer: document.getElementById('lives-p1'),
+        canvas: document.getElementById('canvas-p1'),
+        ctx: document.getElementById('canvas-p1').getContext('2d'),
+        particles: [],
+        active: true
+      },
+      {
+        score: 0,
+        lives: 3,
+        balloons: [],
+        questAnswer: null,
+        fieldDom: document.getElementById('field-p2'),
+        scoreLabel: document.getElementById('score-label-p2'),
+        livesContainer: document.getElementById('lives-p2'),
+        canvas: document.getElementById('canvas-p2'),
+        ctx: document.getElementById('canvas-p2').getContext('2d'),
+        particles: [],
+        active: false
+      }
+    ];
+
+    // Global task structure
+    let currentTask = {
+      text: "",
+      validator: null // check function per balloon value
+    };
+
+    // Color definitions
+    const COLORS = [
+      { name: 'qizil', hex: '#ef4444', text: 'Qizil' },
+      { name: 'moviy', hex: '#0ea5e9', text: 'Moviy' },
+      { name: 'yashil', hex: '#10b981', text: 'Yashil' },
+      { name: 'sariq', hex: '#f59e0b', text: 'Sariq' },
+      { name: 'binafsha', hex: '#8b5cf6', text: 'Binafsha' },
+      { name: 'pushti', hex: '#ec4899', text: 'Pushti' }
+    ];
+
+    // Prime numbers up to 100
+    const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+    // Square numbers
+    const SQUARES = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
+
+    // Get speed multiplier
+    function getSpeedMultiplier() {
+      let base = 0.85;
+      if (speedLevel === 'slow') base = 0.08;
+      else if (speedLevel === 'fast') base = 1.3;
+
+      // Adjust based on age group difficulty (complex math = slower speed)
+      if (ageGroup === '4-5') {
+        base *= 0.45;
+      } else if (ageGroup === '6-7') {
+        base *= 0.75;
+      } else if (ageGroup === '8-9') {
+        base *= 0.90;
+      } else if (ageGroup === '10') {
+        base *= 0.65; // 10+ needs much more time for roots and brackets
+      }
+      return base;
+    }
+
+    // Toggle button setups
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+
+    function updateSpeedBtn() {
+      const speedLabels = {
+        'slow': '🐌 Tezlik: Sekin',
+        'medium': '⚡ Tezlik: O\'rtacha',
+        'fast': '🚀 Tezlik: Tez'
+      };
+      speedBtn.textContent = speedLabels[speedLevel];
+    }
+    updateSpeedBtn();
+
+    speedBtn.addEventListener('click', () => {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('balloon_speed_level', speedLevel);
+      updateSpeedBtn();
+    });
+
+    function updateMuteBtn() {
+      muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+    }
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      updateMuteBtn();
+      if (!isMuted) playSound('click');
+    });
+
+    // Option toggles
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    // Start menu navigation
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Generate Task based on selected Age Group
+    function generateTask() {
+      if (ageGroup === '4-5') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          // Color target
+          const targetColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+          return {
+            text: `🎈 Topshiriq: Faqat ${targetColor.text.toUpperCase()} sharlarni portlat!`,
+            validator: (val, color) => color === targetColor.name
+          };
+        } else {
+          // Number matching
+          const targetNum = Math.floor(Math.random() * 5) + 1; // 1-5
+          return {
+            text: `🎈 Topshiriq: Faqat [ ${targetNum} ] sonli sharlarni portlat!`,
+            validator: (val) => val === targetNum
+          };
+        }
+      }
+      else if (ageGroup === '6-7') {
+        const rand = Math.random();
+        if (rand < 0.33) {
+          return {
+            text: `🎈 Topshiriq: Faqat JUFT sonlarni portlat!`,
+            validator: (val) => typeof val === 'number' && val % 2 === 0
+          };
+        } else if (rand < 0.66) {
+          return {
+            text: `🎈 Topshiriq: Faqat TOQ sonlarni portlat!`,
+            validator: (val) => typeof val === 'number' && val % 2 !== 0
+          };
+        } else {
+          // Target sum
+          const targetSum = Math.floor(Math.random() * 10) + 5; // 5-15
+          return {
+            text: `🎈 Topshiriq: Yig'indisi [ ${targetSum} ] bo'ladigan pufakchalarni portlat!`,
+            validator: (val, color, exprVal) => exprVal === targetSum
+          };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          // Multiplication match
+          const targetProd = [12, 16, 18, 20, 24, 30, 36, 40, 48][Math.floor(Math.random() * 9)];
+          return {
+            text: `🎈 Topshiriq: Javobi [ ${targetProd} ] bo'ladigan ko'paytmani portlat!`,
+            validator: (val, color, exprVal) => exprVal === targetProd
+          };
+        } else {
+          // Divisibility
+          const divisor = [2, 3, 5, 10][Math.floor(Math.random() * 4)];
+          return {
+            text: `🎈 Topshiriq: Faqat [ ${divisor} ] ga bo'linadigan sonlarni portlat!`,
+            validator: (val) => typeof val === 'number' && val % divisor === 0
+          };
+        }
+      }
+      else {
+        // 10+ Yosh
+        const rand = Math.random();
+        if (rand < 0.5) {
+          return {
+            text: `🎈 Topshiriq: Faqat TUB sonlarni portlat!`,
+            validator: (val) => typeof val === 'number' && PRIMES.includes(val)
+          };
+        } else {
+          return {
+            text: `🎈 Topshiriq: Faqat KVADRAT sonlarni portlat!`,
+            validator: (val) => typeof val === 'number' && SQUARES.includes(val)
+          };
+        }
+      }
+    }
+
+    // Generate random values for balloons according to age group
+    function generateBalloonValue() {
+      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      
+      if (ageGroup === '4-5') {
+        const num = Math.floor(Math.random() * 5) + 1; // 1-5
+        return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num };
+      }
+      else if (ageGroup === '6-7') {
+        // Single digit numbers or addition expressions
+        if (Math.random() < 0.4) {
+          const num = Math.floor(Math.random() * 20) + 1;
+          return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num };
+        } else {
+          // Addition expression
+          const a = Math.floor(Math.random() * 10) + 1;
+          const b = Math.floor(Math.random() * 10) + 1;
+          return { display: `${a}+${b}`, val: `${a}+${b}`, color: color.name, hex: color.hex, exprVal: a + b };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        if (Math.random() < 0.4) {
+          const num = Math.floor(Math.random() * 50) + 1;
+          return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num };
+        } else {
+          // Multiplication expression
+          const a = Math.floor(Math.random() * 8) + 2;
+          const b = Math.floor(Math.random() * 8) + 2;
+          return { display: `${a}×${b}`, val: `${a}×${b}`, color: color.name, hex: color.hex, exprVal: a * b };
+        }
+      }
+      else {
+        // 10+ Yosh
+        if (Math.random() < 0.5) {
+          // Select random prime or composite number
+          const list = [2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 21, 23, 25, 29, 31, 35, 36, 37, 49, 50, 64, 81];
+          const val = list[Math.floor(Math.random() * list.length)];
+          return { display: val, val: val, color: color.name, hex: color.hex, exprVal: val };
+        } else {
+          // Multiplication/Division expression
+          const a = Math.floor(Math.random() * 10) + 3;
+          const b = Math.floor(Math.random() * 10) + 3;
+          return { display: `${a * b}÷${a}`, val: `${a * b}÷${a}`, color: color.name, hex: color.hex, exprVal: b };
+        }
+      }
+    }
+
+    // Spawn a balloon for a player track
+    function spawnBalloon(pIdx) {
+      if (!players[pIdx].active || isGameOver) return;
+
+      const field = players[pIdx].fieldDom;
+      const fieldWidth = field.offsetWidth;
+
+      // Select a random lane (0, 1, 2)
+      const lane = Math.floor(Math.random() * 3);
+      
+      // Calculate X coordinate based on lane width
+      const laneWidth = fieldWidth / 3;
+      const x = laneWidth * lane + (laneWidth - 100) / 2; // center in lane
+
+      const balloonData = generateBalloonValue();
+
+      // Create balloon DOM node
+      const bDom = document.createElement('div');
+      bDom.className = 'balloon';
+      bDom.style.left = `${x}px`;
+      bDom.style.top = `${field.offsetHeight + 10}px`;
+      bDom.style.background = `radial-gradient(circle at 30% 30%, ${balloonData.hex} 0%, #000000 130%)`;
+      bDom.textContent = balloonData.display;
+
+      field.appendChild(bDom);
+
+      // Save balloon object state
+      players[pIdx].balloons.push({
+        dom: bDom,
+        x: x,
+        lane: lane,
+        top: field.offsetHeight + 10,
+        val: balloonData.val,
+        color: balloonData.color,
+        exprVal: balloonData.exprVal,
+        isValid: currentTask.validator(balloonData.val, balloonData.color, balloonData.exprVal)
+      });
+    }
+
+    // Setup screens and resize canvas
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active) {
+          p.canvas.width = p.fieldDom.offsetWidth;
+          p.canvas.height = p.fieldDom.offsetHeight;
+        }
+      });
+    }
+
+    // Start Game Initialization
+    function startGame() {
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      // Sync active player panels
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      // Reset Players
+      players.forEach((p, idx) => {
+        p.score = 0;
+        p.lives = 3;
+        p.particles = [];
+        
+        // Remove existing balloons DOM
+        p.fieldDom.querySelectorAll('.balloon').forEach(b => b.remove());
+        p.balloons = [];
+
+        p.scoreLabel.textContent = `Ball: 0`;
+        updateLivesUI(idx);
+      });
+
+      // Generate task
+      currentTask = generateTask();
+      document.getElementById('shared-quest').textContent = currentTask.text;
+
+      // Handle window sizing
+      setTimeout(() => {
+        resizeCanvases();
+        
+        // Spawn first set of balloons
+        for (let i = 0; i < 2; i++) {
+          spawnBalloon(0);
+          if (players[1].active) spawnBalloon(1);
+        }
+      }, 100);
+
+      // Periodically spawn new balloons
+      if (window.spawnInterval) clearInterval(window.spawnInterval);
+      window.spawnInterval = setInterval(() => {
+        if (!isGameOver) {
+          // Keep up to 4 balloons floating on screen at once per track
+          if (players[0].active && players[0].balloons.length < 4) spawnBalloon(0);
+          if (players[1].active && players[1].balloons.length < 4) spawnBalloon(1);
+        }
+      }, 1800);
+
+      // Reset audio environment if needed
+      initAudio();
+
+      // Main Game Loop Loop
+      startGameLoop();
+    }
+
+    // Update heart DOM elements for P1 or P2
+    function updateLivesUI(pIdx) {
+      const hearts = players[pIdx].livesContainer.querySelectorAll('.heart');
+      hearts.forEach((h, i) => {
+        if (i < players[pIdx].lives) {
+          h.classList.remove('lost');
+        } else {
+          h.classList.add('lost');
+        }
+      });
+    }
+
+    // Trigger visual red screen flash and track shake on errors
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const track = document.getElementById(`player-${pIdx + 1}-section`);
+      
+      flash.classList.add('flash-active');
+      track.classList.add('shake');
+      setTimeout(() => flash.classList.remove('flash-active'), 200);
+      setTimeout(() => track.classList.remove('shake'), 400);
+    }
+
+    // Spawn popping explosion particle elements
+    function spawnParticles(pIdx, x, y, color) {
+      const pCount = 15;
+      for (let i = 0; i < pCount; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 6 + 4;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity - 2, // slightly upward gravity offset
+          color: color || '#38bdf8',
+          alpha: 1,
+          size: Math.random() * 5 + 3
+        });
+      }
+    }
+
+    // Pop animation logic
+    function popBalloon(pIdx, balloonIdx) {
+      const bObj = players[pIdx].balloons[balloonIdx];
+      
+      // Get exact coordinates of pop
+      const topOffset = bObj.dom.offsetTop;
+      const leftOffset = bObj.dom.offsetLeft;
+
+      // Extract raw color to matches particle spray
+      let hexColor = '#0ea5e9';
+      const matchedColor = COLORS.find(c => c.name === bObj.color);
+      if (matchedColor) hexColor = matchedColor.hex;
+
+      // Remove from DOM
+      bObj.dom.remove();
+
+      // Play Sound
+      playSound('pop');
+
+      // Trigger particles
+      spawnParticles(pIdx, leftOffset + 50, topOffset + 60, hexColor);
+
+      // Validate balloon click logic
+      if (bObj.isValid) {
+        playSound('success');
+        players[pIdx].score += 1;
+        players[pIdx].scoreLabel.textContent = `Ball: ${players[pIdx].score}`;
+      } else {
+        // Clicked an invalid balloon
+        playSound('error');
+        players[pIdx].lives = Math.max(0, players[pIdx].lives - 1);
+        updateLivesUI(pIdx);
+        triggerDamageEffect(pIdx);
+      }
+
+      // Slice out of active array
+      players[pIdx].balloons.splice(balloonIdx, 1);
+
+      // Check immediate win/loss condition
+      checkGameStatus();
+    }
+
+    // Main checks for single or dual player wins
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        // Single player survival: loses on 0 lives
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        } else if (players[0].score >= 10) {
+          endGame('won');
+        }
+      } else {
+        // Dual player race: first to score 15 wins, or whoever survives longest
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          // Tie or highest score wins
+          if (players[0].score > players[1].score) endGame('p1');
+          else if (players[1].score > players[0].score) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2'); // P1 dead, P2 wins
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1'); // P2 dead, P1 wins
+        }
+        else if (players[0].score >= 15) {
+          endGame('p1');
+        }
+        else if (players[1].score >= 15) {
+          endGame('p2');
+        }
+      }
+    }
+
+    // Finish game loop and open end screens
+    function endGame(status) {
+      isGameOver = true;
+      cancelAnimationFrame(mainGameLoop);
+      clearInterval(window.spawnInterval);
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      if (status === 'won') {
+        title.className = 'win-text';
+        title.textContent = 'Ajoyib! G\'alaba!';
+        details.innerHTML = `Siz topshiriqni a'lo darajada bajardingiz!<br>To'plangan ball: <strong>${players[0].score}</strong>`;
+        startConfetti();
+      } else if (status === 'lost') {
+        title.className = 'lose-text';
+        title.textContent = 'O\'yin Yakunlandi';
+        details.innerHTML = `Sizda barcha jonlar tugadi.<br>To'plangan ball: <strong>${players[0].score}</strong>`;
+        stopConfetti();
+      } else if (status === 'p1') {
+        title.className = 'win-text';
+        title.textContent = '1-O\'yinchi G\'olib!';
+        details.innerHTML = `Ko'k/Binafsha rangli kosmonavt poygada yutib chiqdi!<br>P1 Ball: <strong>${players[0].score}</strong> | P2 Ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else if (status === 'p2') {
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `Yashil/Moviy rangli kosmonavt poygada yutib chiqdi!<br>P1 Ball: <strong>${players[0].score}</strong> | P2 Ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else {
+        title.className = 'win-text';
+        title.textContent = 'Durang!';
+        details.innerHTML = `Ikkala o'yinchi ham munosib jang qildi!<br>P1 Ball: <strong>${players[0].score}</strong> | P2 Ball: <strong>${players[1].score}</strong>`;
+        stopConfetti();
+      }
+    }
+
+    // Main physical tick and canvas particle render loop
+    function startGameLoop() {
+      function tick() {
+        if (isGameOver) return;
+
+        // Calculate speed per frame
+        const currentSpeed = 1.35 * getSpeedMultiplier();
+
+        players.forEach((p, idx) => {
+          if (!p.active) return;
+
+          // Move balloons upwards
+          for (let i = p.balloons.length - 1; i >= 0; i--) {
+            const b = p.balloons[i];
+            b.top -= currentSpeed;
+            b.dom.style.top = `${b.top}px`;
+
+            // If balloon floats past top pop-zone limit (~80px)
+            if (b.top < 65) {
+              b.dom.remove();
+
+              // If it was a valid target and got missed, deduct a life
+              if (b.isValid) {
+                playSound('error');
+                p.lives = Math.max(0, p.lives - 1);
+                updateLivesUI(idx);
+                triggerDamageEffect(idx);
+              }
+
+              p.balloons.splice(i, 1);
+              checkGameStatus();
+            }
+          }
+
+          // Handle canvas particle logic
+          const c = p.canvas;
+          const ctx = p.ctx;
+          ctx.clearRect(0, 0, c.width, c.height);
+
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx;
+            part.y += part.vy;
+            part.vy += 0.15; // Gravity pull
+            part.alpha -= 0.02;
+
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    // Setup mouse/touch bindings on dynamically spawned balloons
+    document.addEventListener('mousedown', (e) => {
+      // Find closest element with class 'balloon'
+      const targetBalloon = e.target.closest('.balloon');
+      if (!targetBalloon) return;
+
+      // Find which player's field it belongs to
+      players.forEach((p, pIdx) => {
+        if (!p.active) return;
+        const bIdx = p.balloons.findIndex(b => b.dom === targetBalloon);
+        if (bIdx !== -1) {
+          popBalloon(pIdx, bIdx);
+        }
+      });
+    });
+
+    // Touch support mapping
+    document.addEventListener('touchstart', (e) => {
+      const targetBalloon = e.target.closest('.balloon');
+      if (!targetBalloon) return;
+
+      players.forEach((p, pIdx) => {
+        if (!p.active) return;
+        const bIdx = p.balloons.findIndex(b => b.dom === targetBalloon);
+        if (bIdx !== -1) {
+          popBalloon(pIdx, bIdx);
+        }
+      });
+    }, { passive: true });
+
+    // Keyboard Lane trigger mapping
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver) return;
+
+      // P1 keyboard mapping: A (Lane 0), S (Lane 1), D (Lane 2)
+      if (players[0].active) {
+        let lanePressed = -1;
+        if (e.key.toLowerCase() === 'a') lanePressed = 0;
+        else if (e.key.toLowerCase() === 's') lanePressed = 1;
+        else if (e.key.toLowerCase() === 'd') lanePressed = 2;
+
+        if (lanePressed !== -1) {
+          // Find lowest balloon in that lane
+          let lowestBIdx = -1;
+          let minTop = 0; // closer to bottom means higher Y coordinate
+          
+          players[0].balloons.forEach((b, idx) => {
+            if (b.lane === lanePressed && b.top > minTop) {
+              minTop = b.top;
+              lowestBIdx = idx;
+            }
+          });
+
+          if (lowestBIdx !== -1) {
+            popBalloon(0, lowestBIdx);
+          }
+        }
+      }
+
+      // P2 keyboard mapping: ArrowLeft (Lane 0), ArrowDown (Lane 1), ArrowRight (Lane 2)
+      if (players[1].active) {
+        let lanePressed = -1;
+        if (e.key === 'ArrowLeft') lanePressed = 0;
+        else if (e.key === 'ArrowDown') lanePressed = 1;
+        else if (e.key === 'ArrowRight') lanePressed = 2;
+
+        if (lanePressed !== -1) {
+          let lowestBIdx = -1;
+          let minTop = 0;
+          
+          players[1].balloons.forEach((b, idx) => {
+            if (b.lane === lanePressed && b.top > minTop) {
+              minTop = b.top;
+              lowestBIdx = idx;
+            }
+          });
+
+          if (lowestBIdx !== -1) {
+            popBalloon(1, lowestBIdx);
+          }
+        }
+      }
+    });
+
+    // Handle resizing
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti Engine for winner screens
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#f44336', '#e91e63', '#9c27b0', '#3f51b5', '#00bcd4', '#4caf50', '#ffeb3b', '#ff9800'];
+      for (let i = 0; i < 120; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.04 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 12;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 10 - 5;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+  </script>
+</body>
+</html>

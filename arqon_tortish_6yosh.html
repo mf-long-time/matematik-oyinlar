@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matematik Arqon Tortish</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-blue: #2563eb;
+      --primary-red: #dc2626;
+      --bg-gradient: linear-gradient(135deg, #FFDEE9 0%, #B5FFFC 100%);
+      --panel-shadow: 0 10px 30px 0 rgba(31, 38, 135, 0.08);
+      --glass-bg: rgba(255, 255, 255, 0.8);
+      --glass-border: rgba(255, 255, 255, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Fredoka', 'Comic Sans MS', 'Chalkboard SE', cursive;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      color: #2d5a00;
+      padding: 12px;
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    #game-container {
+      width: 100%;
+      max-width: 720px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .screen {
+      display: none;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 2px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--panel-shadow);
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      color: #1e3a0a;
+      margin-bottom: 6px;
+      text-shadow: 1px 1px 0px #fff;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #557c3e;
+      margin-bottom: 24px;
+    }
+
+    .setup-section {
+      margin-bottom: 20px;
+    }
+
+    .setup-section h3 {
+      font-size: 15px;
+      margin-bottom: 10px;
+      font-weight: 700;
+      color: #1e3a0a;
+      border-left: 4px solid #4ade80;
+      padding-left: 8px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .cards-grid.cols-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media (max-width: 600px) {
+      .cards-grid.cols-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      h1 { font-size: 20px; }
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 16px;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+    }
+
+    .card.active {
+      background: #fff;
+      border-color: #2e7d32;
+      box-shadow: 0 0 0 2px #2e7d32, 0 8px 16px rgba(0,0,0,0.08);
+    }
+
+    .card-icon {
+      font-size: 28px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #1e3a0a;
+    }
+
+    .card p {
+      font-size: 11px;
+      color: #555;
+      line-height: 1.2;
+    }
+
+    /* Buttons */
+    .btn {
+      border: none;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .btn-primary {
+      background: #2e7d32;
+      color: #fff;
+      border-radius: 14px;
+      padding: 12px 24px;
+      font-size: 16px;
+      width: 100%;
+      box-shadow: 0 4px 15px rgba(46, 125, 50, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: #1b5e20;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    #start-btn {
+      margin-top: 10px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(46, 125, 50, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+    }
+
+    /* Game Screen */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .btn-icon {
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--glass-border);
+      padding: 8px 12px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 13px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #1e3a0a;
+    }
+
+    .btn-icon:hover {
+      background: #fff;
+      transform: translateY(-1px);
+    }
+
+    .game-info {
+      background: rgba(0,0,0,0.05);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      gap: 6px;
+      color: #1e3a0a;
+    }
+
+    .divider {
+      opacity: 0.3;
+    }
+
+    .teams {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .team-panel {
+      flex: 1;
+      border-radius: 20px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border: 2px solid transparent;
+      background: rgba(255, 255, 255, 0.4);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .t1 {
+      border-color: rgba(37, 99, 235, 0.15);
+    }
+
+    .t2 {
+      border-color: rgba(220, 38, 38, 0.15);
+    }
+
+    .tlabel {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      padding: 4px 6px;
+      border-radius: 8px;
+    }
+
+    .t1 .tlabel {
+      background: var(--primary-blue);
+    }
+
+    .t2 .tlabel {
+      background: var(--primary-red);
+    }
+
+    .qbox {
+      border-radius: 10px;
+      padding: 10px 4px;
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .t1 .qbox {
+      border: 2px solid rgba(37, 99, 235, 0.2);
+      color: #1e3a8a;
+    }
+
+    .t2 .qbox {
+      border: 2px solid rgba(220, 38, 38, 0.2);
+      color: #7f1d1d;
+    }
+
+    .inpdisplay {
+      background: #fff;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      border-radius: 8px;
+      padding: 4px;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .t1 .inpdisplay {
+      border: 2px solid rgba(37, 99, 235, 0.15);
+      color: var(--primary-blue);
+    }
+
+    .t2 .inpdisplay {
+      border: 2px solid rgba(220, 38, 38, 0.15);
+      color: var(--primary-red);
+    }
+
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+
+    .numpad button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 2px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s, background-color 0.2s;
+      font-family: inherit;
+    }
+
+    .numpad button:hover {
+      transform: translateY(-1px);
+    }
+
+    .numpad button:active {
+      transform: translateY(1px);
+    }
+
+    .nbtn {
+      background: #fff;
+      color: #333;
+      border: 1px solid rgba(0,0,0,0.05) !important;
+    }
+    .nbtn:hover {
+      background: #f9fafb;
+    }
+
+    .cbtn {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .cbtn:hover {
+      background: #fca5a5;
+    }
+
+    .zbtn {
+      background: #f3f4f6;
+      color: #333;
+    }
+    .zbtn:hover {
+      background: #e5e7eb;
+    }
+
+    .okbtn {
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .okbtn:hover {
+      background: #bbf7d0;
+    }
+
+    .cpu-thinking {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      height: 154px;
+      background: rgba(0,0,0,0.02);
+      border-radius: 12px;
+      border: 2px dashed rgba(220, 38, 38, 0.15);
+      animation: pulseCpu 2.5s infinite ease-in-out;
+    }
+
+    @keyframes pulseCpu {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; background: rgba(220, 38, 38, 0.04); }
+    }
+
+    .cpu-thinking p {
+      font-size: 12px;
+      color: #7f1d1d;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .spinner {
+      font-size: 24px;
+      animation: spin 2s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Arena */
+    .arena {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 10px 14px;
+    }
+
+    .rope-wrap {
+      position: relative;
+      height: 110px;
+      overflow: hidden;
+    }
+
+    .ground {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 12px;
+      background: #8b5a2b;
+      border-radius: 0 0 10px 10px;
+    }
+
+    .rope-track {
+      position: absolute;
+      top: 48%;
+      left: 6%;
+      right: 6%;
+      height: 6px;
+      background: #854d0e;
+      border-radius: 3px;
+    }
+
+    .rope-track::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        #78350f,
+        #78350f 4px,
+        #a16207 4px,
+        #a16207 8px
+      );
+      border-radius: 3px;
+    }
+
+    .knot {
+      position: absolute;
+      top: 48%;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #dc2626;
+      border: 3px solid #fff;
+      transform: translate(-50%, -50%);
+      transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 5;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+
+    .midline {
+      position: absolute;
+      top: 10%;
+      bottom: 12px;
+      left: 50%;
+      width: 3px;
+      background: rgba(0,0,0,0.12);
+      border-radius: 2px;
+      transform: translateX(-50%);
+    }
+
+    .fig {
+      position: absolute;
+      bottom: 12px;
+      font-size: 42px;
+      transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.2s;
+      user-select: none;
+      line-height: 1;
+    }
+
+    .f1 {
+      left: 4%;
+    }
+
+    .f2 {
+      right: 4%;
+      transform: scaleX(-1);
+    }
+
+    .fig.pulling {
+      animation: strain 0.15s infinite alternate;
+    }
+
+    @keyframes strain {
+      0% { transform: translateY(0) rotate(2deg) scale(1.05); }
+      100% { transform: translateY(-3px) rotate(-2deg) scale(1.05); }
+    }
+
+    .fig.pulling.f2 {
+      animation: strain-f2 0.15s infinite alternate;
+    }
+
+    @keyframes strain-f2 {
+      0% { transform: scaleX(-1) translateY(0) rotate(2deg) scale(1.05); }
+      100% { transform: scaleX(-1) translateY(-3px) rotate(-2deg) scale(1.05); }
+    }
+
+    .bars {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .barwrap {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      height: 12px;
+    }
+
+    .b1f {
+      background: var(--primary-blue);
+      height: 100%;
+      transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .b2f {
+      background: var(--primary-red);
+      height: 100%;
+      transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .blbl {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .status {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e3a0a;
+      min-height: 24px;
+      padding: 4px;
+      margin-top: 6px;
+    }
+
+    .help-text {
+      text-align: center;
+      font-size: 11px;
+      color: #557c3e;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    /* Shake Animation for Warnings/Errors */
+    .shake {
+      animation: shakeAnim 0.4s ease-in-out;
+    }
+
+    @keyframes shakeAnim {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* Winner Overlay */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(30, 58, 10, 0.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .winner-card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 28px;
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      transform: scale(0.95);
+      opacity: 0;
+      animation: popUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes popUp {
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .winner-card h2 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .winner-card p {
+      color: #555;
+      margin-bottom: 20px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .win-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border-radius: 12px;
+      padding: 10px 24px;
+      font-size: 15px;
+      width: 100%;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Confetti Elements -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <div id="game-container">
+    <!-- SETUP SCREEN -->
+    <div id="setup-screen" class="screen active">
+      <h1>🎉 ARQON TORTISH : MATEMATIKA 🎉</h1>
+      <p class="subtitle">Qiziqarli arqon tortish o'yini orqali hisoblash qobiliyatingizni sinab ko'ring!</p>
+      
+      <!-- Mode Selector -->
+      <div class="setup-section">
+        <h3>O'yin Rejimi</h3>
+        <div class="cards-grid">
+          <div class="card active" data-mode="single">
+            <span class="card-icon">🤖</span>
+            <h4>Yakka O'yinchi</h4>
+            <p>Kompyuterga qarshi o'yin</p>
+          </div>
+          <div class="card" data-mode="two">
+            <span class="card-icon">👥</span>
+            <h4>Ikki O'yinchi</h4>
+            <p>Do'stingiz bilan bellashuv</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Age/Difficulty Selector -->
+      <div class="setup-section">
+        <h3>Bolaning Yoshi</h3>
+        <div class="cards-grid cols-4">
+          <div class="card" data-age="4-5">
+            <span class="card-icon">👶</span>
+            <h4>4-5 yosh</h4>
+            <p>Qo'shish / Ayirish (1-5)</p>
+          </div>
+          <div class="card active" data-age="6-7">
+            <span class="card-icon">🧒</span>
+            <h4>6-7 yosh</h4>
+            <p>Qo'shish / Ayirish (1-20)</p>
+          </div>
+          <div class="card" data-age="8-9">
+            <span class="card-icon">🧑</span>
+            <h4>8-9 yosh</h4>
+            <p>Ko'paytirish / Bo'lish</p>
+          </div>
+          <div class="card" data-age="10">
+            <span class="card-icon">👨‍🎓</span>
+            <h4>10+ yosh</h4>
+            <p>Aralash va qavsli amallar</p>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">🚀 O'yinni Boshlash</button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="screen">
+      <div class="game-header">
+        <button id="back-btn" class="btn-icon">🏠 Menyu</button>
+        <div class="game-info">
+          <span id="info-mode">🤖 vs CPU</span>
+          <span class="divider">|</span>
+          <span id="info-age">Yosh: 6-7</span>
+        </div>
+        <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+      </div>
+
+      <div class="teams">
+        <!-- Team 1 Panel -->
+        <div class="team-panel t1">
+          <div class="tlabel" id="t1-name">🔵 1-Jamoa</div>
+          <div class="qbox" id="q1">—</div>
+          <div class="inpdisplay" id="inp1">_</div>
+          <div class="numpad" id="pad1"></div>
+        </div>
+
+        <!-- Team 2 Panel -->
+        <div class="team-panel t2">
+          <div class="tlabel" id="t2-name">🔴 2-Jamoa</div>
+          <div class="qbox" id="q2">—</div>
+          <div class="inpdisplay" id="inp2">_</div>
+          <div class="numpad-container">
+            <div class="numpad" id="pad2"></div>
+            <div class="cpu-thinking" id="cpu-status" style="display: none;">
+              <span class="spinner">⚙️</span>
+              <p>Kompyuter fikrlamoqda...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arena">
+        <div class="rope-wrap">
+          <div class="midline"></div>
+          <div class="rope-track"></div>
+          <div class="knot" id="knot" style="left:50%"></div>
+          <div class="fig f1" id="fig1">🧒</div>
+          <div class="fig f2" id="fig2">🧒</div>
+          <div class="ground"></div>
+        </div>
+        <div class="bars">
+          <span class="blbl" style="color:var(--primary-blue)">J1</span>
+          <div class="barwrap">
+            <div class="b1f" id="bar1" style="width:50%"></div>
+            <div class="b2f" id="bar2" style="width:50%"></div>
+          </div>
+          <span class="blbl" style="color:var(--primary-red)">J2</span>
+        </div>
+        <div class="status" id="status">Tayyormisiz? Qani boshladik! 🎮</div>
+        <div class="help-text" id="keyboard-help">
+          ⌨️ Klaviatura: J1: [0-9], [Backspace], [Enter]
+        </div>
+      </div>
+    </div>
+
+    <!-- WIN SCREEN OVERLAY -->
+    <div id="winner-overlay" class="overlay">
+      <div class="winner-card">
+        <h2 id="win-title">🏆</h2>
+        <p id="win-sub"></p>
+        <div class="win-buttons">
+          <button id="restart-btn" class="btn btn-primary">🔄 Qayta O'ynash</button>
+          <button id="menu-btn" class="btn btn-secondary">🏠 Bosh menyu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Game variables
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let ropePosition = 0; // range: -5 (J1 wins) to +5 (J2 wins)
+    let inputs = ["", ""];
+    let activeQs = [null, null];
+    let locked = [false, false];
+    let gameOver = false;
+    let audioMuted = false;
+    let cpuTimeoutId = null;
+
+    const kidEmojis = ['🧒', '👧', '👦', '🧑', '👱'];
+    let characterEmojis = ['🧒', '🧒'];
+
+    // Audio Context (Web Audio API)
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, type, duration) {
+      try {
+        initAudio();
+        if (audioMuted || !audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.error("Audio synthesise error:", e);
+      }
+    }
+
+    function playSuccess() {
+      playTone(523.25, 'triangle', 0.15); // C5
+      setTimeout(() => playTone(659.25, 'triangle', 0.25), 110); // E5
+    }
+
+    function playError() {
+      playTone(220, 'sawtooth', 0.35); // A3
+    }
+
+    function playWin() {
+      const notes = [261.63, 329.63, 392.00, 523.25];
+      notes.forEach((freq, idx) => {
+        setTimeout(() => {
+          playTone(freq, 'sine', 0.25);
+        }, idx * 130);
+      });
+      setTimeout(() => {
+        playTone(523.25, 'sine', 0.6);
+      }, 520);
+    }
+
+    // Dynamic Math Question Generator
+    function generateQuestion(age) {
+      let qText = "";
+      let answer = 0;
+      
+      if (age === '4-5') {
+        // Simple addition and subtraction within 5 or 10.
+        const isAdd = Math.random() > 0.5;
+        if (isAdd) {
+          const a = Math.floor(Math.random() * 4) + 1; // 1-4
+          const b = Math.floor(Math.random() * (5 - a)) + 1;
+          qText = `${a} + ${b} = ?`;
+          answer = a + b;
+        } else {
+          const a = Math.floor(Math.random() * 4) + 2; // 2-5
+          const b = Math.floor(Math.random() * (a - 1)) + 1;
+          qText = `${a} - ${b} = ?`;
+          answer = a - b;
+        }
+      } else if (age === '6-7') {
+        // Addition/subtraction within 20
+        const isAdd = Math.random() > 0.5;
+        if (isAdd) {
+          const a = Math.floor(Math.random() * 12) + 2; // 2-13
+          const b = Math.floor(Math.random() * (20 - a)) + 1;
+          qText = `${a} + ${b} = ?`;
+          answer = a + b;
+        } else {
+          const a = Math.floor(Math.random() * 15) + 6; // 6-20
+          const b = Math.floor(Math.random() * (a - 2)) + 1;
+          qText = `${a} - ${b} = ?`;
+          answer = a - b;
+        }
+      } else if (age === '8-9') {
+        // Multiplication and basic division
+        const isMult = Math.random() > 0.5;
+        if (isMult) {
+          const a = Math.floor(Math.random() * 8) + 2; // 2-9
+          const b = Math.floor(Math.random() * 8) + 2; // 2-9
+          qText = `${a} × ${b} = ?`;
+          answer = a * b;
+        } else {
+          const b = Math.floor(Math.random() * 8) + 2; // 2-9
+          const ans = Math.floor(Math.random() * 8) + 2; // 2-9
+          const a = b * ans;
+          qText = `${a} ÷ ${b} = ?`;
+          answer = ans;
+        }
+      } else {
+        // 10+ yosh: Bracket expressions, multiple operations
+        const type = Math.floor(Math.random() * 3);
+        if (type === 0) {
+          const a = Math.floor(Math.random() * 7) + 3; // 3-9
+          const b = Math.floor(Math.random() * 6) + 2; // 2-7
+          const c = Math.floor(Math.random() * 15) + 1;
+          qText = `${a} × ${b} + ${c} = ?`;
+          answer = a * b + c;
+        } else if (type === 1) {
+          const b = Math.floor(Math.random() * 10) + 4; // 4-13
+          const c = Math.floor(Math.random() * (b - 2)) + 1;
+          const a = Math.floor(Math.random() * 4) + 2; // 2-5
+          qText = `${a} × (${b} - ${c}) = ?`;
+          answer = a * (b - c);
+        } else {
+          const b = Math.floor(Math.random() * 8) + 2; // 2-9
+          const ans = Math.floor(Math.random() * 8) + 2; // 2-9
+          const a = b * ans;
+          const c = Math.floor(Math.random() * 20) + 5;
+          qText = `${a} ÷ ${b} + ${c} = ?`;
+          answer = ans + c;
+        }
+      }
+      return { q: qText, a: answer };
+    }
+
+    // Build Numpads
+    function buildPad(team) {
+      const pad = document.getElementById('pad' + (team + 1));
+      pad.innerHTML = '';
+      [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(n => {
+        const b = document.createElement('button');
+        b.textContent = n; b.className = 'nbtn';
+        b.onclick = () => typeNum(team, String(n));
+        pad.appendChild(b);
+      });
+      const bc = document.createElement('button');
+      bc.textContent = '✕'; bc.className = 'cbtn';
+      bc.onclick = () => clearInp(team);
+      const b0 = document.createElement('button');
+      b0.textContent = '0'; b0.className = 'zbtn';
+      b0.onclick = () => typeNum(team, '0');
+      const bok = document.createElement('button');
+      bok.textContent = '✔'; bok.className = 'okbtn';
+      bok.onclick = () => submit(team);
+      pad.appendChild(bc); pad.appendChild(b0); pad.appendChild(bok);
+    }
+
+    function typeNum(team, ch) {
+      if (gameOver || locked[team]) return;
+      if (inputs[team].length >= 3) return; // Allow up to 3 digits (important for 10+ age)
+      inputs[team] += ch;
+      document.getElementById('inp' + (team + 1)).textContent = inputs[team];
+    }
+
+    function clearInp(team) {
+      if (gameOver || locked[team]) return;
+      inputs[team] = "";
+      document.getElementById('inp' + (team + 1)).textContent = '_';
+    }
+
+    function submit(team) {
+      if (gameOver || locked[team]) return;
+      const val = parseInt(inputs[team]);
+      if (isNaN(val)) {
+        const panel = document.querySelector(`.team-panel.t${team + 1}`);
+        panel.classList.add('shake');
+        setTimeout(() => panel.classList.remove('shake'), 400);
+        setStatus("Raqam kiriting! 🔢");
+        return;
+      }
+      
+      const correct = activeQs[team].a;
+      locked[team] = true;
+
+      // Pull animation & visual indicator
+      document.getElementById(`fig${team + 1}`).classList.add('pulling');
+      document.getElementById(`fig${team + 1}`).textContent = '🥵';
+
+      const rival = 1 - team;
+
+      if (val === correct) {
+        playSuccess();
+        if (team === 0) {
+          ropePosition--;
+          setStatus("✅ 1-Jamoa to'g'ri! Arqon chapga! ⬅️");
+        } else {
+          ropePosition++;
+          setStatus("✅ 2-Jamoa to'g'ri! Arqon o'ngga! ➡️");
+        }
+      } else {
+        playError();
+        // Shake display
+        const display = document.getElementById(`inp${team + 1}`);
+        display.classList.add('shake');
+        setTimeout(() => display.classList.remove('shake'), 400);
+
+        if (team === 0) {
+          ropePosition++;
+          setStatus("❌ 1-Jamoa noto'g'ri! Arqon o'ngga! ➡️");
+        } else {
+          ropePosition--;
+          setStatus("❌ 2-Jamoa noto'g'ri! Arqon chapga! ⬅️");
+        }
+      }
+
+      updateRope();
+
+      if (!checkWin()) {
+        setTimeout(() => {
+          // Reset emoji styles
+          document.getElementById('fig1').classList.remove('pulling');
+          document.getElementById('fig2').classList.remove('pulling');
+          document.getElementById('fig1').textContent = characterEmojis[0];
+          document.getElementById('fig2').textContent = characterEmojis[1];
+
+          locked[team] = false;
+          inputs[team] = "";
+          document.getElementById('inp' + (team + 1)).textContent = '_';
+          activeQs[team] = generateQuestion(ageGroup);
+          document.getElementById('q' + (team + 1)).textContent = activeQs[team].q;
+
+          if (gameMode === 'single' && team === 1) {
+            scheduleCpuAction();
+          }
+        }, 1200);
+      }
+    }
+
+    function setStatus(msg) {
+      document.getElementById('status').textContent = msg;
+    }
+
+    function updateRope() {
+      // ropePosition ranges from -5 to +5. Normalize to 0 to 1
+      const pct = (ropePosition + 5) / 10;
+      
+      // Keep knot within visual range
+      const knotLeft = 12 + pct * 76; 
+      document.getElementById('knot').style.left = knotLeft + '%';
+
+      // Keep character figures pulling at their sides of the knot
+      const f1left = Math.max(1, knotLeft - 20);
+      const f2right = Math.max(1, 100 - knotLeft - 20);
+      document.getElementById('fig1').style.left = f1left + '%';
+      document.getElementById('fig2').style.right = f2right + '%';
+
+      // Scale visual bars
+      const p1 = (5 - ropePosition) * 10;
+      const p2 = (5 + ropePosition) * 10;
+      document.getElementById('bar1').style.width = p1 + '%';
+      document.getElementById('bar2').style.width = p2 + '%';
+    }
+
+    function checkWin() {
+      if (ropePosition <= -5) { endGame(1); return true; }
+      if (ropePosition >= 5) { endGame(2); return true; }
+      return false;
+    }
+
+    function endGame(winner) {
+      gameOver = true;
+      clearGameTimeouts();
+      playWin();
+
+      // Show winner styling
+      if (winner === 1) {
+        document.getElementById('fig1').textContent = '🏆';
+        document.getElementById('fig2').textContent = '😭';
+      } else {
+        document.getElementById('fig1').textContent = '😭';
+        document.getElementById('fig2').textContent = '🏆';
+      }
+
+      document.getElementById('fig1').classList.remove('pulling');
+      document.getElementById('fig2').classList.remove('pulling');
+
+      const winnerName = (gameMode === 'single' && winner === 1)
+        ? "Siz"
+        : (gameMode === 'single' && winner === 2)
+          ? "Kompyuter"
+          : `${winner}-Jamoa`;
+
+      const titleEl = document.getElementById('win-title');
+      const subEl = document.getElementById('win-sub');
+
+      if (winner === 1) {
+        titleEl.innerHTML = `<span style="color: var(--primary-blue)">🏆 ${winnerName} G'OLIB!</span>`;
+        subEl.textContent = gameMode === 'single'
+          ? "Barakalla! Siz kompyuterdan tezroq va aniqroq javob berib, arqonni tortib oldingiz! 🎉"
+          : "Ko'k jamoa arqonni tortib oldi! Barakalla! 🎉";
+      } else {
+        titleEl.innerHTML = `<span style="color: var(--primary-red)">🏆 ${winnerName} G'OLIB!</span>`;
+        subEl.textContent = gameMode === 'single'
+          ? "Afsuski, kompyuter arqonni o'z tomoniga tortib oldi. Yana bir bor urinib ko'ring! 💪"
+          : "Qizil jamoa arqonni tortib oldi! Barakalla! 🎉";
+      }
+
+      document.getElementById('winner-overlay').style.display = 'flex';
+      startConfetti();
+    }
+
+    function clearGameTimeouts() {
+      if (cpuTimeoutId) {
+        clearTimeout(cpuTimeoutId);
+        cpuTimeoutId = null;
+      }
+    }
+
+    // CPU opponent scheduling logic
+    function scheduleCpuAction() {
+      if (gameOver || gameMode !== 'single') return;
+      clearGameTimeouts();
+
+      let minSec = 6, maxSec = 10, accuracy = 0.8;
+      if (ageGroup === '4-5') {
+        minSec = 7; maxSec = 12; accuracy = 0.75;
+      } else if (ageGroup === '6-7') {
+        minSec = 6; maxSec = 10; accuracy = 0.80;
+      } else if (ageGroup === '8-9') {
+        minSec = 5; maxSec = 9; accuracy = 0.82;
+      } else {
+        minSec = 4; maxSec = 8; accuracy = 0.85;
+      }
+
+      const delay = (Math.random() * (maxSec - minSec) + minSec) * 1000;
+
+      cpuTimeoutId = setTimeout(() => {
+        if (gameOver || locked[1]) return;
+
+        const correct = activeQs[1].a;
+        const isCorrect = Math.random() < accuracy;
+        let answer = correct;
+        
+        if (!isCorrect) {
+          const diff = Math.random() > 0.5 ? 1 : -1;
+          answer = Math.max(0, correct + diff);
+          if (answer === correct) answer += 2;
+        }
+
+        // Animate typing digits
+        const ansStr = String(answer);
+        let currentTyped = "";
+        let charIdx = 0;
+
+        function typeChar() {
+          if (gameOver) return;
+          if (charIdx < ansStr.length) {
+            currentTyped += ansStr[charIdx];
+            document.getElementById('inp2').textContent = currentTyped;
+            charIdx++;
+            setTimeout(typeChar, 250);
+          } else {
+            inputs[1] = ansStr;
+            submit(1);
+          }
+        }
+
+        typeChar();
+      }, delay);
+    }
+
+    function startNewGame() {
+      initAudio();
+      
+      // Get settings from active cards
+      const activeModeCard = document.querySelector('[data-mode].active');
+      gameMode = activeModeCard ? activeModeCard.dataset.mode : 'single';
+
+      const activeAgeCard = document.querySelector('[data-age].active');
+      ageGroup = activeAgeCard ? activeAgeCard.dataset.age : '6-7';
+
+      // Update Info display
+      document.getElementById('info-mode').textContent = gameMode === 'single' ? '🤖 vs CPU' : '👥 Jamoaviy';
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      // Reset configurations
+      ropePosition = 0;
+      inputs = ["", ""];
+      locked = [false, false];
+      gameOver = false;
+      clearGameTimeouts();
+      stopConfetti();
+
+      // Set random kid characters
+      characterEmojis[0] = kidEmojis[Math.floor(Math.random() * kidEmojis.length)];
+      characterEmojis[1] = kidEmojis[Math.floor(Math.random() * kidEmojis.length)];
+      document.getElementById('fig1').textContent = characterEmojis[0];
+      document.getElementById('fig2').textContent = characterEmojis[1];
+
+      // Hide winner screen
+      document.getElementById('winner-overlay').style.display = 'none';
+
+      // Config panels according to mode
+      const pad2 = document.getElementById('pad2');
+      const cpuStatus = document.getElementById('cpu-status');
+      const t1Name = document.getElementById('t1-name');
+      const t2Name = document.getElementById('t2-name');
+      const kbdHelp = document.getElementById('keyboard-help');
+
+      if (gameMode === 'single') {
+        pad2.style.display = 'none';
+        cpuStatus.style.display = 'flex';
+        t1Name.textContent = '👤 Siz';
+        t2Name.textContent = '🤖 Kompyuter';
+        kbdHelp.textContent = "⌨️ Klaviatura: [0-9], [Backspace] - o'chirish, [Enter] - tasdiqlash";
+      } else {
+        pad2.style.display = 'grid';
+        cpuStatus.style.display = 'none';
+        t1Name.textContent = '🔵 1-Jamoa';
+        t2Name.textContent = '🔴 2-Jamoa';
+        kbdHelp.textContent = "⌨️ Klaviatura: J1: [0-9], [Backspace], [Enter] | J2: Numpad [0-9], [Decimal], [NumpadEnter]";
+      }
+
+      // Generate first questions
+      activeQs[0] = generateQuestion(ageGroup);
+      activeQs[1] = generateQuestion(ageGroup);
+
+      document.getElementById('q1').textContent = activeQs[0].q;
+      document.getElementById('q2').textContent = activeQs[1].q;
+
+      document.getElementById('inp1').textContent = '_';
+      document.getElementById('inp2').textContent = '_';
+
+      // Toggle Screen active states
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      updateRope();
+      setStatus("O'yin boshlandi! 🎮 Tez va to'g'ri javob bering!");
+
+      if (gameMode === 'single') {
+        scheduleCpuAction();
+      }
+    }
+
+    function returnToMenu() {
+      clearGameTimeouts();
+      stopConfetti();
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+      document.getElementById('winner-overlay').style.display = 'none';
+    }
+
+    // Card Selection events
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+      });
+    });
+
+    // Event listeners
+    document.getElementById('start-btn').addEventListener('click', startNewGame);
+    document.getElementById('back-btn').addEventListener('click', returnToMenu);
+    document.getElementById('menu-btn').addEventListener('click', returnToMenu);
+    
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      startNewGame();
+    });
+
+    // Mute control
+    audioMuted = localStorage.getItem('math_rope_muted') === 'true';
+    const muteBtn = document.getElementById('mute-btn');
+    function updateMuteBtn() {
+      muteBtn.textContent = audioMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+    }
+    updateMuteBtn();
+    
+    muteBtn.addEventListener('click', () => {
+      audioMuted = !audioMuted;
+      localStorage.setItem('math_rope_muted', audioMuted);
+      updateMuteBtn();
+      initAudio();
+    });
+
+    // Keyboard support
+    window.addEventListener('keydown', (e) => {
+      if (gameOver) return;
+
+      const setupActive = document.getElementById('setup-screen').classList.contains('active');
+      if (setupActive) {
+        if (e.key === 'Enter') {
+          startNewGame();
+        }
+        return;
+      }
+
+      // J1 Controls (Any layout)
+      if (e.key >= '0' && e.key <= '9') {
+        typeNum(0, e.key);
+      } else if (e.key === 'Backspace') {
+        clearInp(0);
+      } else if (e.key === 'Enter') {
+        submit(0);
+      }
+
+      // J2 Numpad Controls (Only Local 2-Player Mode)
+      if (gameMode === 'two') {
+        if (e.code && e.code.startsWith('Numpad') && e.code.length === 7) {
+          const num = e.code.charAt(6);
+          if (num >= '0' && num <= '9') {
+            typeNum(1, num);
+          }
+        } else if (e.code === 'NumpadEnter') {
+          submit(1);
+        } else if (e.code === 'NumpadDecimal' || e.code === 'NumpadSubtract') {
+          clearInp(1);
+        }
+      }
+    });
+
+    // Confetti Animation Engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const ctx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+      window.addEventListener('resize', resizeConfetti);
+
+      const colors = ['#f44336', '#e91e63', '#9c27b0', '#3f51b5', '#00bcd4', '#4caf50', '#ffeb3b', '#ff9800'];
+      for (let i = 0; i < 120; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 5 + 4,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.05 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function draw() {
+        if (!confettiActive) return;
+        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 12;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 10 - 5;
+          }
+
+          ctx.beginPath();
+          ctx.lineWidth = p.r;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          ctx.stroke();
+        });
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      window.removeEventListener('resize', resizeConfetti);
+    }
+
+    // Build initial layout
+    buildPad(0);
+    buildPad(1);
+  </script>
+</body>
+</html>

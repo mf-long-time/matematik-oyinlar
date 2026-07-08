@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raqamli Ko'prik — Bridge Inequality Range Builder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-cyan: #06b6d4;
+      --accent-magenta: #d946ef;
+      --accent-yellow: #fbbf24;
+      --success-green: #10b981;
+      --danger-red: #ef4444;
+      --glass-bg: rgba(15, 23, 42, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: #030712;
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Cyber Canyon backdrop */
+    .canyon-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #0f132e 0%, #03040c 100%);
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .grid-lines {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0.02;
+      background-image: linear-gradient(0deg, transparent 24%, rgba(219, 70, 239, .5) 25%, rgba(219, 70, 239, .5) 26%, transparent 27%, transparent 74%, rgba(219, 70, 239, .5) 75%, rgba(219, 70, 239, .5) 76%, transparent 77%), linear-gradient(90deg, transparent 24%, rgba(219, 70, 239, .5) 25%, rgba(219, 70, 239, .5) 26%, transparent 27%, transparent 74%, rgba(219, 70, 239, .5) 75%, rgba(219, 70, 239, .5) 76%, transparent 77%);
+      background-size: 60px 60px;
+    }
+
+    /* Screen manager */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Menu container */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 40px;
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 45px rgba(219, 70, 239, 0.12);
+      backdrop-filter: blur(15px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .logo-area {
+      margin-bottom: 25px;
+    }
+
+    .logo-title {
+      font-size: 3.0rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-magenta) 0%, var(--primary-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(217, 70, 239, 0.2);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.05rem;
+      color: #cbd5e1;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 22px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent-magenta);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 14px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(217, 70, 239, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .opt-card.active {
+      background: linear-gradient(135deg, rgba(217, 70, 239, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+      border-color: var(--accent-magenta);
+      box-shadow: 0 0 18px rgba(217, 70, 239, 0.25);
+    }
+
+    .opt-card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-magenta) 0%, var(--primary-cyan) 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(217, 70, 239, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(217, 70, 239, 0.45);
+    }
+
+    /* Setup Header Controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-magenta);
+    }
+
+    /* Gameplay Screen Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(5, 11, 20, 0.9);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Timer light bar */
+    .timer-fuse-container {
+      position: absolute;
+      top: 70px;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      z-index: 45;
+    }
+
+    .timer-fuse-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-cyan) 0%, var(--accent-magenta) 100%);
+      box-shadow: 0 0 10px var(--primary-cyan);
+      transition: width 0.1s linear;
+    }
+
+    /* Gameplay split tracks wrapper */
+    .tracks-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tracks-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    /* HUD Bar */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px 5px 25px;
+      z-index: 40;
+      pointer-events: none;
+    }
+
+    .hud-label {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary-cyan);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 5px;
+      font-size: 1.3rem;
+    }
+
+    .shield-energy-cell {
+      color: var(--accent-magenta);
+      filter: drop-shadow(0 0 5px rgba(219, 70, 239, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .shield-energy-cell.lost {
+      color: #475569;
+      filter: none;
+      transform: scale(0.8);
+    }
+
+    /* Interactive field */
+    .battle-field {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .reactor-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+
+    /* Option Planks panel */
+    .operators-bar {
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      z-index: 30;
+    }
+
+    .op-btn {
+      min-width: 90px;
+      height: 60px;
+      border-radius: 12px;
+      background: var(--glass-bg);
+      border: 2px solid var(--glass-border);
+      color: #f8fafc;
+      font-size: 1.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+      padding: 0 10px;
+    }
+
+    .op-btn:active {
+      transform: scale(0.9);
+    }
+
+    .op-btn[data-idx="0"] {
+      border-color: var(--accent-magenta);
+      box-shadow: 0 0 15px rgba(219, 70, 239, 0.25);
+    }
+
+    .op-btn[data-idx="1"] {
+      border-color: var(--primary-cyan);
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
+    }
+
+    .op-btn[data-idx="2"] {
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 15px rgba(251, 191, 36, 0.25);
+    }
+
+    .op-btn:hover {
+      transform: translateY(-5px) scale(1.03);
+    }
+
+    .kbd-tag {
+      position: absolute;
+      top: -20px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    /* Action banners */
+    .action-overlay-banner {
+      position: absolute;
+      top: 32%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      z-index: 45;
+      font-size: 4.0rem;
+      font-weight: 900;
+      color: var(--success-green);
+      text-shadow: 0 0 25px var(--success-green), 0 0 45px #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .action-overlay-banner.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.0);
+    }
+
+    .action-overlay-banner.lost {
+      color: var(--danger-red);
+      text-shadow: 0 0 25px var(--danger-red), 0 0 45px #ffffff;
+    }
+
+    /* Flash triggers */
+    .damage-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-flash.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeTrack 0.4s ease-in-out;
+    }
+
+    @keyframes shakeTrack {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Game Over Modal styling */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--danger-red);
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.2rem;
+      color: #cbd5e1;
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background neon grid layers -->
+  <div class="canyon-backdrop">
+    <div class="grid-lines"></div>
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- SETUP/MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="setup-header-btns">
+      <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+      <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+    </div>
+
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Raqamli Ko'prik</h1>
+        <p class="logo-subtitle">Tengsizlik oraliqlari bo'yicha ko'prik yotqizish</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Ko'prikni to'g'ri raqam bilan to'ldiring</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Ko'prik qurish bo'yicha split poyga</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Yulduzchalar oralig'ini topish</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Oraliq sonlarini solishtirish</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Karra va oraliq arifmetikasi</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10 Yosh</div>
+            <div class="opt-card-desc">Qavsli amalli oraliqlar</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">⚡ Laboratoriyani Boshlash</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Menyu</button>
+      
+      <div class="game-info">
+        <button id="game-speed-btn" class="btn-icon" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">⚡ O'rtacha</button>
+        <button id="game-mute-btn" class="btn-icon" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">🔊 On</button>
+        <span class="divider">|</span>
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+      </div>
+    </div>
+
+    <!-- Timer fuse bar line -->
+    <div class="timer-fuse-container">
+      <div class="timer-fuse-fill" id="timer-fuse"></div>
+    </div>
+
+    <!-- Active game tracks wrapper -->
+    <div class="tracks-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Ball: 0 / 10</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="shield-energy-cell">❤️</span>
+            <span class="shield-energy-cell">❤️</span>
+            <span class="shield-energy-cell">❤️</span>
+          </div>
+        </div>
+
+        <div class="battle-field" id="field-p1">
+          <canvas class="reactor-canvas" id="canvas-p1"></canvas>
+          <div class="action-overlay-banner" id="banner-p1">KO'PRIK TAYYOR!</div>
+          <div class="damage-flash" id="flash-p1"></div>
+
+          <!-- Operators input bar -->
+          <div class="operators-bar" id="ops-p1">
+            <button class="op-btn" data-idx="0">
+              <span class="val-txt">?</span>
+              <span class="kbd-tag" style="display:none">A</span>
+            </button>
+            <button class="op-btn" data-idx="1">
+              <span class="val-txt">?</span>
+              <span class="kbd-tag" style="display:none">S</span>
+            </button>
+            <button class="op-btn" data-idx="2">
+              <span class="val-txt">?</span>
+              <span class="kbd-tag" style="display:none">D</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Ball: 0 / 10</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="shield-energy-cell">❤️</span>
+            <span class="shield-energy-cell">❤️</span>
+            <span class="shield-energy-cell">❤️</span>
+          </div>
+        </div>
+
+        <div class="battle-field" id="field-p2">
+          <canvas class="reactor-canvas" id="canvas-p2"></canvas>
+          <div class="action-overlay-banner" id="banner-p2">KO'PRIK TAYYOR!</div>
+          <div class="damage-flash" id="flash-p2"></div>
+
+          <!-- Operators input bar -->
+          <div class="operators-bar" id="ops-p2">
+            <button class="op-btn" data-idx="0">
+              <span class="val-txt">?</span>
+              <span class="kbd-tag" style="display:none">←</span>
+            </button>
+            <button class="op-btn" data-idx="1">
+              <span class="val-txt">?</span>
+              <span class="kbd-tag" style="display:none">↓</span>
+            </button>
+            <button class="op-btn" data-idx="2">
+              <span class="val-txt">?</span>
+              <span class="kbd-tag" style="display:none">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Siz Yutdingiz!</h2>
+      <div class="game-stats" id="gameover-details">
+        To'g'ri yotqizilgan ko'priklar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Boshlash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'snap') {
+        // Plank snap click into slot
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.linearRampToValueAtTime(140, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'cross') {
+        // High ascending chime sweep
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(550, now);
+        osc.frequency.exponentialRampToValueAtTime(1250, now + 0.16);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.16);
+        osc.start(now);
+        osc.stop(now + 0.16);
+      } else if (type === 'fall') {
+        // Shock noise
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.linearRampToValueAtTime(25, now + 0.35);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Config settings
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('bridge_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Timer variables
+    let gameTimeLimit = 25000; // in ms
+    let gameTimeElapsed = 0;
+
+    function getTimerLimit() {
+      let base = 25000;
+      if (speedLevel === 'slow') base = 45000; // 45 seconds (very slow and relaxed)
+      else if (speedLevel === 'fast') base = 12000;
+
+      // Adjust based on age group
+      if (ageGroup === '4-5') {
+        base *= 2.0;
+      } else if (ageGroup === '6-7') {
+        base *= 1.3;
+      } else if (ageGroup === '8-9') {
+        base *= 1.5;
+      } else if (ageGroup === '10') {
+        base *= 2.4; // 2.4x time for parentheses
+      }
+      return base;
+    }
+
+    // Track active players state
+    const players = [
+      {
+        score: 0,
+        lives: 3,
+        active: true,
+        // Hero horizontal running position
+        heroX: 0, // relative pixel x
+        targetHeroX: 0,
+        heroState: 'idle', // 'idle', 'running', 'falling'
+        // Math double bounds values (A < X < B)
+        leftVal: 0,
+        rightVal: 0,
+        leftExpr: "",
+        rightExpr: "",
+        correctVal: 0,
+        choices: [], // 3 option numbers
+        selectedPlankIdx: -1,
+        answeredThisWave: false,
+        // Flying plank animation values
+        flyProgress: 0, // 0 to 1
+        flyPlankIdx: -1,
+        flyStartX: 0,
+        flyStartY: 0,
+        // Visual items lists for 4-5 yosh
+        leftCoins: [],
+        rightCoins: [],
+        choicesCoins: [], // array of 3 coin lists
+        particles: [],
+        clouds: [], // decorative scrolling clouds
+        // DOM nodes
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        bannerDom: null,
+        opsDom: null,
+      },
+      {
+        score: 0,
+        lives: 3,
+        active: false,
+        heroX: 0,
+        targetHeroX: 0,
+        heroState: 'idle',
+        leftVal: 0,
+        rightVal: 0,
+        leftExpr: "",
+        rightExpr: "",
+        correctVal: 0,
+        choices: [],
+        selectedPlankIdx: -1,
+        answeredThisWave: false,
+        flyProgress: 0,
+        flyPlankIdx: -1,
+        flyStartX: 0,
+        flyStartY: 0,
+        leftCoins: [],
+        rightCoins: [],
+        choicesCoins: [],
+        particles: [],
+        clouds: [],
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        bannerDom: null,
+        opsDom: null,
+      }
+    ];
+
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+    const gameSpeedBtn = document.getElementById('game-speed-btn');
+    const gameMuteBtn = document.getElementById('game-mute-btn');
+
+    function syncSettingsUI() {
+      const speedLabels = {
+        'slow': '🐌 Sekin',
+        'medium': '⚡ O\'rtacha',
+        'fast': '🚀 Tez'
+      };
+
+      if (speedBtn) speedBtn.textContent = `⚡ Tezlik: ${speedLabels[speedLevel]}`;
+      if (gameSpeedBtn) gameSpeedBtn.textContent = `⚡ ${speedLabels[speedLevel]}`;
+
+      if (muteBtn) muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+      if (gameMuteBtn) gameMuteBtn.textContent = isMuted ? '🔇 Off' : '🔊 On';
+    }
+    syncSettingsUI();
+
+    function toggleSpeed() {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('bridge_speed_level', speedLevel);
+      syncSettingsUI();
+      gameTimeLimit = getTimerLimit();
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      syncSettingsUI();
+      if (!isMuted) playSound('click');
+    }
+
+    if (speedBtn) speedBtn.addEventListener('click', toggleSpeed);
+    if (gameSpeedBtn) gameSpeedBtn.addEventListener('click', toggleSpeed);
+
+    if (muteBtn) muteBtn.addEventListener('click', toggleMute);
+    if (gameMuteBtn) gameMuteBtn.addEventListener('click', toggleMute);
+
+    // Menu handlers
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    // Navigation triggers
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Inequality Double range bounds generator (A < X < B)
+    function generateRangeEquation() {
+      if (ageGroup === '4-5') {
+        // Visual ranges: e.g. 2 < X < 5. correctVal is 3 or 4.
+        const left = Math.floor(Math.random() * 3) + 1; // 1 to 3
+        const right = left + Math.floor(Math.random() * 2) + 2; // left + 2 to left + 3
+        const correct = left + 1;
+        return { leftVal: left, rightVal: right, leftExpr: String(left), rightExpr: String(right), correctVal: correct };
+      }
+      else if (ageGroup === '6-7') {
+        const left = Math.floor(Math.random() * 7) + 2; // 2 to 8
+        const right = left + Math.floor(Math.random() * 3) + 2; // left + 2 to left + 4
+        const correct = left + 1;
+        return { leftVal: left, rightVal: right, leftExpr: String(left), rightExpr: String(right), correctVal: correct };
+      }
+      else if (ageGroup === '8-9') {
+        // Double range combined with arithmetic
+        // A * B < X < C * D
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const multLeft = Math.floor(Math.random() * 3) + 2; // 2 to 4
+          const a = Math.floor(Math.random() * 2) + 2; // 2 to 3
+          const leftVal = multLeft * a; // 4 to 12
+
+          const rightVal = leftVal + Math.floor(Math.random() * 4) + 3; // left + 3 to left + 6
+          const correct = leftVal + 2;
+
+          return { leftVal: leftVal, rightVal: rightVal, leftExpr: `${multLeft} × ${a}`, rightExpr: String(rightVal), correctVal: correct };
+        } else {
+          const divLeft = [2, 3, 4][Math.floor(Math.random() * 3)];
+          const val = Math.floor(Math.random() * 4) + 3; // 3 to 6
+          const leftVal = val;
+
+          const rightVal = leftVal + Math.floor(Math.random() * 4) + 3;
+          const correct = leftVal + 2;
+
+          return { leftVal: leftVal, rightVal: rightVal, leftExpr: `${val * divLeft} ÷ ${divLeft}`, rightExpr: String(rightVal), correctVal: correct };
+        }
+      }
+      else {
+        // 10 yosh (strictly NO square roots)
+        // (A - B) * C < X < (D + E) * F
+        const a = Math.floor(Math.random() * 5) + 8; // 8 to 12
+        const b = Math.floor(Math.random() * 4) + 2; // 2 to 5
+        const c = Math.floor(Math.random() * 2) + 2; // 2 to 3
+        const leftVal = (a - b) * c; // 6 to 30
+
+        const rightVal = leftVal + Math.floor(Math.random() * 4) + 3;
+        const correct = leftVal + 2;
+
+        return { leftVal: leftVal, rightVal: rightVal, leftExpr: `(${a} - ${b}) × ${c}`, rightExpr: String(rightVal), correctVal: correct };
+      }
+    }
+
+    function generateChoices(correct) {
+      const list = [correct];
+      while (list.length < 3) {
+        const offset = Math.floor(Math.random() * 12) - 6;
+        const fake = correct + offset;
+        if (fake > 0 && !list.includes(fake) && fake !== correct) {
+          list.push(fake);
+        }
+      }
+      return list.sort(() => Math.random() - 0.5);
+    }
+
+    function generateCoinsLayout(count) {
+      const list = [];
+      const rowSize = 3;
+      for (let i = 0; i < count; i++) {
+        const row = Math.floor(i / rowSize);
+        const col = i % rowSize;
+        const countInThisRow = Math.min(rowSize, count - row * rowSize);
+        
+        const spacing = 14;
+        const ox = (col - (countInThisRow - 1) / 2) * spacing;
+        const oy = -10 - row * 13;
+
+        list.push({
+          ox: ox,
+          oy: oy,
+          hue: 45 + (i * 30) % 50
+        });
+      }
+      return list;
+    }
+
+    function initDecorations(p) {
+      p.clouds = [];
+      const count = 5;
+      for (let i = 0; i < count; i++) {
+        p.clouds.push({
+          x: Math.random(),
+          y: Math.random() * 0.25,
+          w: Math.random() * 80 + 50,
+          speed: Math.random() * 0.0008 + 0.0002
+        });
+      }
+    }
+
+    function startGame() {
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      initPlayers();
+
+      const kbdTagsP1 = document.querySelectorAll('#ops-p1 .kbd-tag');
+      const kbdTagsP2 = document.querySelectorAll('#ops-p2 .kbd-tag');
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+        
+        kbdTagsP1.forEach(t => t.style.display = 'none');
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+
+        kbdTagsP1.forEach(t => t.style.display = 'inline-block');
+        kbdTagsP2.forEach(t => t.style.display = 'inline-block');
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      // Reset Players parameters
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+        
+        p.score = 0;
+        p.lives = 3;
+        p.particles = [];
+        p.answeredThisWave = false;
+        p.selectedPlankIdx = -1;
+        p.flyPlankIdx = -1;
+        p.flyProgress = 0;
+        p.heroState = 'idle';
+
+        p.scoreLabel.textContent = `Ball: 0 / 10`;
+        updateLivesUI(idx);
+
+        p.opsDom = document.getElementById(`ops-p${idx + 1}`);
+
+        initDecorations(p);
+
+        p.bannerDom.classList.remove('active');
+      });
+
+      // Bind operators click triggers
+      bindPlankButtons();
+
+      // Start timer limits
+      gameTimeElapsed = 0;
+      gameTimeLimit = getTimerLimit();
+
+      // Load first wave
+      nextQuestWave();
+
+      setTimeout(() => {
+        resizeCanvases();
+
+        // Re-align starting hero coordinates
+        players.forEach(p => {
+          if (p.active) {
+            const leftCliffWidth = p.canvas.width * 0.28;
+            p.heroX = leftCliffWidth - 30;
+            p.targetHeroX = leftCliffWidth - 30;
+          }
+        });
+      }, 150);
+
+      initAudio();
+      startGameLoop();
+    }
+
+    function updateLivesUI(pIdx) {
+      const cells = players[pIdx].livesContainer.querySelectorAll('.shield-energy-cell');
+      cells.forEach((c, i) => {
+        if (i < players[pIdx].lives) {
+          c.classList.remove('lost');
+        } else {
+          c.classList.add('lost');
+        }
+      });
+    }
+
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const track = document.getElementById(`player-${pIdx + 1}-section`);
+      
+      flash.classList.add('active');
+      track.classList.add('shake');
+      setTimeout(() => flash.classList.remove('active'), 200);
+      setTimeout(() => track.classList.remove('shake'), 400);
+    }
+
+    function spawnDustParticles(pIdx, x, y, color) {
+      const count = 30;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 5 + 3;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity,
+          alpha: 1.0,
+          size: Math.random() * 6 + 3,
+          color: color || '#06b6d4'
+        });
+      }
+    }
+
+    function nextQuestWave() {
+      gameTimeElapsed = 0;
+
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+
+        p.answeredThisWave = false;
+        p.selectedPlankIdx = -1;
+        p.flyPlankIdx = -1;
+        p.flyProgress = 0;
+        p.heroState = 'idle';
+
+        p.bannerDom.classList.remove('active');
+
+        // Reset hero position to left cliff edge
+        setTimeout(() => {
+          const leftCliffWidth = p.canvas.width * 0.28;
+          p.heroX = leftCliffWidth - 30;
+          p.targetHeroX = leftCliffWidth - 30;
+        }, 50);
+
+        // Generate bounds
+        const bounds = generateRangeEquation();
+        p.leftVal = bounds.leftVal;
+        p.rightVal = bounds.rightVal;
+        p.leftExpr = bounds.leftExpr;
+        p.rightExpr = bounds.rightExpr;
+        p.correctVal = bounds.correctVal;
+
+        // Choices
+        p.choices = generateChoices(p.correctVal);
+
+        // Render card buttons texts
+        const buttons = p.opsDom.querySelectorAll('.op-btn');
+        buttons.forEach((btn, cIdx) => {
+          const valTxt = btn.querySelector('.val-txt');
+          if (ageGroup === '4-5') {
+            valTxt.textContent = ``; // visual count bubbles instead of text
+          } else {
+            valTxt.textContent = p.choices[cIdx];
+          }
+        });
+
+        if (ageGroup === '4-5') {
+          p.leftCoins = generateCoinsLayout(p.leftVal);
+          p.rightCoins = generateCoinsLayout(p.rightVal);
+          
+          p.choicesCoins = p.choices.map(val => generateCoinsLayout(val));
+        }
+      });
+    }
+
+    function bindPlankButtons() {
+      players.forEach((p, pIdx) => {
+        if (!p.active) return;
+
+        p.opsDom.querySelectorAll('.op-btn').forEach(btn => {
+          const newBtn = btn.cloneNode(true);
+          btn.parentNode.replaceChild(newBtn, btn);
+
+          newBtn.addEventListener('click', (e) => {
+            if (isGameOver || p.answeredThisWave || p.flyPlankIdx !== -1) return;
+
+            const idx = parseInt(newBtn.getAttribute('data-idx'));
+            triggerPlankFly(pIdx, idx, newBtn);
+          });
+        });
+      });
+    }
+
+    function triggerPlankFly(pIdx, plankIdx, btnDom) {
+      const p = players[pIdx];
+      const canvas = p.canvas;
+      const rect = btnDom.getBoundingClientRect();
+      const cRect = canvas.getBoundingClientRect();
+
+      p.flyStartX = rect.left - cRect.left + rect.width / 2;
+      p.flyStartY = rect.top - cRect.top + rect.height / 2;
+
+      p.flyPlankIdx = plankIdx;
+      p.flyProgress = 0;
+      playSound('snap');
+    }
+
+    function processPlankSubmit(pIdx, choiceIndex) {
+      const p = players[pIdx];
+      if (p.answeredThisWave || isGameOver) return;
+
+      p.selectedPlankIdx = choiceIndex;
+      p.answeredThisWave = true;
+
+      const chosenVal = p.choices[choiceIndex];
+
+      const canvasW = p.canvas.width;
+      const canvasH = p.canvas.height;
+      const slotX = canvasW * 0.50;
+      const slotY = canvasH * 0.65; // bridge level
+
+      // Check range correctness: leftVal < chosenVal < rightVal
+      if (chosenVal > p.leftVal && chosenVal < p.rightVal) {
+        // CORRECT BRIDGE COMPLETION
+        p.heroState = 'running';
+        p.targetHeroX = canvasW * 0.72 + 30; // run all the way to right cliff
+
+        playSound('cross');
+
+        p.bannerDom.className = 'action-overlay-banner';
+        p.bannerDom.textContent = 'KO\'PRIK TAYYOR!';
+        p.bannerDom.classList.add('active');
+
+        p.score += 1;
+        p.scoreLabel.textContent = `Ball: ${p.score} / 10`;
+
+        if (p.score >= 10) {
+          setTimeout(() => {
+            endGame(pIdx === 0 ? 'p1' : 'p2');
+          }, 1400);
+        } else {
+          setTimeout(() => {
+            nextQuestWave();
+          }, 1800);
+        }
+      } 
+      else {
+        // WRONG PLANK - CRASHES DOWN
+        p.heroState = 'falling';
+        triggerDamageEffect(pIdx);
+        playSound('fall');
+        spawnDustParticles(pIdx, slotX, slotY, '#ef4444');
+
+        p.bannerDom.className = 'action-overlay-banner lost';
+        p.bannerDom.textContent = 'QULADI!';
+        p.bannerDom.classList.add('active');
+
+        p.lives = Math.max(0, p.lives - 1);
+        updateLivesUI(pIdx);
+        checkGameStatus();
+
+        if (!isGameOver) {
+          setTimeout(() => {
+            nextQuestWave();
+          }, 1800);
+        }
+      }
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        }
+      } else {
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          if (players[0].score > players[1].score) endGame('p1');
+          else if (players[1].score > players[0].score) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2');
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1');
+        }
+      }
+    }
+
+    // Keyboard controls
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver) return;
+
+      // P1: A (left), S (middle), D (right)
+      if (players[0].active && !players[0].answeredThisWave && players[0].flyPlankIdx === -1) {
+        const key = e.key.toLowerCase();
+        const btn0 = document.querySelector('#ops-p1 [data-idx="0"]');
+        const btn1 = document.querySelector('#ops-p1 [data-idx="1"]');
+        const btn2 = document.querySelector('#ops-p1 [data-idx="2"]');
+
+        if (key === 'a' && btn0) triggerPlankFly(0, 0, btn0);
+        else if (key === 's' && btn1) triggerPlankFly(0, 1, btn1);
+        else if (key === 'd' && btn2) triggerPlankFly(0, 2, btn2);
+      }
+
+      // P2: Left, Down, Right Arrows
+      if (players[1].active && !players[1].answeredThisWave && players[1].flyPlankIdx === -1) {
+        const key = e.key;
+        const btn0 = document.querySelector('#ops-p2 [data-idx="0"]');
+        const btn1 = document.querySelector('#ops-p2 [data-idx="1"]');
+        const btn2 = document.querySelector('#ops-p2 [data-idx="2"]');
+
+        if (key === 'ArrowLeft' && btn0) triggerPlankFly(1, 0, btn0);
+        else if (key === 'ArrowDown' && btn1) triggerPlankFly(1, 1, btn1);
+        else if (key === 'ArrowRight' && btn2) triggerPlankFly(1, 2, btn2);
+      }
+    });
+
+    // Main game tick update & draw loops
+    function startGameLoop() {
+      let lastTime = performance.now();
+
+      function tick(now) {
+        if (isGameOver) return;
+
+        const delta = now - lastTime;
+        lastTime = now;
+
+        // 1. Process Global Game Timer
+        if (!players[0].answeredThisWave || (players[1].active && !players[1].answeredThisWave)) {
+          gameTimeElapsed += delta;
+          const pct = Math.max(0, 100 - (gameTimeElapsed / gameTimeLimit) * 100);
+          document.getElementById('timer-fuse').style.width = `${pct}%`;
+
+          // Change fuse color dynamically
+          if (pct < 25) {
+            document.getElementById('timer-fuse').style.background = 'var(--danger-red)';
+            document.getElementById('timer-fuse').style.boxShadow = '0 0 10px var(--danger-red)';
+          } else if (pct < 55) {
+            document.getElementById('timer-fuse').style.background = 'var(--accent-yellow)';
+            document.getElementById('timer-fuse').style.boxShadow = '0 0 10px var(--accent-yellow)';
+          } else {
+            document.getElementById('timer-fuse').style.background = 'linear-gradient(90deg, var(--primary-cyan) 0%, var(--accent-magenta) 100%)';
+            document.getElementById('timer-fuse').style.boxShadow = '0 0 10px var(--primary-cyan)';
+          }
+
+          if (gameTimeElapsed >= gameTimeLimit) {
+            // Timeout impact
+            players.forEach((p, idx) => {
+              if (p.active && !p.answeredThisWave) {
+                p.answeredThisWave = true;
+                p.lives = Math.max(0, p.lives - 1);
+                updateLivesUI(idx);
+                triggerDamageEffect(idx);
+                playSound('fall');
+              }
+            });
+            checkGameStatus();
+
+            if (!isGameOver) {
+              setTimeout(() => {
+                nextQuestWave();
+              }, 1800);
+            }
+          }
+        }
+
+        // 2. Process Players Scale Physics and Canvas Rendering
+        players.forEach((p, idx) => {
+          if (!p.active) return;
+
+          const w = p.canvas.width;
+          const h = p.canvas.height;
+          const ctx = p.ctx;
+
+          // Scroll clouds
+          p.clouds.forEach(c => {
+            c.x -= c.speed;
+            if (c.x < -c.w / w) {
+              c.x = 1.05;
+              c.y = Math.random() * 0.25;
+            }
+          });
+
+          // Animate kiber-hero running
+          if (p.heroState === 'running') {
+            const dx = p.targetHeroX - p.heroX;
+            p.heroX += dx * 0.12;
+          } else if (p.heroState === 'falling') {
+            p.heroX += 0.8;
+            p.targetHeroX += 0.8;
+          }
+
+          // Update flying plank
+          if (p.flyPlankIdx !== -1) {
+            p.flyProgress += 0.08;
+            if (p.flyProgress >= 1.0) {
+              p.flyProgress = 1.0;
+              const fIdx = p.flyPlankIdx;
+              p.flyPlankIdx = -1;
+              processPlankSubmit(idx, fIdx);
+            }
+          }
+
+          // Update particles
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx;
+            part.y += part.vy;
+            part.vy += 0.15; // fall down gravity
+            part.alpha -= 0.02;
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+            }
+          }
+
+          // RENDERING CANVAS DRAWINGS
+          ctx.clearRect(0, 0, w, h);
+
+          // Draw clouds
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+          p.clouds.forEach(c => {
+            ctx.beginPath();
+            ctx.ellipse(c.x * w, c.y * h, c.w / 2, 16, 0, 0, Math.PI*2);
+            ctx.fill();
+          });
+
+          // Coordinates of cliffs and bridge
+          const leftCliffWidth = w * 0.28;
+          const rightCliffWidth = w * 0.28;
+          const cliffH = h * 0.65; // canyon bridge level
+          const gapW = w - leftCliffWidth - rightCliffWidth;
+
+          // Draw Left Cliff
+          ctx.save();
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = '#06b6d4';
+          ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)';
+          ctx.fillStyle = '#050a14';
+          ctx.lineWidth = 4;
+
+          ctx.beginPath();
+          ctx.moveTo(0, h);
+          ctx.lineTo(leftCliffWidth, cliffH);
+          ctx.lineTo(leftCliffWidth - 20, h);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Left Cliff top platform glow
+          ctx.strokeStyle = '#06b6d4';
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.moveTo(0, cliffH);
+          ctx.lineTo(leftCliffWidth, cliffH);
+          ctx.stroke();
+          ctx.restore();
+
+          // Draw Right Cliff
+          ctx.save();
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = '#06b6d4';
+          ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)';
+          ctx.fillStyle = '#050a14';
+          ctx.lineWidth = 4;
+
+          ctx.beginPath();
+          ctx.moveTo(w, h);
+          ctx.lineTo(w - rightCliffWidth, cliffH);
+          ctx.lineTo(w - rightCliffWidth + 20, h);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Right platform top glow
+          ctx.strokeStyle = '#06b6d4';
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.moveTo(w - rightCliffWidth, cliffH);
+          ctx.lineTo(w, cliffH);
+          ctx.stroke();
+          ctx.restore();
+
+          // Draw existing bridge segments
+          ctx.save();
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = '#cbd5e1';
+          ctx.strokeStyle = 'rgba(203, 213, 225, 0.3)';
+          ctx.lineWidth = 4;
+
+          // Left bridge segment
+          ctx.beginPath();
+          ctx.moveTo(leftCliffWidth, cliffH + 2);
+          ctx.lineTo(leftCliffWidth + gapW * 0.35, cliffH + 2);
+          ctx.stroke();
+
+          // Right bridge segment
+          ctx.beginPath();
+          ctx.moveTo(w - rightCliffWidth - gapW * 0.35, cliffH + 2);
+          ctx.lineTo(w - rightCliffWidth, cliffH + 2);
+          ctx.stroke();
+          ctx.restore();
+
+          const slotX = leftCliffWidth + gapW * 0.50;
+          const slotY = cliffH + 2;
+          const plankW = gapW * 0.30;
+
+          // Draw Bridge Inequality slot / completed plank
+          ctx.save();
+          if (p.selectedPlankIdx !== -1) {
+            // Draw completed plank
+            const isCorrect = p.choices[p.selectedPlankIdx] > p.leftVal && p.choices[p.selectedPlankIdx] < p.rightVal;
+            const hex = isCorrect ? '#10b981' : '#ef4444';
+
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = hex;
+            ctx.strokeStyle = hex;
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(slotX - plankW/2, slotY);
+            ctx.lineTo(slotX + plankW/2, slotY);
+            ctx.stroke();
+
+            // Label text of selected plank
+            if (ageGroup !== '4-5') {
+              ctx.fillStyle = '#ffffff';
+              ctx.font = "bold 20px 'Fredoka', sans-serif";
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+              ctx.fillText(p.choices[p.selectedPlankIdx], slotX, slotY - 8);
+            } else {
+              // Draw visual coins on the placed plank
+              p.choicesCoins[p.selectedPlankIdx].forEach(coin => {
+                ctx.save();
+                ctx.fillStyle = `hsl(${coin.hue}, 95%, 60%)`;
+                ctx.beginPath();
+                ctx.arc(slotX + coin.ox, slotY - 14 + coin.oy, 6, 0, Math.PI*2);
+                ctx.fill();
+                ctx.restore();
+              });
+            }
+          } else if (p.flyPlankIdx === -1) {
+            // Empty placeholder box
+            ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([5, 4]);
+            ctx.beginPath();
+            ctx.roundRect(slotX - plankW/2, slotY - 6, plankW, 12, 5);
+            ctx.stroke();
+          }
+          ctx.restore();
+
+          // Draw flying plank animation
+          if (p.flyPlankIdx !== -1) {
+            const currentX = p.flyStartX + (slotX - p.flyStartX) * p.flyProgress;
+            const currentY = p.flyStartY + (slotY - p.flyStartY) * p.flyProgress;
+
+            ctx.save();
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#06b6d4';
+            ctx.strokeStyle = '#06b6d4';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(currentX - plankW/2, currentY);
+            ctx.lineTo(currentX + plankW/2, currentY);
+            ctx.stroke();
+
+            if (ageGroup !== '4-5') {
+              ctx.fillStyle = '#ffffff';
+              ctx.font = "bold 22px 'Fredoka', sans-serif";
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+              ctx.fillText(p.choices[p.flyPlankIdx], currentX, currentY - 8);
+            } else {
+              p.choicesCoins[p.flyPlankIdx].forEach(coin => {
+                ctx.save();
+                ctx.fillStyle = `hsl(${coin.hue}, 95%, 60%)`;
+                ctx.beginPath();
+                ctx.arc(currentX + coin.ox, currentY - 14 + coin.oy, 6, 0, Math.PI*2);
+                ctx.fill();
+                ctx.restore();
+              });
+            }
+            ctx.restore();
+          }
+
+          // DRAW DOUBLE INEQUALITY QUEST (A < X < B)
+          ctx.save();
+          const questX = w * 0.5;
+          const questY = h * 0.36;
+
+          // Backing panel
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+          ctx.strokeStyle = 'rgba(217, 70, 239, 0.3)';
+          ctx.lineWidth = 2.2;
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = 'rgba(217, 70, 239, 0.15)';
+
+          if (ageGroup === '4-5') {
+            const boxW = 240;
+            const boxH = 58;
+
+            ctx.beginPath();
+            ctx.roundRect(questX - boxW/2, questY - boxH/2, boxW, boxH, 15);
+            ctx.fill();
+            ctx.stroke();
+
+            // Center slot dotted circle
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.setLineDash([4, 3]);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(questX, questY, 13, 0, Math.PI*2);
+            ctx.stroke();
+
+            // Operators '<' inside quest
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = "bold 22px 'Fredoka', sans-serif";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('<', questX - 40, questY);
+            ctx.fillText('<', questX + 40, questY);
+
+            // Draw visual star clusters left and right
+            p.leftCoins.forEach(coin => {
+              ctx.save();
+              ctx.fillStyle = `hsl(${coin.hue}, 95%, 60%)`;
+              ctx.beginPath();
+              ctx.arc(questX - 85 + coin.ox, questY + 12 + coin.oy, 6.5, 0, Math.PI*2);
+              ctx.fill();
+              ctx.restore();
+            });
+
+            p.rightCoins.forEach(coin => {
+              ctx.save();
+              ctx.fillStyle = `hsl(${coin.hue}, 95%, 60%)`;
+              ctx.beginPath();
+              ctx.arc(questX + 85 + coin.ox, questY + 12 + coin.oy, 6.5, 0, Math.PI*2);
+              ctx.fill();
+              ctx.restore();
+            });
+          } 
+          else {
+            // Text expression range
+            ctx.font = "bold 22px 'Fredoka', sans-serif";
+            const displayText = `${p.leftExpr}   <   X   <   ${p.rightExpr}`;
+            const metrics = ctx.measureText(displayText);
+            const boxW = Math.max(metrics.width + 45, 180);
+            const boxH = 46;
+
+            ctx.beginPath();
+            ctx.roundRect(questX - boxW/2, questY - boxH/2, boxW, boxH, 15);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(displayText, questX, questY);
+          }
+          ctx.restore();
+
+          // Draw Kiber Hero (Running or Falling platformer sprite)
+          ctx.save();
+          
+          let hy = cliffH;
+          if (p.heroState === 'falling') {
+            const fallElapsed = p.heroX - (slotX - 10);
+            if (fallElapsed > 0) {
+              // Parabolic fall down
+              hy = cliffH + 0.08 * fallElapsed * fallElapsed;
+            }
+          }
+
+          ctx.translate(p.heroX, hy);
+
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = idx === 0 ? '#06b6d4' : '#d946ef';
+          ctx.fillStyle = idx === 0 ? '#22d3ee' : '#e879f9';
+
+          // Simple kiber astronaut body shape
+          ctx.beginPath();
+          ctx.roundRect(-12, -26, 24, 26, 8);
+          ctx.fill();
+
+          // Glowing visor face shield
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath();
+          ctx.roundRect(0, -22, 11, 10, 3);
+          ctx.fill();
+
+          ctx.strokeStyle = idx === 0 ? '#06b6d4' : '#d946ef';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.roundRect(0, -22, 11, 10, 3);
+          ctx.stroke();
+
+          // Leg running animation
+          ctx.fillStyle = '#ffffff';
+          const legW = 6;
+          const legH = 8;
+          let legOffset = 0;
+          if (p.heroState === 'running') {
+            legOffset = Math.sin(now * 0.015) * 5;
+          }
+          ctx.fillRect(-8, 0, legW, legH + legOffset);
+          ctx.fillRect(2, 0, legW, legH - legOffset);
+
+          ctx.restore();
+
+          // Render particles
+          p.particles.forEach(part => {
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI*2);
+            ctx.fill();
+            ctx.restore();
+          });
+
+          // Draw visual coins inside choices buttons for 4-5 yosh
+          if (ageGroup === '4-5') {
+            const buttons = p.opsDom.querySelectorAll('.op-btn');
+            buttons.forEach((btn, cIdx) => {
+              const bRect = btn.getBoundingClientRect();
+              const cRect = p.canvas.getBoundingClientRect();
+              const bx = bRect.left - cRect.left + bRect.width / 2;
+              const by = bRect.top - cRect.top + bRect.height / 2;
+
+              p.choicesCoins[cIdx].forEach(coin => {
+                ctx.save();
+                ctx.fillStyle = `hsl(${coin.hue}, 95%, 60%)`;
+                ctx.beginPath();
+                ctx.arc(bx + coin.ox, by + coin.oy + 14, 5, 0, Math.PI*2);
+                ctx.fill();
+                ctx.restore();
+              });
+            });
+          }
+
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    // Auto resize
+    window.addEventListener('load', safeInit);
+    document.addEventListener('DOMContentLoaded', safeInit);
+  </script>
+</body>
+</html>

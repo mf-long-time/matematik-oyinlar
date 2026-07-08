@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shakllar va Geometriya — Tangram va Simmetriya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-wood: #854d0e;
+      --wood-light: #fef08a;
+      --accent-pink: #ec4899;
+      --success-green: #10b981;
+      --glass-bg: rgba(15, 23, 42, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: radial-gradient(circle at center, #1b130e 0%, #0c0806 100%);
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Wooden table backdrop texture */
+    .table-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+      background-size: 120px 120px;
+      background-image: 
+        radial-gradient(circle, rgba(133, 77, 14, 0.04) 10%, transparent 11%),
+        radial-gradient(circle at 50% 50%, rgba(133, 77, 14, 0.03) 20%, transparent 21%);
+      opacity: 0.85;
+    }
+
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Menu Panel */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 40px;
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(133, 77, 14, 0.2);
+      backdrop-filter: blur(15px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .logo-area {
+      margin-bottom: 30px;
+    }
+
+    .logo-title {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f59e0b 0%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(245, 158, 11, 0.2);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.1rem;
+      color: #a1a1aa;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #f59e0b;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 15px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(245, 158, 11, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .opt-card.active {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%);
+      border-color: #f59e0b;
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+    }
+
+    .opt-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #a1a1aa;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f59e0b 0%, #10b981 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 12px 30px rgba(245, 158, 11, 0.45);
+    }
+
+    /* Setup Header Controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #f59e0b;
+    }
+
+    /* Gameplay Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(24, 18, 15, 0.95);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Quest Panel */
+    .quest-bubble {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 14px 28px;
+      border-radius: 20px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(245, 158, 11, 0.15);
+      text-align: center;
+    }
+
+    /* Play Tracks */
+    .tracks-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tracks-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    /* HUD Bar */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      z-index: 40;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(27, 19, 14, 0.5), transparent);
+    }
+
+    .hud-label {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #f59e0b;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* Workplace View Area */
+    .workplace {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* Target Silhouette Outline Box */
+    .outline-box {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 3px dashed rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
+      margin-left: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Vertical Symmetry Line */
+    .symmetry-line {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 2px;
+      height: 100%;
+      background: repeating-linear-gradient(to bottom, transparent, transparent 4px, #f59e0b 4px, #f59e0b 8px);
+      z-index: 5;
+      display: none;
+    }
+
+    /* Silhouette slot placeholder */
+    .silhouette-slot {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Wood Block palette */
+    .palette-box {
+      width: 260px;
+      height: 90%;
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+      justify-content: flex-start;
+      margin-right: 20px;
+      overflow-y: auto;
+    }
+
+    /* Loose Block style */
+    .block {
+      position: absolute; /* when dragging or generated */
+      cursor: grab;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.35);
+      transition: box-shadow 0.15s, transform 0.1s;
+    }
+
+    .block:active {
+      cursor: grabbing;
+      box-shadow: 0 16px 28px rgba(0,0,0,0.5);
+      transform: scale(1.05);
+    }
+
+    .block.placed {
+      cursor: default;
+      box-shadow: none !important;
+      pointer-events: none;
+      z-index: 4;
+      transform: none !important;
+      animation: snapPulse 0.4s ease-out;
+    }
+
+    @keyframes snapPulse {
+      0% { filter: brightness(1.8) drop-shadow(0 0 15px currentColor); }
+      100% { filter: none; }
+    }
+
+    /* Geometry Shapes with CSS polygon clip-paths */
+    .shape-triangle {
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    }
+
+    .shape-square {
+      border-radius: 8px;
+    }
+
+    .shape-circle {
+      border-radius: 50%;
+    }
+
+    .shape-rectangle {
+      border-radius: 8px;
+    }
+
+    .shape-parallelogram {
+      clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
+    }
+
+    /* Palette layout items */
+    .palette-item-container {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Particles overlay */
+    .particle-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    /* Game Over Container */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.2rem;
+      color: #cbd5e1;
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Wooden texture table -->
+  <div class="table-background"></div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="setup-header-btns">
+    <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+  </div>
+
+  <!-- SETUP/MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Shakllar va Geometriya</h1>
+        <p class="logo-subtitle">Qiziqarli Tangram va Simmetriya</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Geometrik shaklni to'g'ri ter</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Tezkor yig'ish poygasi</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Oddiy shakllar (3 bo'lak)</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Murakkab shakllar (5 bo'lak)</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Tangram modellari (7 bo'lak)</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10+ Yosh</div>
+            <div class="opt-card-desc">Simmetriya va ko'zgudagi aks</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">🛠️ Yig'ishni Boshlash</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Menyu</button>
+      
+      <div class="quest-bubble" id="shared-quest">Shakl yig'ilmoqda...</div>
+      
+      <div class="game-info">
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+      </div>
+    </div>
+
+    <!-- Active game tracks container -->
+    <div class="tracks-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Progress: 0%</div>
+        </div>
+
+        <div class="workplace" id="workplace-p1">
+          <!-- Outline Box Target area -->
+          <div class="outline-box" id="outline-p1">
+            <div class="symmetry-line" id="symmetry-p1"></div>
+            <!-- Silhouette slots are generated here -->
+          </div>
+
+          <!-- Loose Palette boxes -->
+          <div class="palette-box" id="palette-p1">
+            <!-- Loose blocks spawn here -->
+          </div>
+
+          <canvas class="particle-canvas" id="canvas-p1"></canvas>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Progress: 0%</div>
+        </div>
+
+        <div class="workplace" id="workplace-p2">
+          <!-- Outline Box Target area -->
+          <div class="outline-box" id="outline-p2">
+            <div class="symmetry-line" id="symmetry-p2"></div>
+            <!-- Silhouette slots are generated here -->
+          </div>
+
+          <!-- Loose Palette boxes -->
+          <div class="palette-box" id="palette-p2">
+            <!-- Loose blocks spawn here -->
+          </div>
+
+          <canvas class="particle-canvas" id="canvas-p2"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Siz Yutdingiz!</h2>
+      <div class="game-stats" id="gameover-details">
+        Shakllar yig'ildi!
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Boshlash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'grab') {
+        // Wood block picking click
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.linearRampToValueAtTime(300, now + 0.05);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } else if (type === 'snap') {
+        // Wooden lock/snap "thud"
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(250, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.12);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'success') {
+        // Sweet completion chime
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+        osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Game configurations and layout templates
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Puzzle Templates definitions
+    const PUZZLES = {
+      '4-5': [
+        {
+          name: 'Archa (Archacha)',
+          description: 'Yashil archani yig\'ing',
+          slots: [
+            { id: 1, type: 'triangle', x: 160, y: 110, w: 100, h: 100, rot: 0, hex: '#10b981' }, // top leaf
+            { id: 2, type: 'triangle', x: 160, y: 180, w: 130, h: 120, rot: 0, hex: '#059669' }, // bottom leaf
+            { id: 3, type: 'square', x: 160, y: 260, w: 40, h: 60, rot: 0, hex: '#854d0e' }   // trunk
+          ]
+        },
+        {
+          name: 'Uycha',
+          description: 'Qizil uychani yig\'ing',
+          slots: [
+            { id: 1, type: 'triangle', x: 160, y: 110, w: 120, h: 90, rot: 0, hex: '#ef4444' }, // roof
+            { id: 2, type: 'square', x: 160, y: 215, w: 100, h: 100, rot: 0, hex: '#3b82f6' }, // body
+            { id: 3, type: 'rectangle', x: 160, y: 235, w: 30, h: 60, rot: 0, hex: '#eab308' }  // door
+          ]
+        }
+      ],
+      '6-7': [
+        {
+          name: 'Raketa',
+          description: 'Kosmik raketani yig\'ing',
+          slots: [
+            { id: 1, type: 'triangle', x: 160, y: 80, w: 70, h: 70, rot: 0, hex: '#ef4444' }, // nose
+            { id: 2, type: 'rectangle', x: 160, y: 175, w: 70, h: 120, rot: 0, hex: '#06b6d4' }, // body
+            { id: 3, type: 'triangle', x: 100, y: 210, w: 50, h: 50, rot: -90, hex: '#f97316' }, // left wing
+            { id: 4, type: 'triangle', x: 220, y: 210, w: 50, h: 50, rot: 90, hex: '#f97316' }, // right wing
+            { id: 5, type: 'square', x: 160, y: 265, w: 40, h: 40, rot: 0, hex: '#eab308' } // thruster fire
+          ]
+        },
+        {
+          name: 'Kema (Yelkanli)',
+          description: 'Yelkanli kemani yig\'ing',
+          slots: [
+            { id: 1, type: 'triangle', x: 130, y: 120, w: 80, h: 110, rot: 0, hex: '#ffffff' }, // left sail
+            { id: 2, type: 'triangle', x: 200, y: 135, w: 60, h: 90, rot: 0, hex: '#f1f5f9' }, // right sail
+            { id: 3, type: 'rectangle', x: 160, y: 210, w: 10, h: 60, rot: 0, hex: '#854d0e' }, // mast
+            { id: 4, type: 'parallelogram', x: 160, y: 255, w: 140, h: 40, rot: 0, hex: '#7c2d12' } // hull
+          ]
+        }
+      ],
+      '8-9': [
+        {
+          name: 'Tulki Tangram',
+          description: 'Tangram tulkini yig\'ing',
+          slots: [
+            { id: 1, type: 'square', x: 160, y: 160, w: 60, h: 60, rot: 45, hex: '#f97316' }, // head center
+            { id: 2, type: 'triangle', x: 115, y: 105, w: 60, h: 60, rot: -45, hex: '#ea580c' }, // left ear
+            { id: 3, type: 'triangle', x: 205, y: 105, w: 60, h: 60, rot: 45, hex: '#ea580c' }, // right ear
+            { id: 4, type: 'triangle', x: 105, y: 185, w: 80, h: 80, rot: -90, hex: '#f97316' }, // face left
+            { id: 5, type: 'triangle', x: 215, y: 185, w: 80, h: 80, rot: 90, hex: '#f97316' }, // face right
+            { id: 6, type: 'triangle', x: 160, y: 245, w: 70, h: 70, rot: 180, hex: '#c2410c' } // snout
+          ]
+        }
+      ],
+      '10': [
+        {
+          name: 'Simmetriya: Kapalak',
+          description: 'Simmetriya chizig\'i bo\'yicha mirrorni yig\'ing',
+          isSymmetry: true,
+          slots: [
+            // Left prefilled ones (static)
+            { id: 1, type: 'triangle', x: 110, y: 110, w: 80, h: 80, rot: -45, hex: '#ec4899', isPrefilled: true },
+            { id: 2, type: 'triangle', x: 120, y: 210, w: 60, h: 60, rot: -135, hex: '#db2777', isPrefilled: true },
+            { id: 3, type: 'circle', x: 110, y: 160, w: 30, h: 30, rot: 0, hex: '#f59e0b', isPrefilled: true },
+            // Right target slots to drop
+            { id: 4, type: 'triangle', x: 210, y: 110, w: 80, h: 80, rot: 45, hex: '#ec4899' },
+            { id: 5, type: 'triangle', x: 200, y: 210, w: 60, h: 60, rot: 135, hex: '#db2777' },
+            { id: 6, type: 'circle', x: 210, y: 160, w: 30, h: 30, rot: 0, hex: '#f59e0b' }
+          ]
+        },
+        {
+          name: 'Simmetriya: Uycha',
+          description: 'Uycha simmetriyasini yakunlang',
+          isSymmetry: true,
+          slots: [
+            // Left prefilled
+            { id: 1, type: 'triangle', x: 120, y: 110, w: 80, h: 80, rot: -90, hex: '#ef4444', isPrefilled: true }, // left roof half
+            { id: 2, type: 'rectangle', x: 120, y: 210, w: 80, h: 120, rot: 0, hex: '#3b82f6', isPrefilled: true }, // left body half
+            { id: 3, type: 'square', x: 120, y: 210, w: 35, h: 35, rot: 0, hex: '#ffffff', isPrefilled: true },  // window
+            // Right target
+            { id: 4, type: 'triangle', x: 200, y: 110, w: 80, h: 80, rot: 90, hex: '#ef4444' }, // right roof
+            { id: 5, type: 'rectangle', x: 200, y: 210, w: 80, h: 120, rot: 0, hex: '#3b82f6' }, // right body
+            { id: 6, type: 'square', x: 200, y: 210, w: 35, h: 35, rot: 0, hex: '#ffffff' }  // window
+          ]
+        }
+      ]
+    };
+
+    // Active players workspace definitions
+    const players = [
+      {
+        score: 0, // snaps count
+        slots: [], // level target slots
+        blocks: [], // palette blocks data
+        active: true,
+        scoreLabel: null,
+        workspaceDom: null,
+        outlineDom: null,
+        paletteDom: null,
+        canvas: null,
+        ctx: null,
+        particles: []
+      },
+      {
+        score: 0,
+        slots: [],
+        blocks: [],
+        active: false,
+        scoreLabel: null,
+        workspaceDom: null,
+        outlineDom: null,
+        paletteDom: null,
+        canvas: null,
+        ctx: null,
+        particles: []
+      }
+    ];
+
+    function initPlayers() {
+      players.forEach((p, idx) => {
+        p.scoreLabel = document.getElementById(`score-label-p${idx + 1}`);
+        p.workspaceDom = document.getElementById(`workplace-p${idx + 1}`);
+        p.outlineDom = document.getElementById(`outline-p${idx + 1}`);
+        p.paletteDom = document.getElementById(`palette-p${idx + 1}`);
+        p.canvas = document.getElementById(`canvas-p${idx + 1}`);
+        p.ctx = p.canvas ? p.canvas.getContext('2d') : null;
+      });
+    }
+
+    let currentPuzzleTemplate = null;
+
+    const muteBtn = document.getElementById('mute-btn');
+    function updateMuteBtn() {
+      muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+    }
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      updateMuteBtn();
+      if (!isMuted) playSound('click');
+    });
+
+    // Menu Card handlers
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Start Game logic
+    function startGame() {
+      initPlayers();
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      // Pick random puzzle matching age group
+      const list = PUZZLES[ageGroup];
+      currentPuzzleTemplate = list[Math.floor(Math.random() * list.length)];
+      document.getElementById('shared-quest').textContent = `🧩 ${currentPuzzleTemplate.name}: ${currentPuzzleTemplate.description}`;
+
+      // Initialize workspace
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+
+        p.score = 0;
+        p.particles = [];
+        p.blocks = [];
+        p.scoreLabel.textContent = `Progress: 0%`;
+
+        // Clear existing elements in DOM
+        p.outlineDom.querySelectorAll('.silhouette-slot').forEach(s => s.remove());
+        p.outlineDom.querySelectorAll('.block').forEach(b => b.remove());
+        p.workspaceDom.querySelectorAll('.block').forEach(b => b.remove());
+        p.paletteDom.innerHTML = '';
+
+        // Render targets and generate loose blocks
+        p.slots = JSON.parse(JSON.stringify(currentPuzzleTemplate.slots));
+        
+        // Show/hide symmetry vertical divider line
+        const symLine = document.getElementById(`symmetry-p${idx + 1}`);
+        if (currentPuzzleTemplate.isSymmetry) {
+          symLine.style.display = 'block';
+        } else {
+          symLine.style.display = 'none';
+        }
+
+        const looseBlocksData = [];
+
+        p.slots.forEach(slot => {
+          // Render the silhouette shadow slot inside outline Box
+          const slotDom = document.createElement('div');
+          slotDom.className = `silhouette-slot shape-${slot.type}`;
+          slotDom.style.width = `${slot.w}px`;
+          slotDom.style.height = `${slot.h}px`;
+          // Center aligning coordinates
+          slotDom.style.left = `${slot.x - (slot.w / 2)}px`;
+          slotDom.style.top = `${slot.y - (slot.h / 2)}px`;
+          slotDom.style.transform = `rotate(${slot.rot}deg)`;
+          
+          if (slot.isPrefilled) {
+            // Prefilled blocks are already solved, solid color
+            slotDom.style.background = slot.hex;
+            slotDom.style.borderColor = slot.hex;
+            slotDom.style.boxShadow = 'none';
+            p.outlineDom.appendChild(slotDom);
+          } else {
+            // Unfilled slots are targets
+            p.outlineDom.appendChild(slotDom);
+
+            // Create a corresponding loose drag block in palette
+            looseBlocksData.push({
+              id: slot.id,
+              type: slot.type,
+              w: slot.w,
+              h: slot.h,
+              rot: slot.rot,
+              hex: slot.hex,
+              targetX: slot.x,
+              targetY: slot.y,
+              placed: false
+            });
+          }
+        });
+
+        // Shuffle loose blocks
+        looseBlocksData.sort(() => Math.random() - 0.5);
+
+        // Spawn loose blocks inside palette box
+        looseBlocksData.forEach((bData, bIdx) => {
+          const container = document.createElement('div');
+          container.className = 'palette-item-container';
+          p.paletteDom.appendChild(container);
+
+          const blockDom = document.createElement('div');
+          blockDom.className = `block shape-${bData.type}`;
+          blockDom.style.width = `${bData.w}px`;
+          blockDom.style.height = `${bData.h}px`;
+          blockDom.style.transform = `rotate(${bData.rot}deg)`;
+          blockDom.style.background = `radial-gradient(circle at 35% 35%, ${bData.hex} 0%, #000000 150%)`;
+          blockDom.style.borderColor = bData.hex;
+
+          container.appendChild(blockDom);
+
+          // Save references
+          bData.dom = blockDom;
+          bData.containerDom = container;
+          p.blocks.push(bData);
+
+          // Make block draggable
+          setupDragging(idx, bData);
+        });
+
+      });
+
+      setTimeout(() => {
+        resizeCanvases();
+      }, 150);
+
+      initAudio();
+      startGameLoop();
+    }
+
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active && p.canvas && p.workspaceDom) {
+          p.canvas.width = p.workspaceDom.offsetWidth;
+          p.canvas.height = p.workspaceDom.offsetHeight;
+        }
+      });
+    }
+
+    // Drag-and-drop controller
+    function setupDragging(pIdx, bData) {
+      const block = bData.dom;
+      const workplace = players[pIdx].workspaceDom;
+      const outline = players[pIdx].outlineDom;
+
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      let blockStartX = 0;
+      let blockStartY = 0;
+
+      const onPointerDown = (e) => {
+        if (bData.placed || isGameOver) return;
+        isDragging = true;
+        block.releasePointerCapture(e.pointerId);
+
+        playSound('grab');
+
+        // Append block directly to workplace view container so it floats freely
+        const rect = block.getBoundingClientRect();
+        const workRect = workplace.getBoundingClientRect();
+
+        blockStartX = rect.left - workRect.left;
+        blockStartY = rect.top - workRect.top;
+
+        block.style.position = 'absolute';
+        block.style.left = `${blockStartX}px`;
+        block.style.top = `${blockStartY}px`;
+        workplace.appendChild(block);
+
+        startX = e.clientX;
+        startY = e.clientY;
+
+        block.style.zIndex = 1000;
+      };
+
+      const onPointerMove = (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        block.style.left = `${blockStartX + dx}px`;
+        block.style.top = `${blockStartY + dy}px`;
+      };
+
+      const onPointerUp = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+
+        block.style.zIndex = 10;
+
+        // Check distance to target shadow outline slot
+        const workRect = workplace.getBoundingClientRect();
+        const outlineRect = outline.getBoundingClientRect();
+
+        // Calculate target location coordinates relative to workspace box
+        const targetWorkX = (outlineRect.left - workRect.left) + bData.targetX;
+        const targetWorkY = (outlineRect.top - workRect.top) + bData.targetY;
+
+        const currentLeft = parseFloat(block.style.left) + (bData.w / 2);
+        const currentTop = parseFloat(block.style.top) + (bData.h / 2);
+
+        const dist = Math.hypot(currentLeft - targetWorkX, currentTop - targetWorkY);
+
+        if (dist < 30) {
+          // Snap locked!
+          bData.placed = true;
+          block.className = `block placed shape-${bData.type}`;
+          block.style.left = `${bData.targetX - (bData.w / 2)}px`;
+          block.style.top = `${bData.targetY - (bData.h / 2)}px`;
+          block.style.background = bData.hex;
+          block.style.borderColor = bData.hex;
+          block.style.transform = `rotate(${bData.rot}deg)`;
+          
+          outline.appendChild(block); // append permanently inside outline box
+
+          playSound('snap');
+
+          // Burst particles
+          const burstX = outlineRect.left - workRect.left + bData.targetX;
+          const burstY = outlineRect.top - workRect.top + bData.targetY;
+          spawnParticles(pIdx, burstX, burstY, bData.hex);
+
+          // Verify status
+          checkWinCondition(pIdx);
+        } else {
+          // Return to palette grid cell
+          block.style.position = 'relative';
+          block.style.left = '0';
+          block.style.top = '0';
+          bData.containerDom.appendChild(block);
+        }
+      };
+
+      block.addEventListener('pointerdown', onPointerDown);
+      document.addEventListener('pointermove', onPointerMove);
+      document.addEventListener('pointerup', onPointerUp);
+    }
+
+    function spawnParticles(pIdx, x, y, color) {
+      const count = 15;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 4 + 2;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity,
+          color: color || '#f59e0b',
+          alpha: 1,
+          size: Math.random() * 5 + 3
+        });
+      }
+    }
+
+    function checkWinCondition(pIdx) {
+      const placedCount = players[pIdx].blocks.filter(b => b.placed).length;
+      const totalToPlace = players[pIdx].blocks.length;
+
+      const progress = Math.round((placedCount / totalToPlace) * 100);
+      players[pIdx].scoreLabel.textContent = `Progress: ${progress}%`;
+
+      if (placedCount === totalToPlace) {
+        players[pIdx].score = 100;
+        checkGameStatus();
+      }
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        if (players[0].score >= 100) {
+          endGame('won');
+        }
+      } else {
+        if (players[0].score >= 100) {
+          endGame('p1');
+        } else if (players[1].score >= 100) {
+          endGame('p2');
+        }
+      }
+    }
+
+    function endGame(status) {
+      isGameOver = true;
+      cancelAnimationFrame(mainGameLoop);
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      playSound('success');
+
+      if (status === 'won') {
+        title.className = 'win-text';
+        title.textContent = 'Ajoyib G\'alaba!';
+        details.innerHTML = `Siz geometrik shaklni to'g'ri terishga muvaffaq bo'ldingiz!<br>Shakl: <strong>${currentPuzzleTemplate.name}</strong>`;
+        startConfetti();
+      } else if (status === 'p1') {
+        title.className = 'win-text';
+        title.textContent = '1-O\'yinchi G\'olib!';
+        details.innerHTML = `P1 geometrik shaklni birinchi bo'lib to'liq yig'di!<br>Shakl: <strong>${currentPuzzleTemplate.name}</strong>`;
+        startConfetti();
+      } else if (status === 'p2') {
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `P2 geometrik shaklni birinchi bo'lib to'liq yig'di!<br>Shakl: <strong>${currentPuzzleTemplate.name}</strong>`;
+        startConfetti();
+      }
+    }
+
+    // Canvas particle render tick
+    function startGameLoop() {
+      function tick() {
+        if (isGameOver) return;
+
+        players.forEach((p, idx) => {
+          if (!p.active || !p.canvas || !p.ctx) return;
+
+          const c = p.canvas;
+          const ctx = p.ctx;
+          ctx.clearRect(0, 0, c.width, c.height);
+
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx;
+            part.y += part.vy;
+            part.vy += 0.1; // mild gravity
+            part.alpha -= 0.025;
+
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti Engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#ef4444', '#10b981'];
+      for (let i = 0; i < 100; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.04 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 12;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 10 - 5;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    // Initialize DOM references on load
+    initPlayers();
+    document.addEventListener('DOMContentLoaded', initPlayers);
+  </script>
+</body>
+</html>

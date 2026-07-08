@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raqamli Labirint — Mantiq va Matematika O'yini</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-cyan: #06b6d4;
+      --accent-pink: #ec4899;
+      --success-green: #10b981;
+      --warning-gold: #f59e0b;
+      --glass-bg: rgba(15, 23, 42, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: radial-gradient(circle at center, #0b1329 0%, #030712 100%);
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Cyber Grid Background */
+    .grid-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+      background-size: 50px 50px;
+      background-image: 
+        linear-gradient(to right, rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+      perspective: 1000px;
+    }
+
+    .neon-glow-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%);
+      filter: blur(40px);
+      pointer-events: none;
+    }
+    .neon-glow-circle.c1 { width: 500px; height: 500px; top: -10%; left: -10%; }
+    .neon-glow-circle.c2 { width: 400px; height: 400px; bottom: -10%; right: -10%; background: radial-gradient(circle, rgba(236, 72, 153, 0.08) 0%, transparent 70%); }
+
+    /* Screen management */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Setup / Main Menu UI */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 40px;
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(6, 182, 212, 0.25);
+      backdrop-filter: blur(15px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .logo-area {
+      margin-bottom: 30px;
+    }
+
+    .logo-title {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #22d3ee 0%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(6, 182, 212, 0.35);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #22d3ee;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 15px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(6, 182, 212, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .opt-card.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
+      border-color: #22d3ee;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
+    }
+
+    .opt-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #06b6d4 0%, #ec4899 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 12px 30px rgba(6, 182, 212, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0) scale(0.99);
+    }
+
+    /* Setup Header Controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #06b6d4;
+    }
+
+    /* Gameplay Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Quest Panel */
+    .quest-bubble {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(236, 72, 153, 0.15) 100%);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 14px 28px;
+      border-radius: 20px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(6, 182, 212, 0.15);
+      animation: pulseBorder 2s infinite alternate;
+      text-align: center;
+    }
+
+    @keyframes pulseBorder {
+      0% { border-color: rgba(6, 182, 212, 0.3); }
+      100% { border-color: rgba(236, 72, 153, 0.6); }
+    }
+
+    /* Play Tracks */
+    .tracks-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tracks-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    /* HUD Bar */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      z-index: 40;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(15, 23, 42, 0.5), transparent);
+    }
+
+    .hud-label {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #06b6d4;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 5px;
+      font-size: 1.4rem;
+    }
+
+    .heart {
+      color: #ef4444;
+      filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .heart.lost {
+      color: #475569;
+      filter: none;
+      transform: scale(0.8);
+    }
+
+    /* Timer Countdown Bar */
+    .timer-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      position: relative;
+      z-index: 45;
+    }
+
+    .timer-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(to right, #06b6d4, #ec4899);
+      transition: width 0.1s linear;
+    }
+
+    /* Chamber/Maze View Field */
+    .maze-field {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding-bottom: 40px;
+    }
+
+    /* 3 Doors Layout */
+    .doors-container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      width: 90%;
+      max-width: 600px;
+      margin-bottom: 70px;
+      z-index: 10;
+    }
+
+    .door-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .door {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 0.75;
+      background: rgba(15, 23, 42, 0.6);
+      border: 3px solid #1e293b;
+      border-radius: 40px 40px 10px 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .door-glow-cyan {
+      border-color: #06b6d4;
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.3), inset 0 0 15px rgba(6, 182, 212, 0.2);
+    }
+
+    .door-glow-pink {
+      border-color: #ec4899;
+      box-shadow: 0 0 25px rgba(236, 72, 153, 0.3), inset 0 0 15px rgba(236, 72, 153, 0.2);
+    }
+
+    .door-glow-gold {
+      border-color: #f59e0b;
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.3), inset 0 0 15px rgba(245, 158, 11, 0.2);
+    }
+
+    .door:hover {
+      transform: translateY(-8px) scale(1.03);
+    }
+
+    .door-content {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #ffffff;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      z-index: 5;
+    }
+
+    .door-keybind {
+      margin-top: 10px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #94a3b8;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* Player Explorer Character */
+    .runner {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 50px;
+      background: radial-gradient(circle at 35% 35%, #22d3ee 0%, #0891b2 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.6), inset 0 -4px 8px rgba(0,0,0,0.3);
+      z-index: 20;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .runner-split-left {
+      background: radial-gradient(circle at 35% 35%, #ec4899 0%, #be185d 100%);
+      box-shadow: 0 0 20px rgba(236, 72, 153, 0.6), inset 0 -4px 8px rgba(0,0,0,0.3);
+    }
+
+    .runner-split-right {
+      background: radial-gradient(circle at 35% 35%, #10b981 0%, #047857 100%);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.6), inset 0 -4px 8px rgba(0,0,0,0.3);
+    }
+
+    /* Map Progress Dot Indicators */
+    .map-indicator {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      z-index: 10;
+    }
+
+    .map-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #334155;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.3s;
+    }
+
+    .map-dot.completed {
+      background: #06b6d4;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
+    }
+
+    .map-dot.active {
+      background: #ec4899;
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.9);
+      transform: scale(1.2);
+    }
+
+    /* Particle Canvas overlay */
+    .particle-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    /* Damage indicator screens overlay */
+    .damage-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-flash.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeTrack 0.4s ease-in-out;
+    }
+
+    @keyframes shakeTrack {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Game Over Modal Layout */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #ef4444;
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.2rem;
+      color: #cbd5e1;
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cyber grid layer -->
+  <div class="grid-background">
+    <div class="neon-glow-circle c1"></div>
+    <div class="neon-glow-circle c2"></div>
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="setup-header-btns">
+    <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+    <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+  </div>
+
+  <!-- SETUP/MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Raqamli Labirint</h1>
+        <p class="logo-subtitle">Mantiqiy va Arifmetik Xonalar</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">6 ta eshikni topib chiq</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">10-xonagacha poyga</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Rangli va oddiy eshiklar</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Juft/Toq, qo'shish</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Ko'paytirish & bo'linuvchanlik</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10+ Yosh</div>
+            <div class="opt-card-desc">Tub & kvadrat sonlar</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">⚡ Labirintni Boshlash</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Menyu</button>
+      
+      <div class="quest-bubble" id="shared-quest">Topshiriq yuklanmoqda...</div>
+      
+      <div class="game-info">
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+      </div>
+    </div>
+
+    <!-- Active game tracks container -->
+    <div class="tracks-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Xona: 1/6</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="timer-container">
+          <div class="timer-bar" id="timer-p1"></div>
+        </div>
+
+        <div class="maze-field" id="field-p1">
+          <div class="map-indicator" id="map-p1">
+            <div class="map-dot active"></div>
+            <div class="map-dot"></div>
+            <div class="map-dot"></div>
+            <div class="map-dot"></div>
+            <div class="map-dot"></div>
+            <div class="map-dot"></div>
+          </div>
+
+          <!-- 3 Doors layout -->
+          <div class="doors-container" id="doors-p1">
+            <!-- Left Door -->
+            <div class="door-wrapper">
+              <div class="door door-glow-cyan" data-door="0">
+                <span class="door-content" id="door-p1-0">A</span>
+              </div>
+              <span class="door-keybind">A</span>
+            </div>
+            <!-- Center Door -->
+            <div class="door-wrapper">
+              <div class="door door-glow-pink" data-door="1">
+                <span class="door-content" id="door-p1-1">S</span>
+              </div>
+              <span class="door-keybind">S</span>
+            </div>
+            <!-- Right Door -->
+            <div class="door-wrapper">
+              <div class="door door-glow-gold" data-door="2">
+                <span class="door-content" id="door-p1-2">D</span>
+              </div>
+              <span class="door-keybind">D</span>
+            </div>
+          </div>
+
+          <div class="runner runner-split-left" id="runner-p1"></div>
+
+          <canvas class="particle-canvas" id="canvas-p1"></canvas>
+          <div class="damage-flash" id="flash-p1"></div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Xona: 1/6</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="timer-container">
+          <div class="timer-bar" id="timer-p2"></div>
+        </div>
+
+        <div class="maze-field" id="field-p2">
+          <div class="map-indicator" id="map-p2">
+            <div class="map-dot active"></div>
+            <div class="map-dot"></div>
+            <div class="map-dot"></div>
+            <div class="map-dot"></div>
+            <div class="map-dot"></div>
+            <div class="map-dot"></div>
+          </div>
+
+          <!-- 3 Doors layout -->
+          <div class="doors-container" id="doors-p2">
+            <div class="door-wrapper">
+              <div class="door door-glow-cyan" data-door="0">
+                <span class="door-content" id="door-p2-0">←</span>
+              </div>
+              <span class="door-keybind">←</span>
+            </div>
+            <div class="door-wrapper">
+              <div class="door door-glow-pink" data-door="1">
+                <span class="door-content" id="door-p2-1">↓</span>
+              </div>
+              <span class="door-keybind">↓</span>
+            </div>
+            <div class="door-wrapper">
+              <div class="door door-glow-gold" data-door="2">
+                <span class="door-content" id="door-p2-2">→</span>
+              </div>
+              <span class="door-keybind">→</span>
+            </div>
+          </div>
+
+          <div class="runner runner-split-right" id="runner-p2"></div>
+
+          <canvas class="particle-canvas" id="canvas-p2"></canvas>
+          <div class="damage-flash" id="flash-p2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Siz Yutdingiz!</h2>
+      <div class="game-stats" id="gameover-details">
+        Topilgan xonalar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Boshlash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'door') {
+        // White noise door sliding open sweep
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.linearRampToValueAtTime(600, now + 0.35);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'portal') {
+        // High rising sine teleport
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.5);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } else if (type === 'success') {
+        // Happy chime
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.08);
+        osc.frequency.setValueAtTime(783.99, now + 0.16);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'error') {
+        // Buzz sound
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.linearRampToValueAtTime(70, now + 0.2);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Game variables
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('maze_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Track active players state
+    const players = [
+      {
+        score: 0, // chamber index (0 to 5 in single)
+        lives: 3,
+        doors: [], // current door choice templates
+        timerVal: 100, // countdown percentage
+        timerInterval: null,
+        active: true,
+        scoreLabel: null,
+        livesContainer: null,
+        canvas: null,
+        ctx: null,
+        fieldDom: null,
+        particles: [],
+        questAnswer: null
+      },
+      {
+        score: 0,
+        lives: 3,
+        doors: [],
+        timerVal: 100,
+        timerInterval: null,
+        active: false,
+        scoreLabel: null,
+        livesContainer: null,
+        canvas: null,
+        ctx: null,
+        fieldDom: null,
+        particles: [],
+        questAnswer: null
+      }
+    ];
+
+    function initPlayers() {
+      players.forEach((p, idx) => {
+        p.scoreLabel = document.getElementById(`score-label-p${idx + 1}`);
+        p.livesContainer = document.getElementById(`lives-p${idx + 1}`);
+        p.canvas = document.getElementById(`canvas-p${idx + 1}`);
+        p.ctx = p.canvas ? p.canvas.getContext('2d') : null;
+        p.fieldDom = document.getElementById(`field-p${idx + 1}`);
+      });
+    }
+
+    let currentTask = {
+      text: "",
+      validator: null
+    };
+
+    // Color list
+    const DOOR_COLORS = [
+      { name: 'cyan', hex: '#06b6d4', text: 'Moviy' },
+      { name: 'pink', hex: '#ec4899', text: 'Pushti' },
+      { name: 'gold', hex: '#f59e0b', text: 'Sariq' }
+    ];
+
+    const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+    const SQUARES = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
+
+    function getTimeLimit() {
+      let base = 10000; // 10 seconds
+      if (speedLevel === 'slow') base = 18000; // 18 seconds
+      else if (speedLevel === 'fast') base = 6000; // 6 seconds
+
+      // Adjust based on age group difficulty (complex math = more time!)
+      if (ageGroup === '4-5') {
+        base *= 2.0; // double time for counting
+      } else if (ageGroup === '6-7') {
+        base *= 1.3;
+      } else if (ageGroup === '8-9') {
+        base *= 1.6;
+      } else if (ageGroup === '10') {
+        base *= 2.4; // 10+ gets 2.4x time (e.g. 24 seconds on medium, 43.2 seconds on slow!)
+      }
+      return base;
+    }
+
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+
+    function updateSpeedBtn() {
+      const speedLabels = {
+        'slow': '🐌 Tezlik: Sekin',
+        'medium': '⚡ Tezlik: O\'rtacha',
+        'fast': '🚀 Tezlik: Tez'
+      };
+      speedBtn.textContent = speedLabels[speedLevel];
+    }
+    updateSpeedBtn();
+
+    speedBtn.addEventListener('click', () => {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('maze_speed_level', speedLevel);
+      updateSpeedBtn();
+    });
+
+    function updateMuteBtn() {
+      muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+    }
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      updateMuteBtn();
+      if (!isMuted) playSound('click');
+    });
+
+    // Menu Card handlers
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    // Navigation buttons
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      players.forEach(p => clearInterval(p.timerInterval));
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Generate math task
+    function generateTask() {
+      if (ageGroup === '4-5') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const color = DOOR_COLORS[Math.floor(Math.random() * DOOR_COLORS.length)];
+          return {
+            text: `🚪 Topshiriq: Faqat ${color.text.toUpperCase()} eshikdan yur!`,
+            validator: (val, doorColor) => doorColor === color.name
+          };
+        } else {
+          const targetNum = Math.floor(Math.random() * 5) + 1;
+          return {
+            text: `🚪 Topshiriq: Faqat [ ${targetNum} ] sonli eshikni tanla!`,
+            validator: (val) => val === targetNum
+          };
+        }
+      }
+      else if (ageGroup === '6-7') {
+        const rand = Math.random();
+        if (rand < 0.33) {
+          return {
+            text: `🚪 Topshiriq: Faqat JUFT sonli eshikdan o't!`,
+            validator: (val) => typeof val === 'number' && val % 2 === 0
+          };
+        } else if (rand < 0.66) {
+          return {
+            text: `🚪 Topshiriq: Faqat TOQ sonli eshikdan o't!`,
+            validator: (val) => typeof val === 'number' && val % 2 !== 0
+          };
+        } else {
+          const targetSum = Math.floor(Math.random() * 10) + 5; // 5-15
+          return {
+            text: `🚪 Topshiriq: Javobi [ ${targetSum} ] bo'lgan eshikdan o't!`,
+            validator: (val, color, exprVal) => exprVal === targetSum
+          };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const targetProd = [12, 16, 18, 20, 24, 30, 36, 40, 48][Math.floor(Math.random() * 9)];
+          return {
+            text: `🚪 Topshiriq: Javobi [ ${targetProd} ] bo'lgan ko'paytmadan o't!`,
+            validator: (val, color, exprVal) => exprVal === targetProd
+          };
+        } else {
+          const divisor = [2, 3, 5, 10][Math.floor(Math.random() * 4)];
+          return {
+            text: `🚪 Topshiriq: Faqat [ ${divisor} ] ga bo'linadigan sonli eshikdan o't!`,
+            validator: (val) => typeof val === 'number' && val % divisor === 0
+          };
+        }
+      }
+      else {
+        // 10+ yosh
+        const rand = Math.random();
+        if (rand < 0.5) {
+          return {
+            text: `🚪 Topshiriq: Faqat TUB sonli eshikdan o't!`,
+            validator: (val) => typeof val === 'number' && PRIMES.includes(val)
+          };
+        } else {
+          return {
+            text: `🚪 Topshiriq: Faqat KVADRAT sonli eshikdan o't!`,
+            validator: (val) => typeof val === 'number' && SQUARES.includes(val)
+          };
+        }
+      }
+    }
+
+    // Generate random values for the three doors
+    function generateDoorValues() {
+      // Must generate exactly 1 correct option and 2 incorrect options
+      const doors = [
+        { color: 'cyan', display: '', val: null, exprVal: null },
+        { color: 'pink', display: '', val: null, exprVal: null },
+        { color: 'gold', display: '', val: null, exprVal: null }
+      ];
+
+      // Shuffle doors layout
+      doors.sort(() => Math.random() - 0.5);
+
+      // We generate values until we get exactly 1 true validator and 2 false validators
+      let attempts = 0;
+      while (attempts < 200) {
+        attempts++;
+        const vals = [generateSingleValue(), generateSingleValue(), generateSingleValue()];
+        
+        const results = vals.map(v => currentTask.validator(v.val, v.color, v.exprVal));
+        const trueCount = results.filter(r => r === true).length;
+
+        if (trueCount === 1) {
+          // Assign values to doors
+          for (let i = 0; i < 3; i++) {
+            doors[i].display = vals[i].display;
+            doors[i].val = vals[i].val;
+            doors[i].exprVal = vals[i].exprVal;
+            doors[i].isValid = results[i];
+          }
+          break;
+        }
+      }
+
+      return doors;
+    }
+
+    function generateSingleValue() {
+      const color = DOOR_COLORS[Math.floor(Math.random() * DOOR_COLORS.length)];
+      
+      if (ageGroup === '4-5') {
+        const num = Math.floor(Math.random() * 5) + 1;
+        return { display: num, val: num, color: color.name, exprVal: num };
+      }
+      else if (ageGroup === '6-7') {
+        if (Math.random() < 0.4) {
+          const num = Math.floor(Math.random() * 20) + 1;
+          return { display: num, val: num, color: color.name, exprVal: num };
+        } else {
+          const a = Math.floor(Math.random() * 10) + 1;
+          const b = Math.floor(Math.random() * 10) + 1;
+          return { display: `${a}+${b}`, val: `${a}+${b}`, color: color.name, exprVal: a + b };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        if (Math.random() < 0.4) {
+          const num = Math.floor(Math.random() * 50) + 1;
+          return { display: num, val: num, color: color.name, exprVal: num };
+        } else {
+          const a = Math.floor(Math.random() * 8) + 2;
+          const b = Math.floor(Math.random() * 8) + 2;
+          return { display: `${a}×${b}`, val: `${a}×${b}`, color: color.name, exprVal: a * b };
+        }
+      }
+      else {
+        // 10+ yosh
+        if (Math.random() < 0.5) {
+          const list = [2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 21, 23, 25, 29, 31, 35, 36, 37, 49, 50, 64, 81];
+          const val = list[Math.floor(Math.random() * list.length)];
+          return { display: val, val: val, color: color.name, exprVal: val };
+        } else {
+          const a = Math.floor(Math.random() * 10) + 3;
+          const b = Math.floor(Math.random() * 10) + 3;
+          return { display: `${a * b}÷${a}`, val: `${a * b}÷${a}`, color: color.name, exprVal: b };
+        }
+      }
+    }
+
+    // Refresh doors visual labels
+    function generateChamber(pIdx) {
+      if (isGameOver) return;
+
+      const doorsData = generateDoorValues();
+      players[pIdx].doors = doorsData;
+
+      // Update HTML content
+      for (let i = 0; i < 3; i++) {
+        const label = document.getElementById(`door-p${pIdx + 1}-${i}`);
+        label.textContent = doorsData[i].display;
+      }
+
+      // Reset runner position smoothly
+      const runner = document.getElementById(`runner-p${pIdx + 1}`);
+      runner.style.bottom = '40px';
+      runner.style.left = '50%';
+      runner.style.transform = 'translateX(-50%)';
+
+      // Start Countdown Timer
+      startChamberTimer(pIdx);
+    }
+
+    function startChamberTimer(pIdx) {
+      clearInterval(players[pIdx].timerInterval);
+      players[pIdx].timerVal = 100;
+      
+      const timeLimit = getTimeLimit();
+      const tickRate = 100; // ms
+      const decrement = (tickRate / timeLimit) * 100;
+
+      players[pIdx].timerInterval = setInterval(() => {
+        if (isGameOver) {
+          clearInterval(players[pIdx].timerInterval);
+          return;
+        }
+
+        players[pIdx].timerVal -= decrement;
+        const timerBar = document.getElementById(`timer-p${pIdx + 1}`);
+        if (timerBar) {
+          timerBar.style.width = `${Math.max(0, players[pIdx].timerVal)}%`;
+        }
+
+        if (players[pIdx].timerVal <= 0) {
+          clearInterval(players[pIdx].timerInterval);
+          handleTimeOut(pIdx);
+        }
+      }, tickRate);
+    }
+
+    // Deduct a life when countdown ends
+    function handleTimeOut(pIdx) {
+      playSound('error');
+      players[pIdx].lives = Math.max(0, players[pIdx].lives - 1);
+      updateLivesUI(pIdx);
+      triggerDamageEffect(pIdx);
+
+      // Check win/loss
+      checkGameStatus();
+
+      // Proceed to a new set of doors
+      if (!isGameOver) {
+        generateChamber(pIdx);
+      }
+    }
+
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active && p.canvas && p.fieldDom) {
+          p.canvas.width = p.fieldDom.offsetWidth;
+          p.canvas.height = p.fieldDom.offsetHeight;
+        }
+      });
+    }
+
+    // Setup map dot layout (6 dots in single, 10 dots in 2p race)
+    function setupMapIndicators() {
+      const chambersCount = gameMode === 'single' ? 6 : 10;
+      
+      for (let pIdx = 0; pIdx < 2; pIdx++) {
+        if (!players[pIdx].active) continue;
+        const container = document.getElementById(`map-p${pIdx + 1}`);
+        container.innerHTML = '';
+        
+        for (let i = 0; i < chambersCount; i++) {
+          const dot = document.createElement('div');
+          dot.className = 'map-dot';
+          if (i === 0) dot.className = 'map-dot active';
+          container.appendChild(dot);
+        }
+      }
+    }
+
+    // Start Game logic
+    function startGame() {
+      initPlayers();
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      // Reset Players
+      players.forEach((p, idx) => {
+        p.score = 0;
+        p.lives = 3;
+        p.particles = [];
+        p.scoreLabel.textContent = gameMode === 'single' ? `Xona: 1/6` : `Xona: 1/10`;
+        updateLivesUI(idx);
+      });
+
+      // Generate shared task
+      currentTask = generateTask();
+      document.getElementById('shared-quest').textContent = currentTask.text;
+
+      setupMapIndicators();
+
+      setTimeout(() => {
+        resizeCanvases();
+        generateChamber(0);
+        if (players[1].active) generateChamber(1);
+      }, 150);
+
+      initAudio();
+      startGameLoop();
+    }
+
+    function updateLivesUI(pIdx) {
+      const hearts = players[pIdx].livesContainer.querySelectorAll('.heart');
+      hearts.forEach((h, i) => {
+        if (i < players[pIdx].lives) {
+          h.classList.remove('lost');
+        } else {
+          h.classList.add('lost');
+        }
+      });
+    }
+
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const track = document.getElementById(`player-${pIdx + 1}-section`);
+      
+      flash.classList.add('flash-active');
+      track.classList.add('shake');
+      setTimeout(() => flash.classList.remove('flash-active'), 200);
+      setTimeout(() => track.classList.remove('shake'), 400);
+    }
+
+    // Spark particles on door selection
+    function spawnParticles(pIdx, x, y, color) {
+      const pCount = 15;
+      for (let i = 0; i < pCount; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 5 + 3;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity,
+          color: color || '#22d3ee',
+          alpha: 1,
+          size: Math.random() * 4 + 2
+        });
+      }
+    }
+
+    // Map progress dot updates
+    function updateMapDots(pIdx) {
+      const dots = document.getElementById(`map-p${pIdx + 1}`).querySelectorAll('.map-dot');
+      dots.forEach((d, i) => {
+        d.classList.remove('active', 'completed');
+        if (i < players[pIdx].score) {
+          d.classList.add('completed');
+        } else if (i === players[pIdx].score) {
+          d.classList.add('active');
+        }
+      });
+    }
+
+    // Main door selection choice processing
+    function selectDoor(pIdx, doorIdx) {
+      if (isGameOver) return;
+      clearInterval(players[pIdx].timerInterval);
+
+      const door = players[pIdx].doors[doorIdx];
+      const runner = document.getElementById(`runner-p${pIdx + 1}`);
+
+      // Animate character moving towards door
+      // left offsets: 15% (door 0), 50% (door 1), 85% (door 2)
+      const leftPositions = ['25%', '50%', '75%'];
+      runner.style.left = leftPositions[doorIdx];
+      runner.style.bottom = '170px'; // align with doors center
+
+      setTimeout(() => {
+        if (!players[pIdx].fieldDom) return;
+        const fieldWidth = players[pIdx].fieldDom.offsetWidth;
+        const runnerX = (fieldWidth * (doorIdx === 0 ? 0.25 : (doorIdx === 1 ? 0.5 : 0.75)));
+
+        if (door.isValid) {
+          // CORRECT DOOR
+          playSound('door');
+          playSound('success');
+          spawnParticles(pIdx, runnerX, players[pIdx].fieldDom.offsetHeight - 170, '#10b981');
+
+          players[pIdx].score += 1;
+          const totalChambers = gameMode === 'single' ? 6 : 10;
+          players[pIdx].scoreLabel.textContent = `Xona: ${Math.min(totalChambers, players[pIdx].score + 1)}/${totalChambers}`;
+          
+          updateMapDots(pIdx);
+
+          // Visual transition teleport
+          runner.style.transform = 'translateX(-50%) scale(0)';
+          runner.style.opacity = '0';
+
+          setTimeout(() => {
+            runner.style.opacity = '1';
+            runner.style.transform = 'translateX(-50%) scale(1)';
+            checkGameStatus();
+            if (!isGameOver) {
+              generateChamber(pIdx);
+            }
+          }, 400);
+
+        } else {
+          // INCORRECT DOOR
+          playSound('error');
+          spawnParticles(pIdx, runnerX, players[pIdx].fieldDom.offsetHeight - 170, '#ef4444');
+          
+          players[pIdx].lives = Math.max(0, players[pIdx].lives - 1);
+          updateLivesUI(pIdx);
+          triggerDamageEffect(pIdx);
+
+          // Bounce player back to center
+          setTimeout(() => {
+            runner.style.bottom = '40px';
+            runner.style.left = '50%';
+            runner.style.transform = 'translateX(-50%)';
+            checkGameStatus();
+            if (!isGameOver) {
+              startChamberTimer(pIdx);
+            }
+          }, 300);
+        }
+      }, 350);
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      const totalChambers = gameMode === 'single' ? 6 : 10;
+
+      if (gameMode === 'single') {
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        } else if (players[0].score >= totalChambers) {
+          endGame('won');
+        }
+      } else {
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          if (players[0].score > players[1].score) endGame('p1');
+          else if (players[1].score > players[0].score) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2');
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1');
+        }
+        else if (players[0].score >= totalChambers) {
+          endGame('p1');
+        }
+        else if (players[1].score >= totalChambers) {
+          endGame('p2');
+        }
+      }
+    }
+
+    function endGame(status) {
+      isGameOver = true;
+      cancelAnimationFrame(mainGameLoop);
+      players.forEach(p => clearInterval(p.timerInterval));
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      if (status === 'won') {
+        playSound('portal');
+        title.className = 'win-text';
+        title.textContent = 'G\'alaba! Qutuldingiz!';
+        details.innerHTML = `Siz neon labirintdan muvaffaqiyatli chiqib ketdingiz!<br>O'tilgan xonalar: <strong>${players[0].score}</strong>`;
+        startConfetti();
+      } else if (status === 'lost') {
+        title.className = 'lose-text';
+        title.textContent = 'Labirintda Qoldingiz';
+        details.innerHTML = `Siz barcha jonlaringizni yo'qotdingiz.<br>O'tilgan xonalar: <strong>${players[0].score}</strong>`;
+        stopConfetti();
+      } else if (status === 'p1') {
+        playSound('portal');
+        title.className = 'win-text';
+        title.textContent = '1-O\'yinchi G\'olib!';
+        details.innerHTML = `P1 labirint portaliga tezroq yetib bordi!<br>P1 xonalar: <strong>${players[0].score}</strong> | P2 xonalar: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else if (status === 'p2') {
+        playSound('portal');
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `P2 labirint portaliga tezroq yetib bordi!<br>P1 xonalar: <strong>${players[0].score}</strong> | P2 xonalar: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else {
+        title.className = 'win-text';
+        title.textContent = 'Durang!';
+        details.innerHTML = `Ikkala o'yinchi ham labirintda qolib ketdi.<br>P1 xonalar: <strong>${players[0].score}</strong> | P2 xonalar: <strong>${players[1].score}</strong>`;
+        stopConfetti();
+      }
+    }
+
+    // Particle tick render loop
+    function startGameLoop() {
+      function tick() {
+        if (isGameOver) return;
+
+        players.forEach((p, idx) => {
+          if (!p.active || !p.canvas || !p.ctx) return;
+
+          const c = p.canvas;
+          const ctx = p.ctx;
+          ctx.clearRect(0, 0, c.width, c.height);
+
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx;
+            part.y += part.vy;
+            part.alpha -= 0.03;
+
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    // Setup click bindings on Door elements
+    function setupInteraction() {
+      const bindDoors = (pIdx) => {
+        const container = document.getElementById(`doors-p${pIdx + 1}`);
+        container.querySelectorAll('.door').forEach(d => {
+          d.addEventListener('click', () => {
+            if (isGameOver) return;
+            const doorIdx = parseInt(d.getAttribute('data-door'));
+            selectDoor(pIdx, doorIdx);
+          });
+        });
+      };
+
+      bindDoors(0);
+      bindDoors(1);
+    }
+    setupInteraction();
+
+    // Keyboard bindings for door selection
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver) return;
+
+      // P1: A (left), S (center), D (right)
+      if (players[0].active) {
+        let doorIdx = -1;
+        if (e.key.toLowerCase() === 'a') doorIdx = 0;
+        else if (e.key.toLowerCase() === 's') doorIdx = 1;
+        else if (e.key.toLowerCase() === 'd') doorIdx = 2;
+
+        if (doorIdx !== -1) {
+          selectDoor(0, doorIdx);
+        }
+      }
+
+      // P2: ArrowLeft, ArrowDown, ArrowRight
+      if (players[1].active) {
+        let doorIdx = -1;
+        if (e.key === 'ArrowLeft') doorIdx = 0;
+        else if (e.key === 'ArrowDown') doorIdx = 1;
+        else if (e.key === 'ArrowRight') doorIdx = 2;
+
+        if (doorIdx !== -1) {
+          selectDoor(1, doorIdx);
+        }
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti Engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#06b6d4', '#22d3ee', '#ec4899', '#f43f5e', '#f59e0b', '#10b981'];
+      for (let i = 0; i < 110; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.04 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 12;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 10 - 5;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    // Initialize DOM elements on script load and DOMContentLoaded
+    initPlayers();
+    document.addEventListener('DOMContentLoaded', initPlayers);
+  </script>
+</body>
+</html>

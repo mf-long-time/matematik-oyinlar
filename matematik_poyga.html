@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matematik Poyga — Outrun Highway Racer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-neon: #ff007f;
+      --accent-cyan: #00f0ff;
+      --success-green: #39ff14;
+      --warning-gold: #ffea00;
+      --glass-bg: rgba(15, 23, 42, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: #020005;
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Outrun / Synthwave Sun and Grid background */
+    .synth-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+      background: linear-gradient(to bottom, #0d001a 0%, #030008 100%);
+    }
+
+    .synth-sun {
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
+      height: 180px;
+      background: linear-gradient(to bottom, #ff007f 0%, #ffea00 100%);
+      border-radius: 50%;
+      filter: blur(2px) drop-shadow(0 0 30px rgba(255, 0, 127, 0.4));
+      opacity: 0.25;
+      z-index: 2;
+    }
+
+    /* Screen styles */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Menu Panel */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 40px;
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 0, 127, 0.2);
+      backdrop-filter: blur(15px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .logo-area {
+      margin-bottom: 30px;
+    }
+
+    .logo-title {
+      font-size: 3.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-neon) 0%, var(--accent-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(255, 0, 127, 0.35);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 15px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(0, 240, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .opt-card.active {
+      background: linear-gradient(135deg, rgba(255, 0, 127, 0.2) 0%, rgba(0, 240, 255, 0.2) 100%);
+      border-color: var(--primary-neon);
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.25);
+    }
+
+    .opt-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-neon) 0%, var(--accent-cyan) 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(255, 0, 127, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 12px 30px rgba(255, 0, 127, 0.5);
+    }
+
+    /* Setup Header Controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-cyan);
+    }
+
+    /* Gameplay Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(10, 5, 15, 0.9);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Quest Panel */
+    .quest-bubble {
+      background: linear-gradient(135deg, rgba(255, 0, 127, 0.15) 0%, rgba(0, 240, 255, 0.15) 100%);
+      border: 1px solid rgba(255, 0, 127, 0.3);
+      padding: 14px 28px;
+      border-radius: 20px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 0, 127, 0.15);
+      animation: pulseBorder 2s infinite alternate;
+      text-align: center;
+    }
+
+    @keyframes pulseBorder {
+      0% { border-color: rgba(255, 0, 127, 0.3); }
+      100% { border-color: rgba(0, 240, 255, 0.6); }
+    }
+
+    /* Play Tracks */
+    .tracks-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tracks-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    /* HUD Bar */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      z-index: 40;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(15, 0, 25, 0.6), transparent);
+    }
+
+    .hud-label {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 5px;
+      font-size: 1.4rem;
+    }
+
+    .heart {
+      color: #ef4444;
+      filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .heart.lost {
+      color: #475569;
+      filter: none;
+      transform: scale(0.8);
+    }
+
+    /* Highway view track area */
+    .highway-field {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      background: #030008;
+    }
+
+    /* Canvas that draws road lanes & grid lines scrolling */
+    .road-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+
+    /* Car block element */
+    .car {
+      position: absolute;
+      bottom: 50px;
+      width: 70px;
+      height: 110px;
+      z-index: 15;
+      transform: translateX(-50%);
+      transition: left 0.18s cubic-bezier(0.25, 1, 0.5, 1);
+      filter: drop-shadow(0 0 12px currentColor);
+    }
+
+    /* Futuristic Outrun neon sports car drawing */
+    .car::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: currentColor;
+      clip-path: polygon(15% 0%, 85% 0%, 95% 15%, 95% 85%, 85% 100%, 15% 100%, 5% 85%, 5% 15%);
+      border-radius: 6px;
+    }
+
+    /* Cabin window glow */
+    .car::after {
+      content: '';
+      position: absolute;
+      top: 25px;
+      left: 20%;
+      width: 60%;
+      height: 35px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 4px;
+      box-shadow: 0 0 10px #ffffff;
+      clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
+    }
+
+    .car-p1 {
+      color: var(--primary-neon);
+    }
+
+    .car-p2 {
+      color: var(--accent-cyan);
+    }
+
+    /* Lane buttons overlay (for click/touch) */
+    .lane-trigger-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      z-index: 25;
+    }
+
+    .lane-btn {
+      height: 100%;
+      cursor: pointer;
+      background: transparent;
+      outline: none;
+      border: none;
+    }
+
+    /* Hover lane guides */
+    .lane-btn:hover {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    /* Floating Math Gate banner cards */
+    .gate-banner {
+      position: absolute;
+      width: 100%;
+      height: 50px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .gate-card-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 10px;
+    }
+
+    .gate-card {
+      background: rgba(15, 23, 42, 0.85);
+      border: 3px solid #1e293b;
+      color: #ffffff;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 120px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .gate-card-cyan {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
+    }
+
+    .gate-card-pink {
+      border-color: var(--primary-neon);
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.35);
+    }
+
+    .gate-card-gold {
+      border-color: var(--warning-gold);
+      box-shadow: 0 0 15px rgba(255, 234, 0, 0.35);
+    }
+
+    /* Particles overlay */
+    .particle-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    /* Damage flash overlay */
+    .damage-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-flash.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeTrack 0.4s ease-in-out;
+    }
+
+    @keyframes shakeTrack {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Keyboard binds guide indicators */
+    .keybinds-guide {
+      position: absolute;
+      bottom: 6px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      pointer-events: none;
+      z-index: 30;
+      opacity: 0.4;
+      font-size: 0.8rem;
+    }
+
+    .keybind-badge {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #94a3b8;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Game Over Modal Layout */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #ef4444;
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.2rem;
+      color: #cbd5e1;
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Retro Cyber Sun Backdrop -->
+  <div class="synth-background">
+    <div class="synth-sun"></div>
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="setup-header-btns">
+    <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+    <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+  </div>
+
+  <!-- SETUP/MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Matematik Poyga</h1>
+        <p class="logo-subtitle">Tezlik va Karra Jadvali Shossesi</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Darvozalarni to'g'ri tanlab o't</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Shossedagi split-screen poyga</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Rang va oddiy sanash</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Juft/Toq, arifmetika</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Ko'paytirish & karra shossesi</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10+ Yosh</div>
+            <div class="opt-card-desc">Bo'linish, tub sonlar</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">🏎️ Trassaga Chiqish</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Menyu</button>
+      
+      <div class="quest-bubble" id="shared-quest">Topshiriq yuklanmoqda...</div>
+      
+      <div class="game-info">
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+      </div>
+    </div>
+
+    <!-- Active game tracks container -->
+    <div class="tracks-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Ball: 0</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="highway-field" id="field-p1">
+          <canvas class="road-canvas" id="road-p1"></canvas>
+          <div class="car car-p1" id="car-p1"></div>
+
+          <!-- Touch overlays -->
+          <div class="lane-trigger-overlay">
+            <button class="lane-btn" data-lane="0"></button>
+            <button class="lane-btn" data-lane="1"></button>
+            <button class="lane-btn" data-lane="2"></button>
+          </div>
+
+          <!-- Keyboard helpers -->
+          <div class="keybinds-guide">
+            <span class="keybind-badge">A (Chap)</span>
+            <span class="keybind-badge">S (O'rta)</span>
+            <span class="keybind-badge">D (O'ng)</span>
+          </div>
+
+          <canvas class="particle-canvas" id="canvas-p1"></canvas>
+          <div class="damage-flash" id="flash-p1"></div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Ball: 0</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="highway-field" id="field-p2">
+          <canvas class="road-canvas" id="road-p2"></canvas>
+          <div class="car car-p2" id="car-p2"></div>
+
+          <!-- Touch overlays -->
+          <div class="lane-trigger-overlay">
+            <button class="lane-btn" data-lane="0"></button>
+            <button class="lane-btn" data-lane="1"></button>
+            <button class="lane-btn" data-lane="2"></button>
+          </div>
+
+          <!-- Keyboard helpers -->
+          <div class="keybinds-guide">
+            <span class="keybind-badge">← (Chap)</span>
+            <span class="keybind-badge">↓ (O'rta)</span>
+            <span class="keybind-badge">→ (O'ng)</span>
+          </div>
+
+          <canvas class="particle-canvas" id="canvas-p2"></canvas>
+          <div class="damage-flash" id="flash-p2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Siz Yutdingiz!</h2>
+      <div class="game-stats" id="gameover-details">
+        Topilgan javoblar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Boshlash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+    let engineOsc = null;
+    let engineGain = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function startEngineSound() {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      if (engineOsc) {
+        try { engineOsc.stop(); } catch(e) {}
+      }
+
+      engineOsc = audioCtx.createOscillator();
+      engineGain = audioCtx.createGain();
+
+      engineOsc.type = 'sawtooth';
+      engineOsc.frequency.setValueAtTime(65, audioCtx.currentTime); // Low car engine hum
+
+      // Low pass filter to make it sound beefy
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(140, audioCtx.currentTime);
+
+      engineOsc.connect(filter);
+      filter.connect(engineGain);
+      engineGain.connect(audioCtx.destination);
+
+      engineGain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+      engineOsc.start();
+    }
+
+    function setEnginePitch(speedRatio) {
+      if (engineOsc && audioCtx && !isMuted) {
+        // Modulate engine pitch based on car speed
+        engineOsc.frequency.setTargetAtTime(65 + (speedRatio * 50), audioCtx.currentTime, 0.1);
+      }
+    }
+
+    function stopEngineSound() {
+      if (engineOsc) {
+        try {
+          engineOsc.stop();
+        } catch(e) {}
+        engineOsc = null;
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'success') {
+        // Sparkly high chime
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'crash') {
+        // Low explosion buzz
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.linearRampToValueAtTime(30, now + 0.3);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Game variables
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('highway_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Track active players state
+    const players = [
+      {
+        score: 0,
+        lives: 3,
+        laneIdx: 1, // current lane index (0=left, 1=middle, 2=right)
+        targetLaneIdx: 1,
+        gates: [], // list of spawned gate DOM and coordinates
+        roadOffset: 0, // scrolling road coordinate
+        active: true,
+        carDom: null,
+        fieldDom: null,
+        roadCanvas: null,
+        roadCtx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        canvas: null,
+        ctx: null,
+        particles: []
+      },
+      {
+        score: 0,
+        lives: 3,
+        laneIdx: 1,
+        targetLaneIdx: 1,
+        gates: [],
+        roadOffset: 0,
+        active: false,
+        carDom: null,
+        fieldDom: null,
+        roadCanvas: null,
+        roadCtx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        canvas: null,
+        ctx: null,
+        particles: []
+      }
+    ];
+
+    let currentTask = {
+      text: "",
+      validator: null
+    };
+
+    // Color list
+    const GATES_COLORS = [
+      { name: 'cyan', hex: '#00f0ff', text: 'Moviy' },
+      { name: 'pink', hex: '#ff007f', text: 'Pushti' },
+      { name: 'gold', hex: '#ffea00', text: 'Sariq' }
+    ];
+
+    const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+    const SQUARES = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
+
+    // Get speed values
+    function getSpeedMultiplier() {
+      let base = 0.8;
+      if (speedLevel === 'slow') base = 0.07;
+      else if (speedLevel === 'fast') base = 1.25;
+
+      // Adjust based on age group difficulty (complex math = slower speed)
+      if (ageGroup === '4-5') {
+        base *= 0.40;
+      } else if (ageGroup === '6-7') {
+        base *= 0.70;
+      } else if (ageGroup === '8-9') {
+        base *= 0.85;
+      } else if (ageGroup === '10') {
+        base *= 0.65;
+      }
+      return base;
+    }
+
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+
+    function updateSpeedBtn() {
+      const speedLabels = {
+        'slow': '🐌 Tezlik: Sekin',
+        'medium': '⚡ Tezlik: O\'rtacha',
+        'fast': '🚀 Tezlik: Tez'
+      };
+      speedBtn.textContent = speedLabels[speedLevel];
+    }
+    updateSpeedBtn();
+
+    speedBtn.addEventListener('click', () => {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('highway_speed_level', speedLevel);
+      updateSpeedBtn();
+      setEnginePitch(getSpeedMultiplier());
+    });
+
+    function updateMuteBtn() {
+      muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+    }
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      updateMuteBtn();
+      if (!isMuted) {
+        playSound('click');
+        startEngineSound();
+      } else {
+        stopEngineSound();
+      }
+    });
+
+    // Menu Card handlers
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    // Start navigation
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      clearInterval(window.spawnInterval);
+      stopEngineSound();
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Generate math task
+    function generateTask() {
+      if (ageGroup === '4-5') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const color = GATES_COLORS[Math.floor(Math.random() * GATES_COLORS.length)];
+          return {
+            text: `🏎️ Topshiriq: Faqat ${color.text.toUpperCase()} darvozadan o't!`,
+            validator: (val, colorName) => colorName === color.name
+          };
+        } else {
+          const targetNum = Math.floor(Math.random() * 5) + 1;
+          return {
+            text: `🏎️ Topshiriq: Faqat [ ${targetNum} ] sonli darvozadan o't!`,
+            validator: (val) => val === targetNum
+          };
+        }
+      }
+      else if (ageGroup === '6-7') {
+        const rand = Math.random();
+        if (rand < 0.33) {
+          return {
+            text: `🏎️ Topshiriq: Faqat JUFT sonli darvozadan o't!`,
+            validator: (val) => typeof val === 'number' && val % 2 === 0
+          };
+        } else if (rand < 0.66) {
+          return {
+            text: `🏎️ Topshiriq: Faqat TOQ sonli darvozadan o't!`,
+            validator: (val) => typeof val === 'number' && val % 2 !== 0
+          };
+        } else {
+          const targetSum = Math.floor(Math.random() * 10) + 5; // 5-15
+          return {
+            text: `🏎️ Topshiriq: Javobi [ ${targetSum} ] bo'lgan darvozadan o't!`,
+            validator: (val, color, exprVal) => exprVal === targetSum
+          };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const targetProd = [12, 16, 18, 20, 24, 30, 36, 40, 48][Math.floor(Math.random() * 9)];
+          return {
+            text: `🏎️ Topshiriq: Javobi [ ${targetProd} ] bo'lgan darvozadan o't!`,
+            validator: (val, color, exprVal) => exprVal === targetProd
+          };
+        } else {
+          const divisor = [2, 3, 5, 10][Math.floor(Math.random() * 4)];
+          return {
+            text: `🏎️ Topshiriq: Faqat [ ${divisor} ] ga bo'linadigan sonli darvozadan o't!`,
+            validator: (val) => typeof val === 'number' && val % divisor === 0
+          };
+        }
+      }
+      else {
+        // 10+ yosh
+        const rand = Math.random();
+        if (rand < 0.5) {
+          return {
+            text: `🏎️ Topshiriq: Faqat TUB sonli darvozadan o't!`,
+            validator: (val) => typeof val === 'number' && PRIMES.includes(val)
+          };
+        } else {
+          return {
+            text: `🏎️ Topshiriq: Faqat KVADRAT sonli darvozadan o't!`,
+            validator: (val) => typeof val === 'number' && SQUARES.includes(val)
+          };
+        }
+      }
+    }
+
+    // Generate random values for three highway lanes
+    function generateGateValues() {
+      const cards = [
+        { color: 'cyan', display: '', val: null, exprVal: null },
+        { color: 'pink', display: '', val: null, exprVal: null },
+        { color: 'gold', display: '', val: null, exprVal: null }
+      ];
+
+      cards.sort(() => Math.random() - 0.5);
+
+      let attempts = 0;
+      while (attempts < 200) {
+        attempts++;
+        const vals = [generateSingleValue(), generateSingleValue(), generateSingleValue()];
+        
+        const results = vals.map(v => currentTask.validator(v.val, v.color, v.exprVal));
+        const trueCount = results.filter(r => r === true).length;
+
+        // Ensure exactly 1 correct path exists so children aren't trapped or have multiple answers
+        if (trueCount === 1) {
+          for (let i = 0; i < 3; i++) {
+            cards[i].display = vals[i].display;
+            cards[i].val = vals[i].val;
+            cards[i].exprVal = vals[i].exprVal;
+            cards[i].isValid = results[i];
+          }
+          break;
+        }
+      }
+
+      return cards;
+    }
+
+    function generateSingleValue() {
+      const color = GATES_COLORS[Math.floor(Math.random() * GATES_COLORS.length)];
+      
+      if (ageGroup === '4-5') {
+        const num = Math.floor(Math.random() * 5) + 1;
+        return { display: num, val: num, color: color.name, exprVal: num };
+      }
+      else if (ageGroup === '6-7') {
+        if (Math.random() < 0.4) {
+          const num = Math.floor(Math.random() * 20) + 1;
+          return { display: num, val: num, color: color.name, exprVal: num };
+        } else {
+          const a = Math.floor(Math.random() * 10) + 1;
+          const b = Math.floor(Math.random() * 10) + 1;
+          return { display: `${a}+${b}`, val: `${a}+${b}`, color: color.name, exprVal: a + b };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        if (Math.random() < 0.4) {
+          const num = Math.floor(Math.random() * 50) + 1;
+          return { display: num, val: num, color: color.name, exprVal: num };
+        } else {
+          const a = Math.floor(Math.random() * 8) + 2;
+          const b = Math.floor(Math.random() * 8) + 2;
+          return { display: `${a}×${b}`, val: `${a}×${b}`, color: color.name, exprVal: a * b };
+        }
+      }
+      else {
+        if (Math.random() < 0.5) {
+          const list = [2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 21, 23, 25, 29, 31, 35, 36, 37, 49, 50, 64, 81];
+          const val = list[Math.floor(Math.random() * list.length)];
+          return { display: val, val: val, color: color.name, exprVal: val };
+        } else {
+          const a = Math.floor(Math.random() * 10) + 3;
+          const b = Math.floor(Math.random() * 10) + 3;
+          return { display: `${a * b}÷${a}`, val: `${a * b}÷${a}`, color: color.name, exprVal: b };
+        }
+      }
+    }
+
+    // Spawn a math gate banner
+    function spawnGate(pIdx) {
+      if (!players[pIdx].active || isGameOver) return;
+
+      const field = players[pIdx].fieldDom;
+      const cardsData = generateGateValues();
+
+      // Create Gate DOM Node
+      const gDom = document.createElement('div');
+      gDom.className = 'gate-banner';
+      gDom.style.top = '-60px'; // start off screen
+
+      for (let i = 0; i < 3; i++) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'gate-card-wrapper';
+
+        const card = document.createElement('div');
+        const colorClass = cardsData[i].color === 'cyan' ? 'gate-card-cyan' : (cardsData[i].color === 'pink' ? 'gate-card-pink' : 'gate-card-gold');
+        card.className = `gate-card ${colorClass}`;
+        card.textContent = cardsData[i].display;
+
+        wrapper.appendChild(card);
+        gDom.appendChild(wrapper);
+      }
+
+      field.appendChild(gDom);
+
+      players[pIdx].gates.push({
+        dom: gDom,
+        top: -60,
+        cards: cardsData,
+        collisionProcessed: false
+      });
+    }
+
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active) {
+          p.canvas.width = p.fieldDom.offsetWidth;
+          p.canvas.height = p.fieldDom.offsetHeight;
+          p.roadCanvas.width = p.fieldDom.offsetWidth;
+          p.roadCanvas.height = p.fieldDom.offsetHeight;
+        }
+      });
+    }
+
+    function initPlayers() {
+      players.forEach((p, idx) => {
+        p.carDom = document.getElementById(`car-p${idx + 1}`);
+        p.fieldDom = document.getElementById(`field-p${idx + 1}`);
+        p.roadCanvas = document.getElementById(`road-p${idx + 1}`);
+        p.roadCtx = p.roadCanvas ? p.roadCanvas.getContext('2d') : null;
+        p.scoreLabel = document.getElementById(`score-label-p${idx + 1}`);
+        p.livesContainer = document.getElementById(`lives-p${idx + 1}`);
+        p.canvas = document.getElementById(`canvas-p${idx + 1}`);
+        p.ctx = p.canvas ? p.canvas.getContext('2d') : null;
+      });
+    }
+
+    // Start Game logic
+    function startGame() {
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      initPlayers();
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      // Reset players
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+        
+        p.score = 0;
+        p.lives = 3;
+        p.particles = [];
+        p.roadOffset = 0;
+        
+        p.fieldDom.querySelectorAll('.gate-banner').forEach(g => g.remove());
+        p.gates = [];
+
+        p.scoreLabel.textContent = `Ball: 0`;
+        updateLivesUI(idx);
+
+        // Position car in middle lane
+        p.laneIdx = 1;
+        p.targetLaneIdx = 1;
+        alignCarToLane(idx);
+      });
+
+      // Generate task
+      currentTask = generateTask();
+      document.getElementById('shared-quest').textContent = currentTask.text;
+
+      setTimeout(() => {
+        resizeCanvases();
+        
+        // Spawn first gate
+        spawnGate(0);
+        if (players[1].active) spawnGate(1);
+      }, 150);
+
+      if (window.spawnInterval) clearInterval(window.spawnInterval);
+      window.spawnInterval = setInterval(() => {
+        if (!isGameOver) {
+          if (players[0].active && players[0].gates.length < 2) spawnGate(0);
+          if (players[1].active && players[1].gates.length < 2) spawnGate(1);
+        }
+      }, 3500);
+
+      startEngineSound();
+      setEnginePitch(getSpeedMultiplier());
+      startGameLoop();
+    }
+
+    function alignCarToLane(pIdx) {
+      const p = players[pIdx];
+      // left coordinate ratio for 3 lanes: 16.6%, 50%, 83.3%
+      const lanePositions = [16.6, 50, 83.3];
+      p.carDom.style.left = `${lanePositions[p.laneIdx]}%`;
+    }
+
+    function updateLivesUI(pIdx) {
+      const hearts = players[pIdx].livesContainer.querySelectorAll('.heart');
+      hearts.forEach((h, i) => {
+        if (i < players[pIdx].lives) {
+          h.classList.remove('lost');
+        } else {
+          h.classList.add('lost');
+        }
+      });
+    }
+
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const track = document.getElementById(`player-${pIdx + 1}-section`);
+      
+      flash.classList.add('active');
+      track.classList.add('shake');
+      setTimeout(() => flash.classList.remove('active'), 200);
+      setTimeout(() => track.classList.remove('shake'), 400);
+    }
+
+    function spawnParticles(pIdx, x, y, color) {
+      const count = 12;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 4 + 2;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity,
+          color: color || '#00f0ff',
+          alpha: 1,
+          size: Math.random() * 5 + 3
+        });
+      }
+    }
+
+    // Check collision when car crosses gate
+    function processCollision(pIdx, gate) {
+      gate.collisionProcessed = true;
+
+      const matchedCard = gate.cards[players[pIdx].laneIdx];
+      
+      // Car is aligned with correct option
+      if (matchedCard && matchedCard.isValid) {
+        playSound('success');
+        players[pIdx].score += 1;
+        players[pIdx].scoreLabel.textContent = `Ball: ${players[pIdx].score}`;
+
+        // Spark particles at car coordinate
+        const carLeft = players[pIdx].carDom.offsetLeft;
+        const carTop = players[pIdx].carDom.offsetTop;
+        spawnParticles(pIdx, carLeft, carTop, GATES_COLORS.find(c => c.name === matchedCard.color).hex);
+
+        // Flash green border glow on gate card
+        const cardDom = gate.dom.querySelectorAll('.gate-card')[players[pIdx].laneIdx];
+        cardDom.style.borderColor = '#39ff14';
+        cardDom.style.boxShadow = '0 0 25px #39ff14';
+      } 
+      else {
+        // Crash!
+        playSound('crash');
+        players[pIdx].lives = Math.max(0, players[pIdx].lives - 1);
+        updateLivesUI(pIdx);
+        triggerDamageEffect(pIdx);
+
+        // Flash red crash glow on gate card
+        const cardDom = gate.dom.querySelectorAll('.gate-card')[players[pIdx].laneIdx];
+        if (cardDom) {
+          cardDom.style.borderColor = '#ef4444';
+          cardDom.style.boxShadow = '0 0 25px #ef4444';
+        }
+      }
+
+      checkGameStatus();
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        } else if (players[0].score >= 10) {
+          endGame('won');
+        }
+      } else {
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          if (players[0].score > players[1].score) endGame('p1');
+          else if (players[1].score > players[0].score) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2');
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1');
+        }
+        else if (players[0].score >= 15) {
+          endGame('p1');
+        }
+        else if (players[1].score >= 15) {
+          endGame('p2');
+        }
+      }
+    }
+
+    function endGame(status) {
+      isGameOver = true;
+      cancelAnimationFrame(mainGameLoop);
+      clearInterval(window.spawnInterval);
+      stopEngineSound();
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      if (status === 'won') {
+        title.className = 'win-text';
+        title.textContent = 'G\'alaba! Marra!';
+        details.innerHTML = `Siz poygada to'g'ri darvozalardan o'tdingiz!<br>Ball: <strong>${players[0].score}</strong>`;
+        startConfetti();
+      } else if (status === 'lost') {
+        title.className = 'lose-text';
+        title.textContent = 'O\'yin Tugadi';
+        details.innerHTML = `Avtomobilingiz shikastlandi va to'qnashuvda yonib ketdi.<br>Ball: <strong>${players[0].score}</strong>`;
+        stopConfetti();
+      } else if (status === 'p1') {
+        title.className = 'win-text';
+        title.textContent = '1-O\'yinchi G\'olib!';
+        details.innerHTML = `P1 shosseda raqibni ortda qoldirib, portalga yetib bordi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else if (status === 'p2') {
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `P2 shosseda raqibni ortda qoldirib, portalga yetib bordi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else {
+        title.className = 'win-text';
+        title.textContent = 'Durang!';
+        details.innerHTML = `Ikkala poygachi ham shosseda to'qnashuvga uchradi.<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        stopConfetti();
+      }
+    }
+
+    // Draw scrolling perspective lines on track canvas
+    function drawRoadGrid(p) {
+      const ctx = p.roadCtx;
+      const w = p.roadCanvas.width;
+      const h = p.roadCanvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Draw road margins / shoulders
+      ctx.strokeStyle = 'rgba(255, 0, 127, 0.4)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      // left line
+      ctx.moveTo(w * 0.05, 0);
+      ctx.lineTo(w * 0.05, h);
+      // right line
+      ctx.moveTo(w * 0.95, 0);
+      ctx.lineTo(w * 0.95, h);
+      ctx.stroke();
+
+      // Draw lane dividers (two vertical dashed lines)
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([40, 40]);
+      ctx.lineDashOffset = -p.roadOffset;
+
+      ctx.beginPath();
+      // lane 1 divider (X = 33.3%)
+      ctx.moveTo(w * 0.333, 0);
+      ctx.lineTo(w * 0.333, h);
+      // lane 2 divider (X = 66.6%)
+      ctx.moveTo(w * 0.666, 0);
+      ctx.lineTo(w * 0.666, h);
+      ctx.stroke();
+
+      ctx.setLineDash([]); // Reset
+    }
+
+    // Main animation and physical tick loops
+    function startGameLoop() {
+      function tick() {
+        if (isGameOver) return;
+
+        const baseSpeed = 2.6;
+        const currentSpeed = baseSpeed * getSpeedMultiplier();
+
+        players.forEach((p, idx) => {
+          if (!p.active) return;
+
+          const h = p.fieldDom.offsetHeight;
+
+          // Scroll road background
+          p.roadOffset += currentSpeed * 1.5;
+          drawRoadGrid(p);
+
+          // Update car lane animation position smoothly
+          const targetX = p.targetLaneIdx;
+          if (p.laneIdx !== targetX) {
+            p.laneIdx = targetX;
+            alignCarToLane(idx);
+          }
+
+          // Move gates down
+          for (let i = p.gates.length - 1; i >= 0; i--) {
+            const gate = p.gates[i];
+            gate.top += currentSpeed;
+            gate.dom.style.top = `${gate.top}px`;
+
+            // Collision check: when gate bottom crosses car Y level (bottom - 160px)
+            const carTopY = h - 160;
+
+            if (gate.top >= carTopY && gate.top <= carTopY + 30) {
+              if (!gate.collisionProcessed) {
+                processCollision(idx, gate);
+              }
+            }
+
+            // Remove gate once off screen
+            if (gate.top > h + 60) {
+              gate.dom.remove();
+              p.gates.splice(i, 1);
+            }
+          }
+
+          // Render canvas particles
+          const c = p.canvas;
+          const ctx = p.ctx;
+          ctx.clearRect(0, 0, c.width, c.height);
+
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx;
+            part.y += part.vy;
+            part.alpha -= 0.035;
+
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    // Touch and mouse click handlers on overlay grids
+    function setupInteraction() {
+      const bindTriggers = (pIdx) => {
+        const container = document.getElementById(`field-p${pIdx + 1}`);
+        container.querySelectorAll('.lane-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (isGameOver) return;
+            const lane = parseInt(btn.getAttribute('data-lane'));
+            players[pIdx].targetLaneIdx = lane;
+          });
+        });
+      };
+
+      bindTriggers(0);
+      bindTriggers(1);
+    }
+    setupInteraction();
+
+    // Keyboard bindings for lane switching
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver) return;
+
+      // P1: A (left), S (middle), D (right)
+      if (players[0].active) {
+        if (e.key.toLowerCase() === 'a') players[0].targetLaneIdx = 0;
+        else if (e.key.toLowerCase() === 's') players[0].targetLaneIdx = 1;
+        else if (e.key.toLowerCase() === 'd') players[0].targetLaneIdx = 2;
+      }
+
+      // P2: ArrowLeft, ArrowDown, ArrowRight
+      if (players[1].active) {
+        if (e.key === 'ArrowLeft') players[1].targetLaneIdx = 0;
+        else if (e.key === 'ArrowDown') players[1].targetLaneIdx = 1;
+        else if (e.key === 'ArrowRight') players[1].targetLaneIdx = 2;
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti Engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#ff007f', '#00f0ff', '#39ff14', '#ffea00', '#f43f5e'];
+      for (let i = 0; i < 100; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.04 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 12;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 10 - 5;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    // Initialize references on load and DOMContentLoaded
+    initPlayers();
+    document.addEventListener('DOMContentLoaded', initPlayers);
+  </script>
+</body>
+</html>

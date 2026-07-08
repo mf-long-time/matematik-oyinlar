@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tengsizlik Kiber-Tarozi — Inequality Cyber Scale</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-cyan: #06b6d4;
+      --accent-magenta: #d946ef;
+      --accent-yellow: #fbbf24;
+      --success-green: #10b981;
+      --danger-red: #ef4444;
+      --glass-bg: rgba(15, 23, 42, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: #020617;
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Cyber backdrop */
+    .lab-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .grid-pattern {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0.02;
+      background-image: linear-gradient(0deg, transparent 24%, rgba(6, 182, 212, .5) 25%, rgba(6, 182, 212, .5) 26%, transparent 27%, transparent 74%, rgba(6, 182, 212, .5) 75%, rgba(6, 182, 212, .5) 76%, transparent 77%), linear-gradient(90deg, transparent 24%, rgba(6, 182, 212, .5) 25%, rgba(6, 182, 212, .5) 26%, transparent 27%, transparent 74%, rgba(6, 182, 212, .5) 75%, rgba(6, 182, 212, .5) 76%, transparent 77%);
+      background-size: 50px 50px;
+    }
+
+    /* Screens */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Menu container */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 40px;
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 45px rgba(6, 182, 212, 0.12);
+      backdrop-filter: blur(15px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .logo-area {
+      margin-bottom: 25px;
+    }
+
+    .logo-title {
+      font-size: 3.0rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--accent-magenta) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(6, 182, 212, 0.2);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.05rem;
+      color: #94a3b8;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 22px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--primary-cyan);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 14px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(6, 182, 212, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .opt-card.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(219, 70, 239, 0.2) 100%);
+      border-color: var(--primary-cyan);
+      box-shadow: 0 0 18px rgba(6, 182, 212, 0.25);
+    }
+
+    .opt-card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--accent-magenta) 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(6, 182, 212, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(6, 182, 212, 0.45);
+    }
+
+    /* Setup Header Controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--primary-cyan);
+    }
+
+    /* Gameplay Screen Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(5, 11, 20, 0.9);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Timer light bar */
+    .timer-fuse-container {
+      position: absolute;
+      top: 70px;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      z-index: 45;
+    }
+
+    .timer-fuse-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-cyan) 0%, var(--accent-magenta) 100%);
+      box-shadow: 0 0 10px var(--primary-cyan);
+      transition: width 0.1s linear;
+    }
+
+    /* Gameplay split tracks wrapper */
+    .tracks-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tracks-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    /* HUD Bar */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px 5px 25px;
+      z-index: 40;
+      pointer-events: none;
+    }
+
+    .hud-label {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary-cyan);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 5px;
+      font-size: 1.3rem;
+    }
+
+    .shield-energy-cell {
+      color: var(--accent-magenta);
+      filter: drop-shadow(0 0 5px rgba(219, 70, 239, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .shield-energy-cell.lost {
+      color: #475569;
+      filter: none;
+      transform: scale(0.8);
+    }
+
+    /* Interactive balance field */
+    .battle-field {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .reactor-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+
+    /* Operators panel */
+    .operators-bar {
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      z-index: 30;
+    }
+
+    .op-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: var(--glass-bg);
+      border: 2px solid var(--glass-border);
+      color: #f8fafc;
+      font-size: 2.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
+
+    .op-btn:active {
+      transform: scale(0.9);
+    }
+
+    .op-btn[data-op="lt"] {
+      border-color: var(--accent-magenta);
+      box-shadow: 0 0 15px rgba(219, 70, 239, 0.3);
+      color: var(--accent-magenta);
+    }
+
+    .op-btn[data-op="eq"] {
+      border-color: var(--primary-cyan);
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+      color: var(--primary-cyan);
+    }
+
+    .op-btn[data-op="gt"] {
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+      color: var(--accent-yellow);
+    }
+
+    .op-btn:hover {
+      transform: translateY(-5px) scale(1.05);
+    }
+
+    /* Keybind badges */
+    .kbd-tag {
+      position: absolute;
+      top: -20px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    /* Action banners */
+    .action-overlay-banner {
+      position: absolute;
+      top: 35%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      z-index: 45;
+      font-size: 4.0rem;
+      font-weight: 900;
+      color: var(--success-green);
+      text-shadow: 0 0 25px var(--success-green), 0 0 45px #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .action-overlay-banner.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.0);
+    }
+
+    .action-overlay-banner.lost {
+      color: var(--danger-red);
+      text-shadow: 0 0 25px var(--danger-red), 0 0 45px #ffffff;
+    }
+
+    /* Flash triggers */
+    .damage-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-flash.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeTrack 0.4s ease-in-out;
+    }
+
+    @keyframes shakeTrack {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Game Over Modal styling */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--danger-red);
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.2rem;
+      color: #cbd5e1;
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background neon grid layers -->
+  <div class="lab-backdrop">
+    <div class="grid-pattern"></div>
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- SETUP/MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="setup-header-btns">
+      <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+      <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+    </div>
+
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Kiber Tarozi</h1>
+        <p class="logo-subtitle">Tengsizliklarni solishtirish laboratoriyasi</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Tarozini solishtirib muvozanatga keltiring</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Tengsizliklarni tezkor topish bo'yicha duel</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi</h3>
+        <div class="card-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Yulduzlarni sanab solishtirish</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Qo'shish va ayirish</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Ko'paytirish va bo'lish</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10 Yosh</div>
+            <div class="opt-card-desc">Qavsli amallarni solishtirish</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">⚡ Laboratoriyani Boshlash</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Menyu</button>
+      
+      <div class="game-info">
+        <button id="game-speed-btn" class="btn-icon" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">⚡ O'rtacha</button>
+        <button id="game-mute-btn" class="btn-icon" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">🔊 On</button>
+        <span class="divider">|</span>
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+      </div>
+    </div>
+
+    <!-- Timer light fuse line -->
+    <div class="timer-fuse-container">
+      <div class="timer-fuse-fill" id="timer-fuse"></div>
+    </div>
+
+    <!-- Active game tracks wrapper -->
+    <div class="tracks-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Ball: 0 / 10</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="shield-energy-cell">❤️</span>
+            <span class="shield-energy-cell">❤️</span>
+            <span class="shield-energy-cell">❤️</span>
+          </div>
+        </div>
+
+        <div class="battle-field" id="field-p1">
+          <canvas class="reactor-canvas" id="canvas-p1"></canvas>
+          <div class="action-overlay-banner" id="banner-p1">MUVOZANAT!</div>
+          <div class="damage-flash" id="flash-p1"></div>
+
+          <!-- Operators input bar -->
+          <div class="operators-bar" id="ops-p1">
+            <button class="op-btn" data-op="lt">
+              &lt;
+              <span class="kbd-tag" style="display:none">A</span>
+            </button>
+            <button class="op-btn" data-op="eq">
+              =
+              <span class="kbd-tag" style="display:none">S</span>
+            </button>
+            <button class="op-btn" data-op="gt">
+              &gt;
+              <span class="kbd-tag" style="display:none">D</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Ball: 0 / 10</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="shield-energy-cell">❤️</span>
+            <span class="shield-energy-cell">❤️</span>
+            <span class="shield-energy-cell">❤️</span>
+          </div>
+        </div>
+
+        <div class="battle-field" id="field-p2">
+          <canvas class="reactor-canvas" id="canvas-p2"></canvas>
+          <div class="action-overlay-banner" id="banner-p2">MUVOZANAT!</div>
+          <div class="damage-flash" id="flash-p2"></div>
+
+          <!-- Operators input bar -->
+          <div class="operators-bar" id="ops-p2">
+            <button class="op-btn" data-op="lt">
+              &lt;
+              <span class="kbd-tag" style="display:none">←</span>
+            </button>
+            <button class="op-btn" data-op="eq">
+              =
+              <span class="kbd-tag" style="display:none">↓</span>
+            </button>
+            <button class="op-btn" data-op="gt">
+              &gt;
+              <span class="kbd-tag" style="display:none">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Siz Yutdingiz!</h2>
+      <div class="game-stats" id="gameover-details">
+        To'g'ri taqqoslangan tengsizliklar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Boshlash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'success') {
+        // High sparkling bell chime
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(580, now);
+        osc.frequency.exponentialRampToValueAtTime(1300, now + 0.15);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'slide') {
+        // Neon hum slide sound
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(250, now);
+        osc.frequency.linearRampToValueAtTime(380, now + 0.12);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'error') {
+        // Low shock buzz
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(130, now);
+        osc.frequency.linearRampToValueAtTime(30, now + 0.3);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Config settings
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('ineq_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Timer variables
+    let gameTimeLimit = 25000; // in ms
+    let gameTimeElapsed = 0;
+
+    function getTimerLimit() {
+      let base = 25000; // medium
+      if (speedLevel === 'slow') base = 45000; // 45 seconds (very slow and relaxed)
+      else if (speedLevel === 'fast') base = 12000;
+
+      // Adjust based on age group
+      if (ageGroup === '4-5') {
+        base *= 2.0;
+      } else if (ageGroup === '6-7') {
+        base *= 1.3;
+      } else if (ageGroup === '8-9') {
+        base *= 1.5;
+      } else if (ageGroup === '10') {
+        base *= 2.4; // 2.4x time for parentheses calculation comfort!
+      }
+      return base;
+    }
+
+    // Track active players state
+    const players = [
+      {
+        score: 0,
+        lives: 3,
+        active: true,
+        // Scale physics properties
+        targetAngle: 0,
+        angle: 0,
+        angularVel: 0,
+        // Math question side values
+        leftVal: 0,
+        rightVal: 0,
+        leftExpr: "",
+        rightExpr: "",
+        leftCoins: [], // visual coordinates for 4-5 yosh
+        rightCoins: [],
+        correctOp: 'eq', // 'lt', 'eq', 'gt'
+        selectedOp: null, // operator flying or placed
+        answeredThisWave: false,
+        // Flying operator animation values
+        flyProgress: 0, // 0 to 1
+        flyOp: null,
+        flyStartX: 0,
+        flyStartY: 0,
+        // Particles array
+        particles: [],
+        // DOM nodes
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        bannerDom: null,
+      },
+      {
+        score: 0,
+        lives: 3,
+        active: false,
+        targetAngle: 0,
+        angle: 0,
+        angularVel: 0,
+        leftVal: 0,
+        rightVal: 0,
+        leftExpr: "",
+        rightExpr: "",
+        leftCoins: [],
+        rightCoins: [],
+        correctOp: 'eq',
+        selectedOp: null,
+        answeredThisWave: false,
+        flyProgress: 0,
+        flyOp: null,
+        flyStartX: 0,
+        flyStartY: 0,
+        particles: [],
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        bannerDom: null,
+      }
+    ];
+
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+    const gameSpeedBtn = document.getElementById('game-speed-btn');
+    const gameMuteBtn = document.getElementById('game-mute-btn');
+
+    function syncSettingsUI() {
+      const speedLabels = {
+        'slow': '🐌 Sekin',
+        'medium': '⚡ O\'rtacha',
+        'fast': '🚀 Tez'
+      };
+
+      if (speedBtn) speedBtn.textContent = `⚡ Tezlik: ${speedLabels[speedLevel]}`;
+      if (gameSpeedBtn) gameSpeedBtn.textContent = `⚡ ${speedLabels[speedLevel]}`;
+
+      if (muteBtn) muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+      if (gameMuteBtn) gameMuteBtn.textContent = isMuted ? '🔇 Off' : '🔊 On';
+    }
+    syncSettingsUI();
+
+    function toggleSpeed() {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('ineq_speed_level', speedLevel);
+      syncSettingsUI();
+      gameTimeLimit = getTimerLimit();
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      syncSettingsUI();
+      if (!isMuted) playSound('click');
+    }
+
+    if (speedBtn) speedBtn.addEventListener('click', toggleSpeed);
+    if (gameSpeedBtn) gameSpeedBtn.addEventListener('click', toggleSpeed);
+
+    if (muteBtn) muteBtn.addEventListener('click', toggleMute);
+    if (gameMuteBtn) gameMuteBtn.addEventListener('click', toggleMute);
+
+    // Menu handlers
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    // Navigation triggers
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Inequality Equation generator
+    function generateEquationValue() {
+      if (ageGroup === '4-5') {
+        const val = Math.floor(Math.random() * 6) + 1; // 1 to 6
+        return { val: val, expr: String(val) };
+      }
+      else if (ageGroup === '6-7') {
+        const rand = Math.random();
+        if (rand < 0.35) {
+          const val = Math.floor(Math.random() * 12) + 2; // 2 to 13
+          return { val: val, expr: String(val) };
+        } else if (rand < 0.68) {
+          const a = Math.floor(Math.random() * 7) + 2; // 2 to 8
+          const b = Math.floor(Math.random() * 6) + 1; // 1 to 6
+          return { val: a + b, expr: `${a} + ${b}` };
+        } else {
+          const a = Math.floor(Math.random() * 8) + 6; // 6 to 13
+          const b = Math.floor(Math.random() * 5) + 1; // 1 to 5
+          return { val: a - b, expr: `${a} - ${b}` };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        const rand = Math.random();
+        if (rand < 0.35) {
+          const a = Math.floor(Math.random() * 6) + 2; // 2 to 7
+          const b = Math.floor(Math.random() * 5) + 2; // 2 to 6
+          return { val: a * b, expr: `${a} × ${b}` };
+        } else {
+          const b = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+          const val = Math.floor(Math.random() * 6) + 2; // 2 to 7
+          return { val: val, expr: `${val * b} ÷ ${b}` };
+        }
+      }
+      else {
+        // 10 yosh (strictly NO square roots)
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const a = Math.floor(Math.random() * 6) + 8; // 8 to 13
+          const b = Math.floor(Math.random() * 5) + 2; // 2 to 6
+          const c = Math.floor(Math.random() * 3) + 2; // 2 to 4
+          return { val: (a - b) * c, expr: `(${a} - ${b}) × ${c}` };
+        } else {
+          const a = Math.floor(Math.random() * 4) + 2; // 2 to 5
+          const b = Math.floor(Math.random() * 3) + 1; // 1 to 3
+          const c = Math.floor(Math.random() * 5) + 4; // 4 to 8
+          return { val: (a + b) * c, expr: `(${a} + ${b}) × ${c}` };
+        }
+      }
+    }
+
+    function initPlayers() {
+      players.forEach((p, idx) => {
+        p.canvas = document.getElementById(`canvas-p${idx + 1}`);
+        p.ctx = p.canvas ? p.canvas.getContext('2d') : null;
+        p.scoreLabel = document.getElementById(`score-label-p${idx + 1}`);
+        p.livesContainer = document.getElementById(`lives-p${idx + 1}`);
+        p.fieldDom = document.getElementById(`field-p${idx + 1}`);
+        p.bannerDom = document.getElementById(`banner-p${idx + 1}`);
+      });
+    }
+
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active && p.canvas && p.fieldDom) {
+          p.canvas.width = p.fieldDom.offsetWidth;
+          p.canvas.height = p.fieldDom.offsetHeight;
+        }
+      });
+    }
+
+    function startGame() {
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      initPlayers();
+
+      // Keyboard badge key indicators display
+      const kbdTagsP1 = document.querySelectorAll('#ops-p1 .kbd-tag');
+      const kbdTagsP2 = document.querySelectorAll('#ops-p2 .kbd-tag');
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+        
+        kbdTagsP1.forEach(t => t.style.display = 'none');
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+
+        // Show keyboard keybind badges in 2-Player mode
+        kbdTagsP1.forEach(t => t.style.display = 'inline-block');
+        kbdTagsP2.forEach(t => t.style.display = 'inline-block');
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      // Reset Players parameters
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+        
+        p.score = 0;
+        p.lives = 3;
+        p.particles = [];
+        p.answeredThisWave = false;
+        p.angle = 0;
+        p.targetAngle = 0;
+        p.angularVel = 0;
+        p.selectedOp = null;
+        p.flyProgress = 0;
+        p.flyOp = null;
+
+        p.scoreLabel.textContent = `Ball: 0 / 10`;
+        updateLivesUI(idx);
+
+        p.bannerDom.classList.remove('active');
+      });
+
+      // Bind operators click triggers
+      bindOperatorButtons();
+
+      // Start timer limits
+      gameTimeElapsed = 0;
+      gameTimeLimit = getTimerLimit();
+
+      // Load first wave
+      nextQuestWave();
+
+      setTimeout(() => {
+        resizeCanvases();
+      }, 150);
+
+      initAudio();
+      startGameLoop();
+    }
+
+    function updateLivesUI(pIdx) {
+      const cells = players[pIdx].livesContainer.querySelectorAll('.shield-energy-cell');
+      cells.forEach((c, i) => {
+        if (i < players[pIdx].lives) {
+          c.classList.remove('lost');
+        } else {
+          c.classList.add('lost');
+        }
+      });
+    }
+
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const track = document.getElementById(`player-${pIdx + 1}-section`);
+      
+      flash.classList.add('active');
+      track.classList.add('shake');
+      setTimeout(() => flash.classList.remove('active'), 200);
+      setTimeout(() => track.classList.remove('shake'), 400);
+    }
+
+    function spawnGoldParticles(pIdx, x, y, color) {
+      const count = 30;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 6 + 3;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity,
+          alpha: 1.0,
+          size: Math.random() * 6 + 3,
+          color: color || '#10b981'
+        });
+      }
+    }
+
+    function generateCoinsLayout(count) {
+      const list = [];
+      const rowSize = 4;
+      for (let i = 0; i < count; i++) {
+        const row = Math.floor(i / rowSize);
+        const col = i % rowSize;
+        const countInThisRow = Math.min(rowSize, count - row * rowSize);
+        
+        const spacing = 22;
+        const ox = (col - (countInThisRow - 1) / 2) * spacing;
+        const oy = -12 - row * 20;
+
+        list.push({
+          ox: ox,
+          oy: oy,
+          hue: 45 + (i * 30) % 50 // golden/orange/yellow glowing range
+        });
+      }
+      return list;
+    }
+
+    function nextQuestWave() {
+      // Refresh game timer
+      gameTimeElapsed = 0;
+
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+
+        p.answeredThisWave = false;
+        p.selectedOp = null;
+        p.flyOp = null;
+        p.flyProgress = 0;
+        p.targetAngle = 0;
+
+        p.bannerDom.classList.remove('active');
+
+        // Generate left side and right side values
+        const leftData = generateEquationValue();
+        const rightData = generateEquationValue();
+
+        p.leftVal = leftData.val;
+        p.rightVal = rightData.val;
+        p.leftExpr = leftData.expr;
+        p.rightExpr = rightData.expr;
+
+        if (p.leftVal < p.rightVal) p.correctOp = 'lt';
+        else if (p.leftVal > p.rightVal) p.correctOp = 'gt';
+        else p.correctOp = 'eq';
+
+        // Prepare coins coordinates for 4-5 yosh
+        if (ageGroup === '4-5') {
+          p.leftCoins = generateCoinsLayout(p.leftVal);
+          p.rightCoins = generateCoinsLayout(p.rightVal);
+        }
+      });
+    }
+
+    // Direct button clicks fly operator to slot
+    function bindOperatorButtons() {
+      players.forEach((p, pIdx) => {
+        if (!p.active) return;
+
+        const container = document.getElementById(`ops-p${pIdx + 1}`);
+        container.querySelectorAll('.op-btn').forEach(btn => {
+          // Remove old listeners
+          const newBtn = btn.cloneNode(true);
+          btn.parentNode.replaceChild(newBtn, btn);
+
+          newBtn.addEventListener('click', (e) => {
+            if (isGameOver || p.answeredThisWave || p.flyOp) return;
+
+            const op = newBtn.getAttribute('data-op');
+            triggerOperatorFly(pIdx, op, newBtn);
+          });
+        });
+      });
+    }
+
+    function triggerOperatorFly(pIdx, op, btnDom) {
+      const p = players[pIdx];
+      const canvas = p.canvas;
+      const rect = btnDom.getBoundingClientRect();
+      const cRect = canvas.getBoundingClientRect();
+
+      // Relative coordinates of button
+      p.flyStartX = rect.left - cRect.left + rect.width / 2;
+      p.flyStartY = rect.top - cRect.top + rect.height / 2;
+
+      p.flyOp = op;
+      p.flyProgress = 0;
+      playSound('slide');
+    }
+
+    function processOperatorSubmit(pIdx, op) {
+      const p = players[pIdx];
+      if (p.answeredThisWave || isGameOver) return;
+
+      p.selectedOp = op;
+      p.answeredThisWave = true;
+
+      const scaleCenterX = p.canvas.width * 0.5;
+      const scaleCenterY = p.canvas.height * 0.45;
+
+      if (op === p.correctOp) {
+        // CORRECT ANSWER
+        playSound('success');
+        spawnGoldParticles(pIdx, scaleCenterX, scaleCenterY, '#10b981');
+
+        p.bannerDom.className = 'action-overlay-banner';
+        p.bannerDom.textContent = 'TO\'G\'RI!';
+        p.bannerDom.classList.add('active');
+
+        // Tilt physical scale matching real weight
+        if (p.leftVal > p.rightVal) p.targetAngle = -0.22; // left pan down
+        else if (p.leftVal < p.rightVal) p.targetAngle = 0.22; // right pan down
+        else p.targetAngle = 0;
+
+        p.score += 1;
+        p.scoreLabel.textContent = `Ball: ${p.score} / 10`;
+
+        if (p.score >= 10) {
+          endGame(pIdx === 0 ? 'p1' : 'p2');
+        } else {
+          setTimeout(() => {
+            nextQuestWave();
+          }, 1500);
+        }
+      } 
+      else {
+        // WRONG ANSWER
+        triggerDamageEffect(pIdx);
+        playSound('error');
+        spawnGoldParticles(pIdx, scaleCenterX, scaleCenterY, '#ef4444');
+
+        // Tilt scale completely wrong to show extreme error imbalance
+        if (p.leftVal > p.rightVal) p.targetAngle = 0.22;
+        else if (p.leftVal < p.rightVal) p.targetAngle = -0.22;
+        else p.targetAngle = 0.15;
+
+        p.bannerDom.className = 'action-overlay-banner lost';
+        p.bannerDom.textContent = 'XATO!';
+        p.bannerDom.classList.add('active');
+
+        p.lives = Math.max(0, p.lives - 1);
+        updateLivesUI(pIdx);
+        checkGameStatus();
+
+        if (!isGameOver) {
+          setTimeout(() => {
+            nextQuestWave();
+          }, 1500);
+        }
+      }
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        }
+      } else {
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          if (players[0].score > players[1].score) endGame('p1');
+          else if (players[1].score > players[0].score) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2');
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1');
+        }
+      }
+    }
+
+    function endGame(status) {
+      isGameOver = true;
+      cancelAnimationFrame(mainGameLoop);
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      if (status === 'lost') {
+        title.className = 'lose-text';
+        title.textContent = 'Jonlar Tugadi';
+        details.innerHTML = `Qayta urinib ko'ring, tengsizliklarni solishtirish mahorati mashq bilan yaxshilanadi.<br>To'plangan ball: <strong>${players[0].score}</strong>`;
+        stopConfetti();
+      } else if (status === 'p1') {
+        title.className = 'win-text';
+        if (gameMode === 'single') {
+          title.textContent = 'G\'alaba! Tarozi Ustasi!';
+          details.innerHTML = `Siz barcha 10 ta tengsizliklarni to'g'ri hisobladingiz!`;
+        } else {
+          title.textContent = '1-O\'yinchi G\'olib!';
+          details.innerHTML = `P1 tengsizliklarni birinchi bo'lib 10 marta bexato hisobladi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        }
+        startConfetti();
+      } else if (status === 'p2') {
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `P2 tengsizliklarni birinchi bo'lib 10 marta bexato hisobladi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else if (status === 'timeout') {
+        title.className = 'lose-text';
+        title.textContent = 'Vaqt Tugadi';
+        details.innerHTML = `Laboratoriyada vaqt chegarasi tugadi. Tezlikni oshirish uchun yana urinib ko'ring!<br>To'plangan ball: <strong>${players[0].score}</strong>`;
+        stopConfetti();
+      } else {
+        title.className = 'win-text';
+        title.textContent = 'Durang!';
+        details.innerHTML = `Ikkala o'yinchi ham ajoyib hisoblash tezligini ko'rsatdi!<br>P1: <strong>${players[0].score}</strong> | P2: <strong>${players[1].score}</strong>`;
+        stopConfetti();
+      }
+    }
+
+    // Keyboard bindings listener
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver) return;
+
+      // P1: A (<), S (=), D (>)
+      if (players[0].active && !players[0].answeredThisWave && !players[0].flyOp) {
+        const key = e.key.toLowerCase();
+        const btnLt = document.querySelector('#ops-p1 [data-op="lt"]');
+        const btnEq = document.querySelector('#ops-p1 [data-op="eq"]');
+        const btnGt = document.querySelector('#ops-p1 [data-op="gt"]');
+
+        if (key === 'a' && btnLt) triggerOperatorFly(0, 'lt', btnLt);
+        else if (key === 's' && btnEq) triggerOperatorFly(0, 'eq', btnEq);
+        else if (key === 'd' && btnGt) triggerOperatorFly(0, 'gt', btnGt);
+      }
+
+      // P2: Left, Down, Right Arrow keys
+      if (players[1].active && !players[1].answeredThisWave && !players[1].flyOp) {
+        const key = e.key;
+        const btnLt = document.querySelector('#ops-p2 [data-op="lt"]');
+        const btnEq = document.querySelector('#ops-p2 [data-op="eq"]');
+        const btnGt = document.querySelector('#ops-p2 [data-op="gt"]');
+
+        if (key === 'ArrowLeft' && btnLt) triggerOperatorFly(1, 'lt', btnLt);
+        else if (key === 'ArrowDown' && btnEq) triggerOperatorFly(1, 'eq', btnEq);
+        else if (key === 'ArrowRight' && btnGt) triggerOperatorFly(1, 'gt', btnGt);
+      }
+    });
+
+    // Main animation loops
+    function startGameLoop() {
+      let lastTime = performance.now();
+
+      function tick(now) {
+        if (isGameOver) return;
+
+        const delta = now - lastTime;
+        lastTime = now;
+
+        // 1. Process Global Game Timer
+        if (!players[0].answeredThisWave || (players[1].active && !players[1].answeredThisWave)) {
+          gameTimeElapsed += delta;
+          const pct = Math.max(0, 100 - (gameTimeElapsed / gameTimeLimit) * 100);
+          document.getElementById('timer-fuse').style.width = `${pct}%`;
+
+          // Change fuse color dynamically
+          if (pct < 25) {
+            document.getElementById('timer-fuse').style.background = 'var(--danger-red)';
+            document.getElementById('timer-fuse').style.boxShadow = '0 0 10px var(--danger-red)';
+          } else if (pct < 55) {
+            document.getElementById('timer-fuse').style.background = 'var(--accent-yellow)';
+            document.getElementById('timer-fuse').style.boxShadow = '0 0 10px var(--accent-yellow)';
+          } else {
+            document.getElementById('timer-fuse').style.background = 'linear-gradient(90deg, var(--primary-cyan) 0%, var(--accent-magenta) 100%)';
+            document.getElementById('timer-fuse').style.boxShadow = '0 0 10px var(--primary-cyan)';
+          }
+
+          if (gameTimeElapsed >= gameTimeLimit) {
+            // Timeout impact
+            players.forEach((p, idx) => {
+              if (p.active && !p.answeredThisWave) {
+                p.answeredThisWave = true;
+                p.lives = Math.max(0, p.lives - 1);
+                updateLivesUI(idx);
+                triggerDamageEffect(idx);
+                playSound('error');
+              }
+            });
+            checkGameStatus();
+
+            if (!isGameOver) {
+              setTimeout(() => {
+                nextQuestWave();
+              }, 1500);
+            }
+          }
+        }
+
+        // 2. Process Players Scale Physics and Canvas Rendering
+        players.forEach((p, idx) => {
+          if (!p.active) return;
+
+          const w = p.canvas.width;
+          const h = p.canvas.height;
+          const ctx = p.ctx;
+
+          // Damped spring physics for scale beam tilting
+          const k = 0.08; // spring constant
+          const d = 0.85; // damping factor
+          const ax = (p.targetAngle - p.angle) * k;
+          p.angularVel = (p.angularVel + ax) * d;
+          p.angle += p.angularVel;
+
+          // Update flying operator animation
+          if (p.flyOp) {
+            p.flyProgress += 0.09;
+            if (p.flyProgress >= 1.0) {
+              p.flyProgress = 1.0;
+              const op = p.flyOp;
+              p.flyOp = null;
+              processOperatorSubmit(idx, op);
+            }
+          }
+
+          // Update particles
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx;
+            part.y += part.vy;
+            part.alpha -= 0.02;
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+            }
+          }
+
+          // RENDER CANVAS DRAWING
+          ctx.clearRect(0, 0, w, h);
+
+          const scaleX = w * 0.5;
+          const scaleY = h * 0.45;
+          const beamLen = w * 0.32;
+
+          // Draw fulcrum stand post
+          ctx.save();
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = '#06b6d4';
+          ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)';
+          ctx.lineWidth = 4;
+          ctx.fillStyle = '#0a0f1d';
+
+          ctx.beginPath();
+          ctx.moveTo(scaleX - 25, h * 0.82);
+          ctx.lineTo(scaleX - 8, scaleY);
+          ctx.lineTo(scaleX + 8, scaleY);
+          ctx.lineTo(scaleX + 25, h * 0.82);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Draw neon base plate
+          ctx.strokeStyle = '#06b6d4';
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.moveTo(scaleX - w * 0.2, h * 0.82);
+          ctx.lineTo(scaleX + w * 0.2, h * 0.82);
+          ctx.stroke();
+          ctx.restore();
+
+          // Draw rotating scale beam (tosh yelkasi)
+          ctx.save();
+          ctx.translate(scaleX, scaleY);
+          ctx.rotate(p.angle);
+
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = '#d946ef';
+          ctx.strokeStyle = '#d946ef';
+          ctx.lineWidth = 8;
+          ctx.beginPath();
+          ctx.moveTo(-beamLen, 0);
+          ctx.lineTo(beamLen, 0);
+          ctx.stroke();
+
+          // Left and Right pivot hooks
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(-beamLen, 0, 5, 0, Math.PI * 2);
+          ctx.arc(beamLen, 0, 5, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+
+          // Draw Left Pan hanging down
+          const leftPivotX = scaleX - beamLen * Math.cos(p.angle);
+          const leftPivotY = scaleY - beamLen * Math.sin(p.angle);
+
+          const leftPanY = leftPivotY + h * 0.20;
+
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(leftPivotX, leftPivotY);
+          ctx.lineTo(leftPivotX - 35, leftPanY);
+          ctx.moveTo(leftPivotX, leftPivotY);
+          ctx.lineTo(leftPivotX + 35, leftPanY);
+          ctx.stroke();
+
+          // Left Pan base tray
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = '#06b6d4';
+          ctx.strokeStyle = '#06b6d4';
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.moveTo(leftPivotX - 50, leftPanY);
+          ctx.lineTo(leftPivotX + 50, leftPanY);
+          ctx.stroke();
+          ctx.restore();
+
+          // Draw Right Pan hanging down
+          const rightPivotX = scaleX + beamLen * Math.cos(p.angle);
+          const rightPivotY = scaleY + beamLen * Math.sin(p.angle);
+
+          const rightPanY = rightPivotY + h * 0.20;
+
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(rightPivotX, rightPivotY);
+          ctx.lineTo(rightPivotX - 35, rightPanY);
+          ctx.moveTo(rightPivotX, rightPivotY);
+          ctx.lineTo(rightPivotX + 35, rightPanY);
+          ctx.stroke();
+
+          // Right Pan base tray
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = '#06b6d4';
+          ctx.strokeStyle = '#06b6d4';
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.moveTo(rightPivotX - 50, rightPanY);
+          ctx.lineTo(rightPivotX + 50, rightPanY);
+          ctx.stroke();
+          ctx.restore();
+
+          // DRAW QUEST ELEMENTS (Mevalar/Sonlar)
+          if (ageGroup === '4-5') {
+            // Draw visual coins
+            p.leftCoins.forEach(coin => {
+              ctx.save();
+              ctx.shadowBlur = 8;
+              ctx.shadowColor = '#fbbf24';
+              ctx.fillStyle = `hsl(${coin.hue}, 90%, 55%)`;
+              ctx.beginPath();
+              ctx.arc(leftPivotX + coin.ox, leftPanY + coin.oy, 11, 0, Math.PI*2);
+              ctx.fill();
+              ctx.restore();
+            });
+
+            p.rightCoins.forEach(coin => {
+              ctx.save();
+              ctx.shadowBlur = 8;
+              ctx.shadowColor = '#fbbf24';
+              ctx.fillStyle = `hsl(${coin.hue}, 90%, 55%)`;
+              ctx.beginPath();
+              ctx.arc(rightPivotX + coin.ox, rightPanY + coin.oy, 11, 0, Math.PI*2);
+              ctx.fill();
+              ctx.restore();
+            });
+          } 
+          else {
+            // Draw math text expressions above trays
+            ctx.save();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${Math.min(w * 0.052, 28)}px 'Fredoka', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(255,255,255,0.4)';
+
+            ctx.fillText(p.leftExpr, leftPivotX, leftPanY - 25);
+            ctx.fillText(p.rightExpr, rightPivotX, rightPanY - 25);
+            ctx.restore();
+          }
+
+          // Draw middle placeholder slot / active operator
+          const slotX = scaleX;
+          const slotY = scaleY + h * 0.16;
+
+          ctx.save();
+          if (p.selectedOp) {
+            // Draw submitted operator
+            const hex = p.selectedOp === 'lt' ? '#d946ef' : (p.selectedOp === 'gt' ? '#fbbf24' : '#06b6d4');
+            ctx.fillStyle = hex;
+            ctx.font = "bold 38px 'Fredoka', sans-serif";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = hex;
+            
+            const opStr = p.selectedOp === 'lt' ? '<' : (p.selectedOp === 'gt' ? '>' : '=');
+            ctx.fillText(opStr, slotX, slotY);
+          } else if (!p.flyOp) {
+            // Draw empty slot circle
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([6, 4]);
+            ctx.beginPath();
+            ctx.arc(slotX, slotY, 26, 0, Math.PI*2);
+            ctx.stroke();
+          }
+          ctx.restore();
+
+          // Draw flying operator animation
+          if (p.flyOp) {
+            const currentX = p.flyStartX + (slotX - p.flyStartX) * p.flyProgress;
+            const currentY = p.flyStartY + (slotY - p.flyStartY) * p.flyProgress;
+
+            const hex = p.flyOp === 'lt' ? '#d946ef' : (p.flyOp === 'gt' ? '#fbbf24' : '#06b6d4');
+
+            ctx.save();
+            ctx.fillStyle = hex;
+            ctx.font = "bold 44px 'Fredoka', sans-serif";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = hex;
+            
+            const opStr = p.flyOp === 'lt' ? '<' : (p.flyOp === 'gt' ? '>' : '=');
+            ctx.fillText(opStr, currentX, currentY);
+            ctx.restore();
+          }
+
+          // Draw particles
+          p.particles.forEach(part => {
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI*2);
+            ctx.fill();
+            ctx.restore();
+          });
+
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti Engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#06b6d4', '#d946ef', '#10b981', '#fbbf24', '#ef4444'];
+      for (let i = 0; i < 100; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.04 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 12;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 10 - 5;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    function safeInit() {
+      initPlayers();
+    }
+    window.addEventListener('load', safeInit);
+    document.addEventListener('DOMContentLoaded', safeInit);
+  </script>
+</body>
+</html>

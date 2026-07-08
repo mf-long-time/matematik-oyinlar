@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matematik Ko'prik — Math Bridge Builder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-cyan: #06b6d4;
+      --accent-pink: #ec4899;
+      --success-green: #10b981;
+      --wood-brown: #854d0e;
+      --glass-bg: rgba(15, 23, 42, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: linear-gradient(to bottom, #bae6fd 0%, #e0f2fe 100%);
+      color: #0f172a;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Cartoon sky background with floating clouds */
+    .sky-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .cloud {
+      position: absolute;
+      background: #ffffff;
+      border-radius: 100px;
+      opacity: 0.8;
+      filter: blur(1px);
+      animation: floatCloud 25s linear infinite;
+    }
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: #ffffff;
+      border-radius: 50%;
+    }
+    .cloud.c1 { width: 120px; height: 40px; top: 15%; left: -150px; animation-duration: 35s; }
+    .cloud.c1::before { width: 50px; height: 50px; top: -25px; left: 15px; }
+    .cloud.c1::after { width: 60px; height: 60px; top: -30px; left: 45px; }
+
+    .cloud.c2 { width: 160px; height: 50px; top: 30%; left: -200px; animation-duration: 25s; animation-delay: 5s; }
+    .cloud.c2::before { width: 70px; height: 70px; top: -35px; left: 20px; }
+    .cloud.c2::after { width: 80px; height: 80px; top: -40px; left: 60px; }
+
+    @keyframes floatCloud {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(120vw); }
+    }
+
+    /* Screen styles */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Menu Panel */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 40px;
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25), 0 0 40px rgba(6, 182, 212, 0.15);
+      backdrop-filter: blur(15px);
+      color: #ffffff;
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .logo-area {
+      margin-bottom: 30px;
+    }
+
+    .logo-title {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #06b6d4 0%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(6, 182, 212, 0.2);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 25px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #22d3ee;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 15px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(6, 182, 212, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .opt-card.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(236, 72, 153, 0.25) 100%);
+      border-color: #06b6d4;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
+    }
+
+    .opt-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #06b6d4 0%, #ec4899 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(6, 182, 212, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 12px 30px rgba(6, 182, 212, 0.45);
+    }
+
+    /* Setup Header Controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: #06b6d4;
+    }
+
+    /* Gameplay Screen Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+      color: #ffffff;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(15, 23, 42, 0.85);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Quest Panel */
+    .quest-bubble {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 12px 24px;
+      border-radius: 20px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 15px rgba(6, 182, 212, 0.15);
+      animation: pulseBorder 2s infinite alternate;
+      text-align: center;
+    }
+
+    @keyframes pulseBorder {
+      0% { border-color: rgba(6, 182, 212, 0.3); }
+      100% { border-color: rgba(236, 72, 153, 0.6); }
+    }
+
+    /* Tracks Area */
+    .tracks-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tracks-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.2);
+    }
+
+    /* HUD Stats */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      z-index: 40;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), transparent);
+    }
+
+    .hud-label {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #06b6d4;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* Chasm field view area */
+    .chasm-field {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* Moving sliding world container (everything slides left when success) */
+    .world-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* Platforms */
+    .platform {
+      position: absolute;
+      bottom: 0;
+      height: 250px;
+      background: linear-gradient(to bottom, #10b981 0%, #047857 15px, #854d0e 16px, #451a03 100%);
+      border-top: 4px solid #34d399;
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      z-index: 5;
+    }
+
+    /* Bridge/Stick Hero Line */
+    .bridge {
+      position: absolute;
+      bottom: 250px; /* aligns with top of platform */
+      width: 6px;
+      height: 0;
+      background: linear-gradient(to bottom, #d97706, #78350f);
+      border-radius: 3px;
+      transform-origin: bottom center;
+      transform: rotate(0deg);
+      z-index: 10;
+      box-shadow: 0 0 10px rgba(217, 119, 6, 0.5);
+    }
+
+    /* Length Counter badge floating on bridge tip */
+    .length-badge {
+      position: absolute;
+      background: #0f172a;
+      border: 2px solid #06b6d4;
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 8px;
+      pointer-events: none;
+      transform: translate(-40%, -100%);
+      z-index: 12;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      display: none;
+    }
+
+    /* Explorer Character sphere */
+    .hero {
+      position: absolute;
+      bottom: 250px;
+      width: 32px;
+      height: 32px;
+      background: radial-gradient(circle at 35% 35%, #ec4899 0%, #be185d 100%);
+      border-radius: 50%;
+      z-index: 15;
+      box-shadow: 0 4px 10px rgba(236, 72, 153, 0.5), inset 0 -3px 6px rgba(0,0,0,0.4);
+      transform: translateX(-50%);
+      transition: bottom 0.25s ease-in, left 0.1s linear; /* falls in chasm dynamically */
+    }
+
+    .hero-p2 {
+      background: radial-gradient(circle at 35% 35%, #06b6d4 0%, #0891b2 100%);
+      box-shadow: 0 4px 10px rgba(6, 182, 212, 0.5), inset 0 -3px 6px rgba(0,0,0,0.4);
+    }
+
+    /* Giant grow trigger button inside track field */
+    .grow-btn-container {
+      position: absolute;
+      bottom: 40px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      z-index: 30;
+    }
+
+    .btn-grow {
+      font-family: var(--font-family);
+      background: linear-gradient(135deg, #f59e0b 0%, #ec4899 100%);
+      color: #ffffff;
+      border: 3px solid rgba(255,255,255,0.25);
+      border-radius: 50px;
+      padding: 15px 35px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+      outline: none;
+      transition: all 0.1s;
+    }
+
+    .btn-grow:active {
+      transform: scale(0.95);
+      box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-grow-p2 {
+      background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%);
+      box-shadow: 0 10px 25px rgba(6, 182, 212, 0.4);
+    }
+
+    /* Keybind badge helper labels */
+    .keyboard-badge-helper {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #94a3b8;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 35;
+      opacity: 0.5;
+    }
+
+    /* Canvas particle overlays */
+    .particle-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 25;
+    }
+
+    /* Red damage flash screen overlays */
+    .damage-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-flash.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeTrack 0.4s ease-in-out;
+    }
+
+    @keyframes shakeTrack {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Game Over Modal Layout */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(15px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: #ef4444;
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.2rem;
+      color: #cbd5e1;
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating cloud backdrop -->
+  <div class="sky-background">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+  </div>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="setup-header-btns">
+    <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+    <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+  </div>
+
+  <!-- SETUP/MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Matematik Ko'prik</h1>
+        <p class="logo-subtitle">Chasm o'lchash va ko'prik cho'zish o'yini</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Ko'prikni to'g'ri cho'zib o't</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Marraga yetib borish poygasi</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Olma sanash & sonlar</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Qo'shish va ayirish</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Karra jadvali & ko'paytirish</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10+ Yosh</div>
+            <div class="opt-card-desc">Bo'lish, kvadrat ildizlar</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">🌉 Ko'prik Qurishga Jo'nash</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Menyu</button>
+      
+      <div class="quest-bubble" id="shared-quest">Topshiriq yuklanmoqda...</div>
+      
+      <div class="game-info">
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+      </div>
+    </div>
+
+    <!-- Active game tracks container -->
+    <div class="tracks-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Ball: 0</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="chasm-field" id="field-p1">
+          <!-- World sliding box -->
+          <div class="world-container" id="world-p1">
+            <!-- Platforms, bridge and hero generated here -->
+          </div>
+
+          <div class="grow-btn-container">
+            <button class="btn-grow" id="grow-p1">🌉 Ko'prikni Cho'zish</button>
+          </div>
+          <span class="keyboard-badge-helper">SPACE / W bosib turing</span>
+
+          <canvas class="particle-canvas" id="canvas-p1"></canvas>
+          <div class="damage-flash" id="flash-p1"></div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Ball: 0</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+            <span class="heart">❤️</span>
+          </div>
+        </div>
+
+        <div class="chasm-field" id="field-p2">
+          <!-- World sliding box -->
+          <div class="world-container" id="world-p2">
+            <!-- Platforms, bridge and hero generated here -->
+          </div>
+
+          <div class="grow-btn-container">
+            <button class="btn-grow btn-grow-p2" id="grow-p2">🌉 Ko'prikni Cho'zish</button>
+          </div>
+          <span class="keyboard-badge-helper">↑ / ENTER bosib turing</span>
+
+          <canvas class="particle-canvas" id="canvas-p2"></canvas>
+          <div class="damage-flash" id="flash-p2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Siz Yutdingiz!</h2>
+      <div class="game-stats" id="gameover-details">
+        Muvaffaqiyatli o'tishlar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Boshlash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+    let growSoundOsc = null;
+    let growSoundGain = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function startGrowSound() {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      if (growSoundOsc) {
+        try { growSoundOsc.stop(); } catch(e) {}
+      }
+
+      growSoundOsc = audioCtx.createOscillator();
+      growSoundGain = audioCtx.createGain();
+
+      growSoundOsc.type = 'triangle';
+      growSoundOsc.frequency.setValueAtTime(200, audioCtx.currentTime); // growing sweep
+      growSoundOsc.connect(growSoundGain);
+      growSoundGain.connect(audioCtx.destination);
+
+      growSoundGain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      growSoundOsc.start();
+    }
+
+    // Modulate pitch dynamically as bridge stick length grows
+    function updateGrowSoundFrequency(length) {
+      if (growSoundOsc && audioCtx && !isMuted) {
+        growSoundOsc.frequency.setValueAtTime(200 + (length * 18), audioCtx.currentTime);
+      }
+    }
+
+    function stopGrowSound() {
+      if (growSoundOsc) {
+        try { growSoundOsc.stop(); } catch(e) {}
+        growSoundOsc = null;
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'land') {
+        // Wooden thud
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(240, now);
+        osc.frequency.exponentialRampToValueAtTime(60, now + 0.12);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'fall') {
+        // whistle fall
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        osc.frequency.linearRampToValueAtTime(100, now + 0.5);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } else if (type === 'success') {
+        // Sparkly victory chime
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.08);
+        osc.frequency.setValueAtTime(783.99, now + 0.16);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Game variables
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('bridge_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Track active players state
+    const players = [
+      {
+        score: 0,
+        lives: 3,
+        correctAnswer: null, // math target answer
+        bridgeLength: 0, // current growth length units
+        isGrowing: false,
+        growSpeed: 0.25,
+        targetDist: 150, // pixel distance from left platform start
+        targetWidth: 60,
+        worldShiftX: 0, // offset slide
+        active: true,
+        // DOM dynamic bindings
+        worldDom: null,
+        fieldDom: null,
+        btnDom: null,
+        scoreLabel: null,
+        livesContainer: null,
+        canvas: null,
+        ctx: null,
+        particles: [],
+        state: 'ready', // 'ready', 'growing', 'rotating', 'walking', 'falling', 'won'
+        bridgeDom: null,
+        badgeDom: null,
+        heroDom: null,
+        platStartDom: null,
+        platTargetDom: null,
+        bridgeAngle: 0
+      },
+      {
+        score: 0,
+        lives: 3,
+        correctAnswer: null,
+        bridgeLength: 0,
+        isGrowing: false,
+        growSpeed: 0.25,
+        targetDist: 150,
+        targetWidth: 60,
+        worldShiftX: 0,
+        active: false,
+        worldDom: null,
+        fieldDom: null,
+        btnDom: null,
+        scoreLabel: null,
+        livesContainer: null,
+        canvas: null,
+        ctx: null,
+        particles: [],
+        state: 'ready',
+        bridgeDom: null,
+        badgeDom: null,
+        heroDom: null,
+        platStartDom: null,
+        platTargetDom: null,
+        bridgeAngle: 0
+      }
+    ];
+
+    let currentTask = {
+      text: "",
+      correct: 0
+    };
+
+    // Math equation generator
+    function generateTask() {
+      if (ageGroup === '4-5') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const num = Math.floor(Math.random() * 5) + 5; // answers: 5 to 9
+          // Generate emoji fruit list representing count challenge
+          const apples = '🍎'.repeat(num);
+          return {
+            text: `🌉 Olmalarni sana: [ ${apples} ]`,
+            correct: num
+          };
+        } else {
+          const a = Math.floor(Math.random() * 4) + 3; // 3-6
+          const b = Math.floor(Math.random() * 3) + 2; // 2-4
+          return {
+            text: `🌉 Qo'shing: [ ${a} + ${b} = ? ]`,
+            correct: a + b
+          };
+        }
+      }
+      else if (ageGroup === '6-7') {
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const a = Math.floor(Math.random() * 6) + 5; // 5-10
+          const b = Math.floor(Math.random() * 5) + 3; // 3-7
+          return {
+            text: `🌉 Qo'shing: [ ${a} + ${b} = ? ]`,
+            correct: a + b
+          };
+        } else {
+          const a = Math.floor(Math.random() * 7) + 12; // 12-18
+          const b = Math.floor(Math.random() * 6) + 2; // 2-7
+          return {
+            text: `🌉 Ayiring: [ ${a} - ${b} = ? ]`,
+            correct: a - b
+          };
+        }
+      }
+      else if (ageGroup === '8-9') {
+        const a = Math.floor(Math.random() * 6) + 3; // 3-8
+        const b = Math.floor(Math.random() * 4) + 2; // 2-5
+        return {
+          text: `🌉 Ko'paytiring: [ ${a} × ${b} = ? ]`,
+          correct: a * b
+        };
+      }
+      else {
+        // 10 yosh
+        const rand = Math.random();
+        if (rand < 0.5) {
+          const a = Math.floor(Math.random() * 8) + 12; // 12-19
+          const b = Math.floor(Math.random() * 7) + 5;  // 5-11
+          const c = Math.floor(Math.random() * 3) + 2;  // 2-4
+          return {
+            text: `🌉 Hisoblang: [ (${a} - ${b}) × ${c} = ? ]`,
+            correct: (a - b) * c
+          };
+        } else {
+          const b = Math.floor(Math.random() * 5) + 2; // 2-6
+          const a = b * (Math.floor(Math.random() * 7) + 6); // quotient 6 to 12
+          return {
+            text: `🌉 Bo'ling: [ ${a} ÷ ${b} = ? ]`,
+            correct: a / b
+          };
+        }
+      }
+    }
+
+    const scale = 20; // 1 unit of bridge = 20px
+
+    function getGrowSpeedMultiplier() {
+      if (speedLevel === 'slow') return 0.08;
+      if (speedLevel === 'fast') return 0.40;
+      return 0.22; // medium
+    }
+
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+
+    function updateSpeedBtn() {
+      const speedLabels = {
+        'slow': '🐌 Tezlik: Sekin',
+        'medium': '⚡ Tezlik: O\'rtacha',
+        'fast': '🚀 Tezlik: Tez'
+      };
+      speedBtn.textContent = speedLabels[speedLevel];
+    }
+    updateSpeedBtn();
+
+    speedBtn.addEventListener('click', () => {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('bridge_speed_level', speedLevel);
+      updateSpeedBtn();
+    });
+
+    function updateMuteBtn() {
+      muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+    }
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      updateMuteBtn();
+      if (!isMuted) playSound('click');
+    });
+
+    // Menu Card handlers
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    // Navigation buttons
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      stopGrowSound();
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    let interactionBound = false;
+    function initPlayers() {
+      players.forEach((p, idx) => {
+        p.worldDom = document.getElementById(`world-p${idx + 1}`);
+        p.fieldDom = document.getElementById(`field-p${idx + 1}`);
+        p.btnDom = document.getElementById(`grow-p${idx + 1}`);
+        p.scoreLabel = document.getElementById(`score-label-p${idx + 1}`);
+        p.livesContainer = document.getElementById(`lives-p${idx + 1}`);
+        p.canvas = document.getElementById(`canvas-p${idx + 1}`);
+        p.ctx = p.canvas ? p.canvas.getContext('2d') : null;
+      });
+
+      if (!interactionBound && players[0].btnDom) {
+        setupInteraction();
+        interactionBound = true;
+      }
+    }
+
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active && p.canvas && p.fieldDom) {
+          p.canvas.width = p.fieldDom.offsetWidth;
+          p.canvas.height = p.fieldDom.offsetHeight;
+        }
+      });
+    }
+
+    // Start Game logic
+    function startGame() {
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      initPlayers();
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      // Reset Players and generate initial platform
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+
+        p.score = 0;
+        p.lives = 3;
+        p.particles = [];
+        p.worldShiftX = 0;
+        p.worldDom.style.transform = 'translateX(0px)';
+        p.scoreLabel.textContent = `Ball: 0`;
+        updateLivesUI(idx);
+
+        // Generate starting chasm platforms
+        p.correctAnswer = 0;
+        p.state = 'ready';
+
+        resetPlatform(idx, true);
+      });
+
+      // Generate first quest
+      currentTask = generateTask();
+      document.getElementById('shared-quest').textContent = currentTask.text;
+
+      players.forEach((p, idx) => {
+        if (p.active) {
+          p.correctAnswer = currentTask.correct;
+          resetPlatform(idx, false);
+        }
+      });
+
+      setTimeout(() => {
+        resizeCanvases();
+      }, 150);
+
+      initAudio();
+      startGameLoop();
+    }
+
+    function updateLivesUI(pIdx) {
+      const hearts = players[pIdx].livesContainer.querySelectorAll('.heart');
+      hearts.forEach((h, i) => {
+        if (i < players[pIdx].lives) {
+          h.classList.remove('lost');
+        } else {
+          h.classList.add('lost');
+        }
+      });
+    }
+
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const track = document.getElementById(`player-${pIdx + 1}-section`);
+      
+      flash.classList.add('active');
+      track.classList.add('shake');
+      setTimeout(() => flash.classList.remove('active'), 200);
+      setTimeout(() => track.classList.remove('shake'), 400);
+    }
+
+    function spawnParticles(pIdx, x, y, color) {
+      const count = 15;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 4 + 2;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity,
+          color: color || '#ff007f',
+          alpha: 1,
+          size: Math.random() * 5 + 3
+        });
+      }
+    }
+
+    // Reset platforms and spawn DOM
+    function resetPlatform(pIdx, isInitialSetup) {
+      const p = players[pIdx];
+      const world = p.worldDom;
+
+      if (isInitialSetup) {
+        // Clear all previous DOM children
+        world.innerHTML = '';
+
+        // Spawn left start platform
+        const startPlat = document.createElement('div');
+        startPlat.className = 'platform';
+        startPlat.style.left = '0px';
+        startPlat.style.width = '100px';
+        world.appendChild(startPlat);
+        p.platStartDom = startPlat;
+
+        // Spawn hero
+        const hero = document.createElement('div');
+        const colorClass = pIdx === 0 ? '' : 'hero-p2';
+        hero.className = `hero ${colorClass}`;
+        hero.style.left = '70px';
+        world.appendChild(hero);
+        p.heroDom = hero;
+
+        // Spawn bridge
+        const bridge = document.createElement('div');
+        bridge.className = 'bridge';
+        bridge.style.left = '87px'; // start at edge of starting platform
+        
+        const badge = document.createElement('div');
+        badge.className = 'length-badge';
+        badge.textContent = '0';
+        bridge.appendChild(badge);
+
+        world.appendChild(bridge);
+        p.bridgeDom = bridge;
+        p.badgeDom = badge;
+      } 
+      else {
+        // Spawn right target platform at distance scaled to correctAnswer
+        const startWidth = parseFloat(p.platStartDom.style.width) || 100;
+        const bridgeStartX = startWidth - 13;
+
+        p.targetWidth = 50 + Math.random() * 25;
+
+        // Align target center exactly with correctAnswer units
+        const targetCenter = bridgeStartX + (p.correctAnswer * scale);
+        p.targetDist = targetCenter - (p.targetWidth / 2);
+
+        // Delete old target platforms
+        if (p.platTargetDom) p.platTargetDom.remove();
+
+        const targetPlat = document.createElement('div');
+        targetPlat.className = 'platform';
+        targetPlat.style.left = `${p.targetDist}px`;
+        targetPlat.style.width = `${p.targetWidth}px`;
+        
+        world.appendChild(targetPlat);
+        p.platTargetDom = targetPlat;
+
+        // Reset bridge parameters
+        p.bridgeLength = 0;
+        p.bridgeDom.style.height = '0px';
+        p.bridgeDom.style.left = `${bridgeStartX}px`;
+        p.bridgeDom.style.transform = 'rotate(0deg)';
+        p.bridgeAngle = 0;
+        
+        p.badgeDom.style.display = 'none';
+        p.badgeDom.textContent = '0';
+
+        p.heroDom.style.left = `${startWidth - 30}px`;
+        p.heroDom.style.bottom = '250px';
+
+        p.state = 'ready';
+      }
+    }
+
+    // Growing bridge controller
+    function startGrowing(pIdx) {
+      const p = players[pIdx];
+      if (p.state !== 'ready' || isGameOver) return;
+
+      p.state = 'growing';
+      p.isGrowing = true;
+      p.bridgeLength = 0;
+      p.badgeDom.style.display = 'block';
+
+      startGrowSound();
+    }
+
+    function stopGrowing(pIdx) {
+      const p = players[pIdx];
+      if (p.state !== 'growing') return;
+
+      p.isGrowing = false;
+      stopGrowSound();
+
+      // Trigger bridge rotation drop
+      p.state = 'rotating';
+    }
+
+    function handleBridgeRotation(pIdx) {
+      const p = players[pIdx];
+      
+      p.bridgeAngle += 3; // rotation speed deg/frame
+      p.bridgeDom.style.transform = `rotate(${p.bridgeAngle}deg)`;
+
+      if (p.bridgeAngle >= 90) {
+        p.bridgeAngle = 90;
+        p.bridgeDom.style.transform = 'rotate(90deg)';
+        
+        playSound('land');
+
+        p.state = 'walking';
+      }
+    }
+
+    function handleHeroWalk(pIdx) {
+      const p = players[pIdx];
+      
+      const currentX = parseFloat(p.heroDom.style.left);
+      const walkSpeed = 3.5; // px/frame
+
+      // Calculate critical endpoints dynamically
+      const startWidth = parseFloat(p.platStartDom.style.width) || 100;
+      const bridgeStartX = startWidth - 13;
+      const bridgeEndPixel = bridgeStartX + (p.bridgeLength * scale);
+      
+      // Target platform landing bounds
+      const platStart = p.targetDist;
+      const platEnd = p.targetDist + p.targetWidth;
+
+      if (currentX < bridgeEndPixel) {
+        // Walk along bridge
+        p.heroDom.style.left = `${currentX + walkSpeed}px`;
+      } 
+      else {
+        // Reached end of bridge! Verify if landed on platform
+        if (bridgeEndPixel >= platStart && bridgeEndPixel <= platEnd) {
+          // SAFE LANDING!
+          p.state = 'won';
+          
+          playSound('success');
+
+          // Score and progress
+          p.score += 1;
+          p.scoreLabel.textContent = `Ball: ${p.score}`;
+
+          // Confetti particles at landing coordinate
+          const outlineRect = p.fieldDom.getBoundingClientRect();
+          const pLeft = outlineRect.left + bridgeEndPixel + p.worldShiftX;
+          const pTop = outlineRect.top + p.fieldDom.offsetHeight - 250;
+          spawnParticles(pIdx, bridgeEndPixel, p.fieldDom.offsetHeight - 250, '#10b981');
+
+          // Shift world viewport to focus new starting platform
+          setTimeout(() => {
+            shiftWorld(pIdx);
+          }, 600);
+
+        } else {
+          // FAILED LANDING! Falls into chasm
+          p.state = 'falling';
+          playSound('fall');
+        }
+      }
+    }
+
+    function handleHeroFall(pIdx) {
+      const p = players[pIdx];
+      const currentY = parseFloat(p.heroDom.style.bottom);
+      const fallSpeed = 7; // px/frame
+
+      if (currentY > -100) {
+        p.heroDom.style.bottom = `${currentY - fallSpeed}px`;
+      } 
+      else {
+        // Reset player state after fall crash
+        p.state = 'ready';
+        p.lives = Math.max(0, p.lives - 1);
+        updateLivesUI(pIdx);
+        triggerDamageEffect(pIdx);
+
+        checkGameStatus();
+
+        if (!isGameOver) {
+          // Restart on same chasm platform
+          resetPlatform(pIdx, false);
+        }
+      }
+    }
+
+    // Slide platforms layout left
+    function shiftWorld(pIdx) {
+      const p = players[pIdx];
+
+      // Shift worldX coordinate
+      p.worldShiftX -= p.targetDist;
+      p.worldDom.style.transform = `translateX(${p.worldShiftX}px)`;
+
+      // Replace start platform DOM with target platform DOM coordinates
+      setTimeout(() => {
+        // Redraw structure locally
+        p.worldDom.style.transition = 'none'; // temporarily disable transition for instant coordinate reset
+        
+        p.worldShiftX = 0;
+        p.worldDom.style.transform = 'translateX(0px)';
+
+        p.platStartDom.style.width = `${p.targetWidth}px`;
+        p.platStartDom.style.left = '0px';
+
+        p.heroDom.style.left = `${p.targetWidth - 30}px`;
+        p.heroDom.style.bottom = '250px';
+
+        p.bridgeDom.style.left = `${p.targetWidth - 13}px`;
+        p.bridgeDom.style.height = '0px';
+        p.bridgeDom.style.transform = 'rotate(0deg)';
+        p.bridgeAngle = 0;
+
+        p.badgeDom.style.display = 'none';
+        p.badgeDom.textContent = '0';
+
+        if (p.platTargetDom) p.platTargetDom.remove();
+
+        p.state = 'ready';
+
+        // Check if both players are ready for next round
+        checkNextRound();
+
+        setTimeout(() => {
+          p.worldDom.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+        }, 50);
+
+      }, 600);
+    }
+
+    function checkNextRound() {
+      // In single player, just generate next task
+      if (gameMode === 'single') {
+        if (players[0].state === 'ready') {
+          currentTask = generateTask();
+          document.getElementById('shared-quest').textContent = currentTask.text;
+          players[0].correctAnswer = currentTask.correct;
+          resetPlatform(0, false);
+        }
+      } else {
+        // In 2-player mode, generate next task only when both players are ready/waiting
+        if (players[0].state === 'ready' && players[1].state === 'ready') {
+          currentTask = generateTask();
+          document.getElementById('shared-quest').textContent = currentTask.text;
+
+          players[0].correctAnswer = currentTask.correct;
+          players[1].correctAnswer = currentTask.correct;
+
+          resetPlatform(0, false);
+          resetPlatform(1, false);
+        }
+      }
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        } else if (players[0].score >= 6) {
+          endGame('won');
+        }
+      } else {
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          if (players[0].score > players[1].score) endGame('p1');
+          else if (players[1].score > players[0].score) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2');
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1');
+        }
+        else if (players[0].score >= 6) {
+          endGame('p1');
+        }
+        else if (players[1].score >= 6) {
+          endGame('p2');
+        }
+      }
+    }
+
+    function endGame(status) {
+      isGameOver = true;
+      cancelAnimationFrame(mainGameLoop);
+      stopGrowSound();
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      if (status === 'won') {
+        title.className = 'win-text';
+        title.textContent = 'Muvaffaqiyatli O\'tish!';
+        details.innerHTML = `Siz barcha matematik ko'priklardan to'g'ri o'tdingiz!<br>Muvaffaqiyatli sakrashlar: <strong>${players[0].score}</strong>`;
+        startConfetti();
+      } else if (status === 'lost') {
+        title.className = 'lose-text';
+        title.textContent = 'Jarlikka Yiqildingiz';
+        details.innerHTML = `Barcha jonlaringiz tugadi.<br>O'tilgan ko'priklar: <strong>${players[0].score}</strong>`;
+        stopConfetti();
+      } else if (status === 'p1') {
+        title.className = 'win-text';
+        title.textContent = '1-O\'yinchi G\'olib!';
+        details.innerHTML = `P1 poygada ko'priklarni tezroq va aniqroq qurdi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else if (status === 'p2') {
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `P2 poygada ko'priklarni tezroq va aniqroq qurdi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else {
+        title.className = 'win-text';
+        title.textContent = 'Durang!';
+        details.innerHTML = `Ikkala poygachi ham munosib ko'prikchilik qildilar!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        stopConfetti();
+      }
+    }
+
+    // Main animation physics tick loop
+    function startGameLoop() {
+      function tick() {
+        if (isGameOver) return;
+
+        players.forEach((p, idx) => {
+          if (!p.active) return;
+
+          // Growing bridge stick
+          if (p.state === 'growing' && p.isGrowing) {
+            p.bridgeLength += getGrowSpeedMultiplier();
+            p.bridgeDom.style.height = `${p.bridgeLength * scale}px`;
+            
+            const currentNum = Math.floor(p.bridgeLength);
+            p.badgeDom.textContent = currentNum;
+
+            updateGrowSoundFrequency(p.bridgeLength);
+          }
+
+          // Rotating stick drop down
+          if (p.state === 'rotating') {
+            handleBridgeRotation(idx);
+          }
+
+          // Walking across
+          if (p.state === 'walking') {
+            handleHeroWalk(idx);
+          }
+
+          // Falling into chasm
+          if (p.state === 'falling') {
+            handleHeroFall(idx);
+          }
+
+          // Render canvas particles
+          const c = p.canvas;
+          const ctx = p.ctx;
+          ctx.clearRect(0, 0, c.width, c.height);
+
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx;
+            part.y += part.vy;
+            part.vy += 0.12; // gravity
+            part.alpha -= 0.025;
+
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    // Touch and mouse click press-and-hold triggers
+    function setupInteraction() {
+      const bindTriggers = (pIdx) => {
+        const btn = players[pIdx].btnDom;
+
+        const onStart = (e) => {
+          e.preventDefault();
+          startGrowing(pIdx);
+        };
+
+        const onEnd = (e) => {
+          e.preventDefault();
+          stopGrowing(pIdx);
+        };
+
+        btn.addEventListener('mousedown', onStart);
+        btn.addEventListener('mouseup', onEnd);
+        btn.addEventListener('mouseleave', onEnd);
+
+        btn.addEventListener('touchstart', onStart, { passive: false });
+        btn.addEventListener('touchend', onEnd, { passive: false });
+      };
+
+      bindTriggers(0);
+      bindTriggers(1);
+    }
+
+    // Keyboard bindings for bridge growing press-and-hold
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver) return;
+
+      // P1: SPACE or W
+      if (players[0].active) {
+        if ((e.key === ' ' || e.key.toLowerCase() === 'w') && !players[0].isGrowing) {
+          startGrowing(0);
+        }
+      }
+
+      // P2: ArrowUp or ENTER
+      if (players[1].active) {
+        if ((e.key === 'ArrowUp' || e.key === 'Enter') && !players[1].isGrowing) {
+          startGrowing(1);
+        }
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      // P1 release
+      if (players[0].active) {
+        if (e.key === ' ' || e.key.toLowerCase() === 'w') {
+          stopGrowing(0);
+        }
+      }
+
+      // P2 release
+      if (players[1].active) {
+        if (e.key === 'ArrowUp' || e.key === 'Enter') {
+          stopGrowing(1);
+        }
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti Engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#06b6d4', '#ec4899', '#10b981', '#f59e0b', '#ef4444'];
+      for (let i = 0; i < 100; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.04 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 12;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 10 - 5;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+  </script>
+</body>
+</html>
