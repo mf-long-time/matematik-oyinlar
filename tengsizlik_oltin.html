@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tengsizlik Oltin Izlovchi — Inequality Gold Miner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-cyan: #06b6d4;
+      --accent-magenta: #d946ef;
+      --accent-yellow: #fbbf24;
+      --success-green: #10b981;
+      --danger-red: #ef4444;
+      --glass-bg: rgba(10, 15, 30, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: #18120a;
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Underground gold mine backdrop */
+    .mine-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #2b1a08 0%, #0f0a04 100%);
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .dust-sparkle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.03) 0%, transparent 80%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Screens setup */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Menu Panels */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 30px 40px;
+      text-align: center;
+      max-width: 620px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 45px rgba(251, 191, 36, 0.15);
+      backdrop-filter: blur(20px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .logo-area {
+      margin-bottom: 25px;
+    }
+
+    .logo-title {
+      font-size: 3.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-yellow) 0%, var(--success-green) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(251, 191, 36, 0.25);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent-yellow);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .speed-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 12px 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    /* Active States with custom glows based on categories */
+    .opt-card[data-mode="single"].active {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 25px rgba(251, 191, 36, 0.35);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-mode="split"].active {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%);
+      border-color: var(--success-green);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.35);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="4-5"].active {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #f8fafc;
+      box-shadow: 0 0 20px rgba(248, 250, 252, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="6-7"].active {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: var(--success-green);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="8-9"].active {
+      background: rgba(14, 165, 233, 0.08);
+      border-color: #0ea5e9;
+      box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="10"].active {
+      background: rgba(217, 70, 239, 0.08);
+      border-color: var(--accent-magenta);
+      box-shadow: 0 0 20px rgba(217, 70, 239, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-speed="slow"].active {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: var(--success-green);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-speed="medium"].active {
+      background: rgba(251, 191, 36, 0.08);
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-speed="fast"].active {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: var(--danger-red);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-yellow) 0%, var(--success-green) 100%);
+      background-size: 200% auto;
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary:hover {
+      background-position: right center;
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 15px 35px rgba(251, 191, 36, 0.6);
+    }
+
+    .btn-primary:active {
+      transform: translateY(-1px) scale(0.99);
+    }
+
+    /* Top right controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-yellow);
+    }
+
+    /* Gameplay Screen Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(20, 15, 10, 0.9);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Target Equation Bubble */
+    .equation-bubble {
+      background: rgba(15, 23, 42, 0.85);
+      border: 2px solid rgba(251, 191, 36, 0.4);
+      padding: 12px 30px;
+      border-radius: 20px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #ffffff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(251, 191, 36, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      animation: goldPulse 2s infinite alternate;
+    }
+
+    @keyframes goldPulse {
+      0% { border-color: rgba(251, 191, 36, 0.4); box-shadow: 0 0 15px rgba(251, 191, 36, 0.1); }
+      100% { border-color: rgba(16, 185, 129, 0.6); box-shadow: 0 0 25px rgba(16, 185, 129, 0.25); }
+    }
+
+    /* Play Tracks Layout */
+    .arena-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .arena-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.12);
+    }
+
+    /* HUD Bar */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      z-index: 40;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(20, 15, 10, 0.6), transparent);
+    }
+
+    .hud-label {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--accent-yellow);
+      text-shadow: 0 2px 5px rgba(0,0,0,0.7);
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 5px;
+      font-size: 1.4rem;
+    }
+
+    .heart-icon {
+      color: #ef4444;
+      filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .heart-icon.lost {
+      color: #334155;
+      filter: none;
+      transform: scale(0.85);
+    }
+
+    /* Miner canvas */
+    .miner-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+
+    /* Controls overlay */
+    .interaction-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+      background: transparent;
+      cursor: crosshair;
+    }
+
+    /* Helper badge */
+    .keyboard-helper {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--glass-border);
+      color: #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      pointer-events: none;
+      z-index: 30;
+      opacity: 0.65;
+    }
+
+    /* Flash damage screen */
+    .damage-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-overlay.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeContainer 0.4s ease-in-out;
+    }
+
+    @keyframes shakeContainer {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* Game Over Container */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(20px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--danger-red);
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.25rem;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Undersea scenery backdrops -->
+  <div class="mine-backdrop">
+    <div class="dust-sparkle"></div>
+  </div>
+
+  <canvas id="confetti-canvas" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index:99; pointer-events:none;"></canvas>
+
+  <div class="setup-header-btns">
+    <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+    <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+  </div>
+
+  <!-- MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Oltin Izlovchi</h1>
+        <p class="logo-subtitle">Aylanuvchi qarmoq va oltin konlari tengsizligi</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Me'yorga to'g'ri oltinlarni tortib oling</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Konchilar poygasi va raqobati</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi (Ninza Darajalari)</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Oq belbog' • Sonlarni Solishtirish</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Yashil belbog' • Qo'shish & Ayirish</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Ko'k belbog' • Ko'paytirish</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10+ Yosh</div>
+            <div class="opt-card-desc">Qora belbog' • Tub & Bo'lish</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Tezligi (Jang Tezligi)</h3>
+        <div class="speed-grid">
+          <div class="opt-card" data-speed="slow">
+            <div class="opt-card-title">🐌 Sekin</div>
+            <div class="opt-card-desc">Toshbaqa usuli</div>
+          </div>
+          <div class="opt-card active" data-speed="medium">
+            <div class="opt-card-title">⚡ O'rtacha</div>
+            <div class="opt-card-desc">Ninza usuli</div>
+          </div>
+          <div class="opt-card" data-speed="fast">
+            <div class="opt-card-title">🚀 Tez</div>
+            <div class="opt-card-desc">Chaqmoq usuli</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">⚔️ Konni Boshlash</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Bosh sahifa</button>
+      
+      <div class="equation-bubble" id="shared-quest">
+        Oltin &gt; 10
+      </div>
+      
+      <div class="game-info">
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+        <span class="divider">|</span>
+        <span id="info-speed">Tezlik: O'rtacha</span>
+      </div>
+    </div>
+
+    <!-- Active game tracks container -->
+    <div class="arena-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Ball: 0 / 15</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="heart-icon">❤️</span>
+            <span class="heart-icon">❤️</span>
+            <span class="heart-icon">❤️</span>
+          </div>
+        </div>
+
+        <div class="player-section" style="flex:1; position:relative;">
+          <canvas class="miner-canvas" id="canvas-p1"></canvas>
+          <div class="interaction-overlay" id="trigger-p1"></div>
+          
+          <span class="keyboard-helper">Bo'shliq / S / Ekran bosish - Qarmoqni Otish</span>
+          <div class="damage-overlay" id="flash-p1"></div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Ball: 0 / 15</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="heart-icon">❤️</span>
+            <span class="heart-icon">❤️</span>
+            <span class="heart-icon">❤️</span>
+          </div>
+        </div>
+
+        <div class="player-section" style="flex:1; position:relative;">
+          <canvas class="miner-canvas" id="canvas-p2"></canvas>
+          <div class="interaction-overlay" id="trigger-p2"></div>
+
+          <span class="keyboard-helper">Enter / ArrowDown / Ekran bosish - Qarmoqni Otish</span>
+          <div class="damage-overlay" id="flash-p2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Siz Yutdingiz!</h2>
+      <div class="game-stats" id="gameover-details">
+        Muvaffaqiyatli yig'imlar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Boshlash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer for swinging mechanical reel and coin sounds
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'reel') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.linearRampToValueAtTime(180, now + 0.25);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.linearRampToValueAtTime(0.005, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      } else if (type === 'pass') {
+        // Double metallic coin chime
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, now); // D5
+        osc.frequency.setValueAtTime(880, now + 0.08); // A5
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+        osc.start(now);
+        osc.stop(now + 0.22);
+      } else if (type === 'crash') {
+        // Deep blast explosion thud
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(130, now);
+        osc.frequency.linearRampToValueAtTime(25, now + 0.35);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Configs
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('oltin_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Player instances
+    const players = [
+      {
+        score: 0,
+        lives: 3,
+        active: true,
+        // Pendulum states
+        hookAngle: 0,
+        hookAngleDir: 1, // 1: CW, -1: CCW
+        hookLen: 50,
+        hookState: 'swinging', // 'swinging', 'extending', 'retracting', 'caught'
+        items: [], // nuggets and rocks
+        caughtItem: null,
+        particles: [],
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        triggerDom: null
+      },
+      {
+        score: 0,
+        lives: 3,
+        active: false,
+        hookAngle: 0,
+        hookAngleDir: 1,
+        hookLen: 50,
+        hookState: 'swinging',
+        items: [],
+        caughtItem: null,
+        particles: [],
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        triggerDom: null
+      }
+    ];
+
+    let currentQuest = {
+      targetNum: 0,
+      sign: '>', // '>', '<', or '='
+      text: ""
+    };
+
+    function getSwingSpeed() {
+      if (speedLevel === 'slow') return 0.02;
+      if (speedLevel === 'fast') return 0.045;
+      return 0.032; // medium
+    }
+
+    function getExtendSpeed() {
+      if (speedLevel === 'slow') return 4.0;
+      if (speedLevel === 'fast') return 8.5;
+      return 6.0; // medium
+    }
+
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+
+    function updateSpeedUI() {
+      const speedLabels = {
+        'slow': '🐌 Tezlik: Sekin',
+        'medium': '⚡ Tezlik: O\'rtacha',
+        'fast': '🚀 Tezlik: Tez'
+      };
+      speedBtn.textContent = speedLabels[speedLevel];
+
+      const inGameSpeed = document.getElementById('info-speed');
+      if (inGameSpeed) {
+        const gameLabels = {
+          'slow': 'Sekin',
+          'medium': 'O\'rtacha',
+          'fast': 'Tez'
+        };
+        inGameSpeed.textContent = `Tezlik: ${gameLabels[speedLevel]}`;
+      }
+
+      document.querySelectorAll('[data-speed]').forEach(card => {
+        if (card.getAttribute('data-speed') === speedLevel) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
+    }
+    updateSpeedUI();
+
+    speedBtn.addEventListener('click', () => {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('oltin_speed_level', speedLevel);
+      updateSpeedUI();
+    });
+
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+      if (!isMuted) playSound('click');
+    });
+
+    // Menu selections
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    document.querySelectorAll('[data-speed]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        speedLevel = card.getAttribute('data-speed');
+        localStorage.setItem('oltin_speed_level', speedLevel);
+        updateSpeedUI();
+      });
+    });
+
+    // Navigation triggers
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Mathematical problem generator for inequality target
+    function generateInequalityQuest() {
+      let targetNum = 0;
+      const signs = ['>', '<'];
+      const sign = signs[Math.floor(Math.random() * signs.length)];
+
+      if (ageGroup === '4-5') {
+        targetNum = Math.floor(Math.random() * 6) + 2; // 2-7
+      } 
+      else if (ageGroup === '6-7') {
+        targetNum = Math.floor(Math.random() * 12) + 6; // 6-17
+      } 
+      else if (ageGroup === '8-9') {
+        targetNum = Math.floor(Math.random() * 25) + 10; // 10-34
+      } 
+      else {
+        targetNum = Math.floor(Math.random() * 45) + 20; // 20-64
+      }
+
+      const text = `Tutadigan Oltin ${sign} ${targetNum}`;
+
+      return { targetNum, sign, text };
+    }
+
+    // Generate value for gold nuggets
+    function generateGoldValue() {
+      const target = currentQuest.targetNum;
+      const satisfies = Math.random() < 0.5;
+
+      let val = 0;
+
+      if (currentQuest.sign === '>') {
+        if (satisfies) {
+          val = target + Math.floor(Math.random() * 10) + 1;
+        } else {
+          val = Math.max(1, target - Math.floor(Math.random() * target));
+        }
+      } 
+      else { // '<'
+        if (satisfies) {
+          val = Math.max(1, target - Math.floor(Math.random() * target) - 1);
+        } else {
+          val = target + Math.floor(Math.random() * 10);
+        }
+      }
+
+      return val;
+    }
+
+    function createMineItem(w, h) {
+      const types = ['gold', 'gold', 'rock'];
+      const selectedType = types[Math.floor(Math.random() * types.length)];
+
+      const rx = Math.random() * (w - 100) + 50;
+      const ry = Math.random() * (h - 220) + 160; // subterranean distribution
+
+      const isRock = selectedType === 'rock';
+      const sizeMult = Math.random() * 0.3 + 0.85;
+
+      return {
+        type: selectedType,
+        x: rx,
+        y: ry,
+        val: isRock ? Math.floor(Math.random() * 9) + 1 : generateGoldValue(),
+        color: isRock ? '#64748b' : '#fbbf24',
+        radius: isRock ? 22 * sizeMult : 26 * sizeMult
+      };
+    }
+
+    // Initialize layout canvases
+    function initPlayers() {
+      players.forEach((p, idx) => {
+        p.canvas = document.getElementById(`canvas-p${idx + 1}`);
+        p.ctx = p.canvas ? p.canvas.getContext('2d') : null;
+        p.scoreLabel = document.getElementById(`score-label-p${idx + 1}`);
+        p.livesContainer = document.getElementById(`lives-p${idx + 1}`);
+        p.fieldDom = p.canvas ? p.canvas.parentElement : null;
+        p.triggerDom = document.getElementById(`trigger-p${idx + 1}`);
+      });
+    }
+
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active && p.canvas && p.fieldDom) {
+          p.canvas.width = p.fieldDom.offsetWidth;
+          p.canvas.height = p.fieldDom.offsetHeight;
+        }
+      });
+    }
+
+    // Play Game Setup
+    function startGame() {
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      initPlayers();
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+      updateSpeedUI();
+
+      // Reset Players state
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+
+        p.score = 0;
+        p.lives = 3;
+        p.hookAngle = 0;
+        p.hookAngleDir = 1;
+        p.hookLen = 45;
+        p.hookState = 'swinging';
+        p.items = [];
+        p.caughtItem = null;
+        p.particles = [];
+
+        p.scoreLabel.textContent = `Ball: 0 / 15`;
+        updateLivesUI(idx);
+      });
+
+      // Show first quest
+      nextQuest();
+
+      setTimeout(() => {
+        resizeCanvases();
+
+        players.forEach((p, idx) => {
+          if (p.active) {
+            // Spawn initial mine items
+            for (let i = 0; i < 6; i++) {
+              p.items.push(createMineItem(p.canvas.width, p.canvas.height));
+            }
+          }
+        });
+      }, 150);
+
+      initAudio();
+      startGameLoop();
+    }
+
+    function nextQuest() {
+      currentQuest = generateInequalityQuest();
+      document.getElementById('shared-quest').textContent = currentQuest.text;
+    }
+
+    function updateLivesUI(pIdx) {
+      const hearts = players[pIdx].livesContainer.querySelectorAll('.heart-icon');
+      hearts.forEach((h, i) => {
+        if (i < players[pIdx].lives) {
+          h.classList.remove('lost');
+        } else {
+          h.classList.add('lost');
+        }
+      });
+    }
+
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const section = document.getElementById(`player-${pIdx + 1}-section`);
+      playSound('crash');
+      
+      flash.classList.add('active');
+      section.classList.add('shake');
+      setTimeout(() => flash.classList.remove('active'), 200);
+      setTimeout(() => section.classList.remove('shake'), 400);
+    }
+
+    function spawnExplosion(pIdx, x, y, color) {
+      const count = 20;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 4 + 2;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: Math.random() * 5 + 3,
+          color: color || '#fbbf24',
+          alpha: 1.0,
+          decay: Math.random() * 0.04 + 0.02
+        });
+      }
+    }
+
+    // Process player catching a gold nugget
+    function checkCaughtItem(pIdx) {
+      const p = players[pIdx];
+      const item = p.caughtItem;
+      if (!item) return;
+
+      if (item.type === 'rock') {
+        // Heavy rock! Dulls/damages life
+        p.lives = Math.max(0, p.lives - 1);
+        updateLivesUI(pIdx);
+        triggerDamageEffect(pIdx);
+      } 
+      else {
+        // Validate inequality matching
+        let matched = false;
+        if (currentQuest.sign === '>') {
+          matched = item.val > currentQuest.targetNum;
+        } else {
+          matched = item.val < currentQuest.targetNum;
+        }
+
+        if (matched) {
+          p.score += 1;
+          p.scoreLabel.textContent = `Ball: ${p.score} / 15`;
+          playSound('pass');
+          spawnExplosion(pIdx, p.canvas.width/2, 60, item.color);
+          nextQuest();
+        } 
+        else {
+          p.lives = Math.max(0, p.lives - 1);
+          updateLivesUI(pIdx);
+          triggerDamageEffect(pIdx);
+        }
+      }
+
+      p.caughtItem = null;
+      p.hookLen = 45;
+      p.hookState = 'swinging';
+      checkGameStatus();
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        } else if (players[0].score >= 15) {
+          endGame('won');
+        }
+      } else {
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          if (players[0].score > players[1].score) endGame('p1');
+          else if (players[1].score > players[0].score) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2');
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1');
+        }
+        else if (players[0].score >= 15) {
+          endGame('p1');
+        }
+        else if (players[1].score >= 15) {
+          endGame('p2');
+        }
+      }
+    }
+
+    function endGame(status) {
+      isGameOver = true;
+      cancelAnimationFrame(mainGameLoop);
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      if (status === 'won') {
+        title.className = 'win-text';
+        title.textContent = 'G\'alaba! Oltin Izlovchi Qirol!';
+        details.innerHTML = `Siz shartga mos keladigan barcha oltin nuggetlarni yig'dingiz!<br>Ball: <strong>${players[0].score}</strong>`;
+        startConfetti();
+      } else if (status === 'lost') {
+        title.className = 'lose-text';
+        title.textContent = 'Jang Tugadi';
+        details.innerHTML = `Qarmoqlaringiz og'ir yuklar tufayli butunlay uzildi.<br>Ball: <strong>${players[0].score}</strong>`;
+        stopConfetti();
+      } else if (status === 'p1') {
+        title.className = 'win-text';
+        title.textContent = '1-O\'yinchi G\'olib!';
+        details.innerHTML = `P1 shartlarni aniq va to'g'ri hisoblab ko'proq oltin yig'di!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else if (status === 'p2') {
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `P2 shartlarni aniq va to'g'ri hisoblab ko'proq oltin yig'di!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else {
+        title.className = 'win-text';
+        title.textContent = 'Durang!';
+        details.innerHTML = `Ikkala konchi ham o'z ishining ustasi ekan!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        stopConfetti();
+      }
+    }
+
+    // Playback loop
+    let lastTime = 0;
+    function startGameLoop() {
+      lastTime = performance.now();
+      function tick(timestamp) {
+        if (isGameOver) return;
+        if (!timestamp) timestamp = performance.now();
+
+        let dt = (timestamp - lastTime) / 16.666;
+        if (dt > 4.0) dt = 4.0;
+        lastTime = timestamp;
+
+        players.forEach((p, idx) => {
+          if (!p.active) return;
+
+          const w = p.canvas.width;
+          const h = p.canvas.height;
+          const ctx = p.ctx;
+
+          ctx.clearRect(0, 0, w, h);
+
+          // 1. Pendulum swinging updates
+          const hookOriginX = w / 2;
+          const hookOriginY = 45;
+
+          if (p.hookState === 'swinging') {
+            p.hookAngle += getSwingSpeed() * p.hookAngleDir * dt;
+            // Bound angle between -75deg and 75deg
+            if (p.hookAngle > Math.PI * 0.4) p.hookAngleDir = -1;
+            else if (p.hookAngle < -Math.PI * 0.4) p.hookAngleDir = 1;
+          } 
+          else if (p.hookState === 'extending') {
+            p.hookLen += getExtendSpeed() * dt;
+
+            // Check hit screen boundary (bounce back retract)
+            const clawX = hookOriginX + Math.sin(p.hookAngle) * p.hookLen;
+            const clawY = hookOriginY + Math.cos(p.hookAngle) * p.hookLen;
+            if (clawX < 10 || clawX > w - 10 || clawY > h - 20) {
+              p.hookState = 'retracting';
+            }
+          } 
+          else if (p.hookState === 'retracting') {
+            p.hookLen -= getExtendSpeed() * dt;
+            if (p.hookLen <= 45) {
+              p.hookLen = 45;
+              p.hookState = 'swinging';
+            }
+          } 
+          else if (p.hookState === 'caught') {
+            const pullSpeed = p.caughtItem && p.caughtItem.type === 'rock' ? getExtendSpeed() * 0.4 : getExtendSpeed() * 0.75;
+            p.hookLen -= pullSpeed * dt;
+            
+            if (p.caughtItem) {
+              p.caughtItem.x = hookOriginX + Math.sin(p.hookAngle) * p.hookLen;
+              p.caughtItem.y = hookOriginY + Math.cos(p.hookAngle) * p.hookLen;
+            }
+
+            if (p.hookLen <= 45) {
+              p.hookLen = 45;
+              checkCaughtItem(idx);
+            }
+          }
+
+          // Spawning mine items periodically if count goes below 5
+          if (p.items.length < 5 && Math.random() < 0.01) {
+            p.items.push(createMineItem(w, h));
+          }
+
+          // 2. Render & Check collision on underground items
+          const clawX = hookOriginX + Math.sin(p.hookAngle) * p.hookLen;
+          const clawY = hookOriginY + Math.cos(p.hookAngle) * p.hookLen;
+
+          for (let i = p.items.length - 1; i >= 0; i--) {
+            const item = p.items[i];
+            
+            if (p.caughtItem !== item) {
+              // Collision check with extended claw
+              if (p.hookState === 'extending') {
+                const dist = Math.hypot(clawX - item.x, clawY - item.y);
+                if (dist < item.radius + 12) {
+                  p.hookState = 'caught';
+                  p.caughtItem = item;
+                  p.items.splice(i, 1);
+                  continue;
+                }
+              }
+            }
+
+            // Draw mine item
+            ctx.save();
+            ctx.translate(item.x, item.y);
+
+            // Glowing items
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = item.color;
+
+            // Stylized gold nugget or rock path
+            ctx.fillStyle = item.color;
+            ctx.beginPath();
+            
+            if (item.type === 'rock') {
+              // Rocky/jagged octagon
+              for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+                const dist = item.radius * (0.8 + Math.sin(a*3) * 0.15);
+                ctx.lineTo(Math.cos(a) * dist, Math.sin(a) * dist);
+              }
+            } else {
+              // Rounded nugget/gem
+              ctx.arc(0, 0, item.radius, 0, Math.PI * 2);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Draw number value inside nugget (Upright!)
+            ctx.fillStyle = item.type === 'rock' ? '#cbd5e1' : '#1e1b4b';
+            ctx.font = 'bold 1.25rem Fredoka';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.val, 0, 0);
+
+            ctx.restore();
+          }
+
+          // 3. Draw caught active item dangling on the hook
+          if (p.caughtItem) {
+            const item = p.caughtItem;
+            ctx.save();
+            ctx.translate(item.x, item.y);
+            ctx.fillStyle = item.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = item.color;
+            ctx.beginPath();
+            ctx.arc(0, 0, item.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = '#1e1b4b';
+            ctx.font = 'bold 1.2rem Fredoka';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.val, 0, 0);
+            ctx.restore();
+          }
+
+          // 4. Draw Rope Line & Hook
+          ctx.save();
+          ctx.strokeStyle = '#d97706'; // rope brown
+          ctx.lineWidth = 2.0;
+          ctx.beginPath();
+          ctx.moveTo(hookOriginX, hookOriginY);
+          ctx.lineTo(clawX, clawY);
+          ctx.stroke();
+
+          // Draw rotating metallic claw
+          ctx.translate(clawX, clawY);
+          ctx.rotate(-p.hookAngle);
+          ctx.strokeStyle = '#94a3b8';
+          ctx.lineWidth = 3.5;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          // Arc hooks
+          ctx.arc(-8, 5, 8, 0, Math.PI * 0.7);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(8, 5, 8, Math.PI * 0.3, Math.PI);
+          ctx.stroke();
+          ctx.restore();
+
+          // 5. Update & Draw Particles
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx * dt;
+            part.y += part.vy * dt;
+            part.alpha -= part.decay * dt;
+
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+
+          // 6. Draw mining machine / platform crane at hookOrigin
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(hookOriginX - 30, 10, 60, 35);
+          // Rotating gear
+          ctx.fillStyle = '#1e293b';
+          ctx.beginPath();
+          ctx.arc(hookOriginX, hookOriginY - 10, 15, 0, Math.PI * 2);
+          ctx.fill();
+
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    // Interaction controls trigger dropping line
+    function setupInteraction() {
+      const bindControls = (pIdx) => {
+        const p = players[pIdx];
+        const trigger = p.triggerDom;
+        if (!trigger) return;
+
+        const handleInput = (clientX, clientY) => {
+          if (p.hookState !== 'swinging') return;
+
+          const rect = trigger.getBoundingClientRect();
+          const clickX = clientX - rect.left;
+          const clickY = clientY - rect.top;
+
+          const hookOriginX = p.canvas.width / 2;
+          const hookOriginY = 45;
+
+          const dx = clickX - hookOriginX;
+          const dy = clickY - hookOriginY;
+          if (dy > 15) { // aim directly towards the clicked point if it is below the crane
+            p.hookAngle = Math.atan2(dx, dy);
+          }
+
+          dropClawHook(pIdx);
+        };
+
+        trigger.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          handleInput(e.clientX, e.clientY);
+        });
+
+        trigger.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          handleInput(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+      };
+
+      bindControls(0);
+      bindControls(1);
+    }
+
+    function dropClawHook(pIdx) {
+      const p = players[pIdx];
+      if (p.hookState === 'swinging') {
+        p.hookState = 'extending';
+        playSound('reel');
+      }
+    }
+
+    // Keyboard Arrow Controls
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver) return;
+
+      // P1 key binds: Space or S to drop hook
+      if (players[0].active) {
+        if (e.key === ' ' || e.key.toLowerCase() === 's') {
+          e.preventDefault();
+          dropClawHook(0);
+        }
+      }
+
+      // P2 key binds: Enter or ArrowDown to drop hook
+      if (players[1].active) {
+        if (e.key === 'Enter' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          dropClawHook(1);
+        }
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti celebration engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#fbbf24', '#10b981', '#06b6d4', '#d946ef', '#ef4444'];
+      for (let i = 0; i < 80; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 5 + 3,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 8 - 4,
+          tiltAngleIncremental: Math.random() * 0.05 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 10;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 8 - 4;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    function safeInit() {
+      initPlayers();
+      setupInteraction();
+      resizeCanvases();
+    }
+
+    window.addEventListener('load', safeInit);
+    document.addEventListener('DOMContentLoaded', safeInit);
+  </script>
+</body>
+</html>

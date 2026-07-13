@@ -223,8 +223,11 @@
       top: 20px;
       right: 20px;
       display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
       gap: 10px;
       z-index: 100;
+      max-width: calc(100% - 40px);
     }
 
     .btn-icon {
@@ -240,6 +243,8 @@
       align-items: center;
       gap: 6px;
       transition: all 0.2s;
+      min-width: 130px;
+      white-space: nowrap;
     }
 
     .btn-icon:hover {
@@ -476,7 +481,7 @@
       transition: opacity 0.15s ease-out;
     }
 
-    .damage-flash.active {
+    .damage-flash.flash-active {
       opacity: 1;
     }
 
@@ -624,8 +629,8 @@
             <div class="opt-card-desc">Ko'paytirish & karra</div>
           </div>
           <div class="opt-card" data-age="10">
-            <div class="opt-card-title">🦅 10+ Yosh</div>
-            <div class="opt-card-desc">Tub & kvadrat sonlar</div>
+            <div class="opt-card-title">🦅 10 Yosh</div>
+            <div class="opt-card-desc">4-sinf arifmetika</div>
           </div>
         </div>
       </div>
@@ -839,19 +844,19 @@
 
     // Get speed multiplier
     function getSpeedMultiplier() {
-      let base = 0.85;
-      if (speedLevel === 'slow') base = 0.08;
-      else if (speedLevel === 'fast') base = 1.25;
+      let base = 1.0;
+      if (speedLevel === 'slow') base = 0.6;
+      else if (speedLevel === 'fast') base = 1.4;
 
       // Adjust based on age group difficulty (complex math = slower speed)
       if (ageGroup === '4-5') {
-        base *= 0.45;
+        base *= 0.65;
       } else if (ageGroup === '6-7') {
-        base *= 0.75;
+        base *= 0.85;
       } else if (ageGroup === '8-9') {
-        base *= 0.90;
+        base *= 0.95;
       } else if (ageGroup === '10') {
-        base *= 0.65; // 10+ needs much more time for roots and brackets
+        base *= 0.8;
       }
       return base;
     }
@@ -935,7 +940,6 @@
       document.getElementById('setup-screen').classList.add('active');
     }
 
-    // Generate Task based on age
     function generateTask() {
       if (ageGroup === '4-5') {
         const rand = Math.random();
@@ -943,13 +947,33 @@
           const targetColor = FRUIT_COLORS[Math.floor(Math.random() * FRUIT_COLORS.length)];
           return {
             text: `🍏 Topshiriq: Faqat ${targetColor.text.toUpperCase()} mevalarni ter!`,
-            validator: (val, color) => color === targetColor.name
+            validator: (val, color) => color === targetColor.name,
+            generator: (valid) => {
+              const type = Math.random() < 0.5 ? 'apple' : 'pear';
+              if (valid) {
+                const num = Math.floor(Math.random() * 5) + 1;
+                return { display: num, val: num, color: targetColor.name, hex: targetColor.hex, exprVal: num, type };
+              }
+              const wrongColor = FRUIT_COLORS.filter(c => c.name !== targetColor.name)[Math.floor(Math.random() * 2)];
+              const num = Math.floor(Math.random() * 5) + 1;
+              return { display: num, val: num, color: wrongColor.name, hex: wrongColor.hex, exprVal: num, type };
+            }
           };
         } else {
           const targetNum = Math.floor(Math.random() * 5) + 1;
           return {
             text: `🍏 Topshiriq: Faqat [ ${targetNum} ] sonli mevalarni ter!`,
-            validator: (val) => val === targetNum
+            validator: (val) => val === targetNum,
+            generator: (valid) => {
+              const color = FRUIT_COLORS[Math.floor(Math.random() * FRUIT_COLORS.length)];
+              const type = Math.random() < 0.5 ? 'apple' : 'pear';
+              if (valid) {
+                return { display: targetNum, val: targetNum, color: color.name, hex: color.hex, exprVal: targetNum, type };
+              }
+              let num;
+              do { num = Math.floor(Math.random() * 5) + 1; } while (num === targetNum);
+              return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
+            }
           };
         }
       }
@@ -958,18 +982,56 @@
         if (rand < 0.33) {
           return {
             text: `🍏 Topshiriq: Faqat JUFT sonli mevalarni ter!`,
-            validator: (val) => typeof val === 'number' && val % 2 === 0
+            validator: (val) => typeof val === 'number' && val % 2 === 0,
+            generator: (valid) => {
+              const color = FRUIT_COLORS[Math.floor(Math.random() * FRUIT_COLORS.length)];
+              const type = Math.random() < 0.5 ? 'apple' : 'pear';
+              if (valid) {
+                const num = (Math.floor(Math.random() * 10) + 1) * 2;
+                return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
+              }
+              let num;
+              do { num = Math.floor(Math.random() * 20) + 1; } while (num % 2 === 0);
+              return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
+            }
           };
         } else if (rand < 0.66) {
           return {
             text: `🍏 Topshiriq: Faqat TOQ sonli mevalarni ter!`,
-            validator: (val) => typeof val === 'number' && val % 2 !== 0
+            validator: (val) => typeof val === 'number' && val % 2 !== 0,
+            generator: (valid) => {
+              const color = FRUIT_COLORS[Math.floor(Math.random() * FRUIT_COLORS.length)];
+              const type = Math.random() < 0.5 ? 'apple' : 'pear';
+              if (valid) {
+                let num = Math.floor(Math.random() * 10) * 2 + 1;
+                if (num < 1) num = 1;
+                return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
+              }
+              let num;
+              do { num = Math.floor(Math.random() * 20) + 1; } while (num % 2 === 1);
+              return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
+            }
           };
         } else {
-          const targetSum = Math.floor(Math.random() * 10) + 5; // 5-15
+          const targetSum = Math.floor(Math.random() * 10) + 5;
           return {
             text: `🍏 Topshiriq: Yig'indisi [ ${targetSum} ] bo'ladigan mevalarni ter!`,
-            validator: (val, color, exprVal) => exprVal === targetSum
+            validator: (val, color, exprVal) => exprVal === targetSum,
+            generator: (valid) => {
+              const color = FRUIT_COLORS[Math.floor(Math.random() * FRUIT_COLORS.length)];
+              const type = Math.random() < 0.5 ? 'apple' : 'pear';
+              if (valid) {
+                const a = Math.floor(Math.random() * (targetSum - 1)) + 1;
+                const b = targetSum - a;
+                return { display: `${a}+${b}`, val: `${a}+${b}`, color: color.name, hex: color.hex, exprVal: a + b, type };
+              }
+              let a, b;
+              do {
+                a = Math.floor(Math.random() * 10) + 1;
+                b = Math.floor(Math.random() * 10) + 1;
+              } while (a + b === targetSum);
+              return { display: `${a}+${b}`, val: `${a}+${b}`, color: color.name, hex: color.hex, exprVal: a + b, type };
+            }
           };
         }
       }
@@ -979,72 +1041,179 @@
           const targetProd = [12, 16, 18, 20, 24, 30, 36, 40, 48][Math.floor(Math.random() * 9)];
           return {
             text: `🍏 Topshiriq: Javobi [ ${targetProd} ] bo'ladigan ko'paytmani ter!`,
-            validator: (val, color, exprVal) => exprVal === targetProd
+            validator: (val, color, exprVal) => exprVal === targetProd,
+            generator: (valid) => {
+              const color = FRUIT_COLORS[Math.floor(Math.random() * FRUIT_COLORS.length)];
+              const type = Math.random() < 0.5 ? 'apple' : 'pear';
+              if (valid) {
+                const factors = [2, 3, 4, 5, 6, 8, 9];
+                const a = factors[Math.floor(Math.random() * factors.length)];
+                const b = targetProd / a;
+                if (Number.isInteger(b) && b > 1) {
+                  return { display: `${a}×${b}`, val: `${a}×${b}`, color: color.name, hex: color.hex, exprVal: a * b, type };
+                }
+                return { display: targetProd, val: targetProd, color: color.name, hex: color.hex, exprVal: targetProd, type };
+              }
+              let a = Math.floor(Math.random() * 8) + 2;
+              let b = Math.floor(Math.random() * 8) + 2;
+              while (a * b === targetProd) {
+                a = Math.floor(Math.random() * 8) + 2;
+                b = Math.floor(Math.random() * 8) + 2;
+              }
+              return { display: `${a}×${b}`, val: `${a}×${b}`, color: color.name, hex: color.hex, exprVal: a * b, type };
+            }
           };
         } else {
           const divisor = [2, 3, 5, 10][Math.floor(Math.random() * 4)];
           return {
             text: `🍏 Topshiriq: Faqat [ ${divisor} ] ga bo'linadigan sonlarni ter!`,
-            validator: (val) => typeof val === 'number' && val % divisor === 0
+            validator: (val) => typeof val === 'number' && val % divisor === 0,
+            generator: (valid) => {
+              const color = FRUIT_COLORS[Math.floor(Math.random() * FRUIT_COLORS.length)];
+              const type = Math.random() < 0.5 ? 'apple' : 'pear';
+              if (valid) {
+                const num = (Math.floor(Math.random() * 10) + 1) * divisor;
+                return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
+              }
+              let num;
+              do { num = Math.floor(Math.random() * 50) + 1; } while (num % divisor === 0);
+              return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
+            }
           };
         }
       }
       else {
         const rand = Math.random();
-        if (rand < 0.5) {
+        if (rand < 0.35) {
+          const a = Math.floor(Math.random() * 90) + 10;
+          const b = Math.floor(Math.random() * 90) + 10;
+          const targetSum = a + b;
           return {
-            text: `🍏 Topshiriq: Faqat TUB sonli mevalarni ter!`,
-            validator: (val) => typeof val === 'number' && PRIMES.includes(val)
+            text: `🍏 Topshiriq: Yig'indisi [ ${targetSum} ] bo'ladigan mevalarni ter!`,
+            validator: (val, color, exprVal) => exprVal === targetSum,
+            generator: (valid) => {
+              const color = FRUIT_COLORS[Math.floor(Math.random() * FRUIT_COLORS.length)];
+              const type = Math.random() < 0.5 ? 'apple' : 'pear';
+              if (valid) {
+                return { display: `${a}+${b}`, val: `${a}+${b}`, color: color.name, hex: color.hex, exprVal: targetSum, type };
+              }
+              let wrongA, wrongB;
+              do {
+                wrongA = Math.floor(Math.random() * 90) + 10;
+                wrongB = Math.floor(Math.random() * 90) + 10;
+              } while (wrongA + wrongB === targetSum);
+              return { display: `${wrongA}+${wrongB}`, val: `${wrongA}+${wrongB}`, color: color.name, hex: color.hex, exprVal: wrongA + wrongB, type };
+            }
+          };
+        } else if (rand < 0.7) {
+          const a = Math.floor(Math.random() * 90) + 20;
+          const b = Math.floor(Math.random() * 19) + 1;
+          const targetDiff = a - b;
+          return {
+            text: `🍏 Topshiriq: Ayirmasi [ ${targetDiff} ] bo'ladigan mevalarni ter!`,
+            validator: (val, color, exprVal) => exprVal === targetDiff,
+            generator: (valid) => {
+              const color = FRUIT_COLORS[Math.floor(Math.random() * FRUIT_COLORS.length)];
+              const type = Math.random() < 0.5 ? 'apple' : 'pear';
+              if (valid) {
+                return { display: `${a}-${b}`, val: `${a}-${b}`, color: color.name, hex: color.hex, exprVal: targetDiff, type };
+              }
+              let wrongA, wrongB, diff;
+              do {
+                wrongA = Math.floor(Math.random() * 90) + 20;
+                wrongB = Math.floor(Math.random() * 19) + 1;
+                diff = wrongA - wrongB;
+              } while (diff === targetDiff);
+              return { display: `${wrongA}-${wrongB}`, val: `${wrongA}-${wrongB}`, color: color.name, hex: color.hex, exprVal: diff, type };
+            }
           };
         } else {
+          const divisor = [5, 10][Math.floor(Math.random() * 2)];
           return {
-            text: `🍏 Topshiriq: Faqat KVADRAT sonli mevalarni ter!`,
-            validator: (val) => typeof val === 'number' && SQUARES.includes(val)
+            text: `🍏 Topshiriq: Faqat [ ${divisor} ] ga bo'linadigan sonlarni ter!`,
+            validator: (val) => typeof val === 'number' && val % divisor === 0,
+            generator: (valid) => {
+              const color = FRUIT_COLORS[Math.floor(Math.random() * FRUIT_COLORS.length)];
+              const type = Math.random() < 0.5 ? 'apple' : 'pear';
+              if (valid) {
+                const num = (Math.floor(Math.random() * 10) + 2) * divisor;
+                return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
+              }
+              let num;
+              do { num = Math.floor(Math.random() * 90) + 10; } while (num % divisor === 0);
+              return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
+            }
           };
         }
       }
     }
 
-    // Generate random fruit values
-    function generateFruitValue() {
+    function randomFruitValue() {
       const color = FRUIT_COLORS[Math.floor(Math.random() * FRUIT_COLORS.length)];
       const type = Math.random() < 0.5 ? 'apple' : 'pear';
 
       if (ageGroup === '4-5') {
         const num = Math.floor(Math.random() * 5) + 1;
-        return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type: type };
+        return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
       }
       else if (ageGroup === '6-7') {
         if (Math.random() < 0.4) {
           const num = Math.floor(Math.random() * 20) + 1;
-          return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type: type };
+          return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
         } else {
           const a = Math.floor(Math.random() * 10) + 1;
           const b = Math.floor(Math.random() * 10) + 1;
-          return { display: `${a}+${b}`, val: `${a}+${b}`, color: color.name, hex: color.hex, exprVal: a + b, type: type };
+          return { display: `${a}+${b}`, val: `${a}+${b}`, color: color.name, hex: color.hex, exprVal: a + b, type };
         }
       }
       else if (ageGroup === '8-9') {
         if (Math.random() < 0.4) {
           const num = Math.floor(Math.random() * 50) + 1;
-          return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type: type };
+          return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
         } else {
           const a = Math.floor(Math.random() * 8) + 2;
           const b = Math.floor(Math.random() * 8) + 2;
-          return { display: `${a}×${b}`, val: `${a}×${b}`, color: color.name, hex: color.hex, exprVal: a * b, type: type };
+          return { display: `${a}×${b}`, val: `${a}×${b}`, color: color.name, hex: color.hex, exprVal: a * b, type };
         }
       }
       else {
-        if (Math.random() < 0.5) {
-          const list = [2, 3, 4, 5, 7, 8, 9, 11, 12, 13, 15, 16, 17, 21, 23, 25, 29, 31, 35, 36, 37, 49, 50, 64, 81];
-          const val = list[Math.floor(Math.random() * list.length)];
-          return { display: val, val: val, color: color.name, hex: color.hex, exprVal: val, type: type };
+        const rand = Math.random();
+        if (rand < 0.35) {
+          const a = Math.floor(Math.random() * 90) + 10;
+          const b = Math.floor(Math.random() * 90) + 10;
+          return { display: `${a}+${b}`, val: `${a}+${b}`, color: color.name, hex: color.hex, exprVal: a + b, type };
+        } else if (rand < 0.65) {
+          const a = Math.floor(Math.random() * 90) + 20;
+          const b = Math.floor(Math.random() * 19) + 1;
+          return { display: `${a}-${b}`, val: `${a}-${b}`, color: color.name, hex: color.hex, exprVal: a - b, type };
+        } else if (rand < 0.85) {
+          const a = Math.floor(Math.random() * 8) + 2;
+          const b = Math.floor(Math.random() * 9) + 2;
+          return { display: `${a}×${b}`, val: `${a}×${b}`, color: color.name, hex: color.hex, exprVal: a * b, type };
         } else {
-          const a = Math.floor(Math.random() * 10) + 3;
-          const b = Math.floor(Math.random() * 10) + 3;
-          return { display: `${a * b}÷${a}`, val: `${a * b}÷${a}`, color: color.name, hex: color.hex, exprVal: b, type: type };
+          const divisor = [5, 10][Math.floor(Math.random() * 2)];
+          const num = (Math.floor(Math.random() * 18) + 1) * divisor;
+          return { display: num, val: num, color: color.name, hex: color.hex, exprVal: num, type };
         }
       }
+    }
+
+    function generateFruitValue() {
+      if (currentTask.generator) {
+        const roll = Math.random();
+        if (roll < 0.40) {
+          return currentTask.generator(true);
+        }
+        if (roll < 0.75) {
+          return currentTask.generator(false);
+        }
+      }
+
+      const fruit = randomFruitValue();
+      if (currentTask.generator && Math.random() < 0.20 && currentTask.validator(fruit.val, fruit.color, fruit.exprVal)) {
+        return currentTask.generator(false);
+      }
+      return fruit;
     }
 
     // Spawn a falling fruit
@@ -1152,10 +1321,10 @@
       if (window.spawnInterval) clearInterval(window.spawnInterval);
       window.spawnInterval = setInterval(() => {
         if (!isGameOver) {
-          if (players[0].active && players[0].fruits.length < 3) spawnFruit(0);
-          if (players[1].active && players[1].fruits.length < 3) spawnFruit(1);
+          if (players[0].active && players[0].fruits.length < 4) spawnFruit(0);
+          if (players[1].active && players[1].fruits.length < 4) spawnFruit(1);
         }
-      }, 2000);
+      }, 1400);
 
       initAudio();
       startGameLoop();

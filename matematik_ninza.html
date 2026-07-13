@@ -83,9 +83,9 @@
       background: var(--glass-bg);
       border: 1px solid var(--glass-border);
       border-radius: 30px;
-      padding: 40px;
+      padding: 30px 40px;
       text-align: center;
-      max-width: 550px;
+      max-width: 620px;
       width: 100%;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(190, 18, 60, 0.15);
       backdrop-filter: blur(15px);
@@ -98,7 +98,7 @@
     }
 
     .logo-area {
-      margin-bottom: 30px;
+      margin-bottom: 25px;
     }
 
     .logo-title {
@@ -118,7 +118,7 @@
     }
 
     .menu-section {
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       text-align: left;
     }
 
@@ -137,11 +137,17 @@
       gap: 12px;
     }
 
+    .speed-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
     .opt-card {
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
-      padding: 15px;
+      padding: 12px 10px;
       cursor: pointer;
       text-align: center;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -149,14 +155,75 @@
 
     .opt-card:hover {
       background: rgba(255, 255, 255, 0.09);
-      border-color: rgba(190, 18, 60, 0.4);
-      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px) scale(1.02);
     }
 
-    .opt-card.active {
-      background: linear-gradient(135deg, rgba(190, 18, 60, 0.2) 0%, rgba(234, 179, 8, 0.2) 100%);
-      border-color: var(--primary-crimson);
-      box-shadow: 0 0 20px rgba(190, 18, 60, 0.25);
+    /* Active States with custom glows based on categories */
+    /* Game Mode Card Active Styles */
+    .opt-card[data-mode="single"].active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+      border-color: #06b6d4;
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.35);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-mode="split"].active {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+      border-color: #ec4899;
+      box-shadow: 0 0 25px rgba(236, 72, 153, 0.35);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    /* Age Card Active Styles */
+    .opt-card[data-age="4-5"].active {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #f8fafc;
+      box-shadow: 0 0 20px rgba(248, 250, 252, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="6-7"].active {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: #10b981;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="8-9"].active {
+      background: rgba(14, 165, 233, 0.08);
+      border-color: #0ea5e9;
+      box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="10"].active {
+      background: rgba(217, 70, 239, 0.08);
+      border-color: #d946ef;
+      box-shadow: 0 0 20px rgba(217, 70, 239, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    /* Speed Card Active Styles */
+    .opt-card[data-speed="slow"].active {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: #10b981;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-speed="medium"].active {
+      background: rgba(234, 179, 8, 0.08);
+      border-color: #eab308;
+      box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-speed="fast"].active {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: #ef4444;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      transform: translateY(-3px) scale(1.02);
     }
 
     .opt-card-title {
@@ -186,14 +253,21 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary-crimson) 0%, var(--accent-yellow) 100%);
+      background: linear-gradient(135deg, #be123c 0%, #eab308 50%, #be123c 100%);
+      background-size: 200% auto;
       color: #ffffff;
       box-shadow: 0 8px 25px rgba(190, 18, 60, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .btn-primary:hover {
-      transform: translateY(-2px) scale(1.01);
-      box-shadow: 0 12px 30px rgba(190, 18, 60, 0.5);
+      background-position: right center;
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 15px 35px rgba(190, 18, 60, 0.6);
+    }
+
+    .btn-primary:active {
+      transform: translateY(-1px) scale(0.99);
     }
 
     /* Setup Header Controls */
@@ -497,23 +571,41 @@
       </div>
 
       <div class="menu-section">
-        <h3 class="menu-section-title">Yosh Toifasi</h3>
+        <h3 class="menu-section-title">Yosh Toifasi (Ninza Darajalari)</h3>
         <div class="card-grid">
           <div class="opt-card" data-age="4-5">
             <div class="opt-card-title">🐣 4-5 Yosh</div>
-            <div class="opt-card-desc">Ranglar & olma hisoblash</div>
+            <div class="opt-card-desc">Oq belbog' • Ranglar & Hisob</div>
           </div>
           <div class="opt-card active" data-age="6-7">
             <div class="opt-card-title">🦊 6-7 Yosh</div>
-            <div class="opt-card-desc">Qo'shish va ayirish</div>
+            <div class="opt-card-desc">Yashil belbog' • Qo'shish & Ayirish</div>
           </div>
           <div class="opt-card" data-age="8-9">
             <div class="opt-card-title">🦁 8-9 Yosh</div>
-            <div class="opt-card-desc">Karra jadvali & ko'paytirish</div>
+            <div class="opt-card-desc">Ko'k belbog' • Ko'paytirish</div>
           </div>
           <div class="opt-card" data-age="10">
             <div class="opt-card-title">🦅 10+ Yosh</div>
-            <div class="opt-card-desc">Bo'lish, tub sonlar</div>
+            <div class="opt-card-desc">Qora belbog' • Tub & Bo'lish</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Tezligi (Jang Tezligi)</h3>
+        <div class="speed-grid">
+          <div class="opt-card" data-speed="slow">
+            <div class="opt-card-title">🐌 Sekin</div>
+            <div class="opt-card-desc">Toshbaqa usuli</div>
+          </div>
+          <div class="opt-card active" data-speed="medium">
+            <div class="opt-card-title">⚡ O'rtacha</div>
+            <div class="opt-card-desc">Ninza usuli</div>
+          </div>
+          <div class="opt-card" data-speed="fast">
+            <div class="opt-card-title">🚀 Tez</div>
+            <div class="opt-card-desc">Chaqmoq usuli</div>
           </div>
         </div>
       </div>
@@ -533,6 +625,8 @@
         <span id="info-mode">Yakka O'yinchi</span>
         <span class="divider">|</span>
         <span id="info-age">Yosh: 6-7</span>
+        <span class="divider">|</span>
+        <span id="info-speed">Tezlik: O'rtacha</span>
       </div>
     </div>
 
@@ -726,23 +820,41 @@
     }
 
     function getPhysicsParams() {
-      if (speedLevel === 'slow') return { vy: -3.8, grav: 0.009 };
-      if (speedLevel === 'fast') return { vy: -9.5, grav: 0.10 };
-      return { vy: -8.0, grav: 0.07 }; // medium
+      if (speedLevel === 'slow') return { vy: -4.2, grav: 0.02 };
+      if (speedLevel === 'fast') return { vy: -8.0, grav: 0.075 };
+      return { vy: -6.0, grav: 0.042 }; // medium
     }
 
     const speedBtn = document.getElementById('speed-toggle-btn');
     const muteBtn = document.getElementById('mute-btn');
 
-    function updateSpeedBtn() {
+    function updateSpeedUI() {
       const speedLabels = {
         'slow': '🐌 Tezlik: Sekin',
         'medium': '⚡ Tezlik: O\'rtacha',
         'fast': '🚀 Tezlik: Tez'
       };
       speedBtn.textContent = speedLabels[speedLevel];
+
+      const inGameSpeed = document.getElementById('info-speed');
+      if (inGameSpeed) {
+        const gameLabels = {
+          'slow': 'Sekin',
+          'medium': 'O\'rtacha',
+          'fast': 'Tez'
+        };
+        inGameSpeed.textContent = `Tezlik: ${gameLabels[speedLevel]}`;
+      }
+
+      document.querySelectorAll('[data-speed]').forEach(card => {
+        if (card.getAttribute('data-speed') === speedLevel) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
     }
-    updateSpeedBtn();
+    updateSpeedUI();
 
     speedBtn.addEventListener('click', () => {
       playSound('click');
@@ -750,7 +862,7 @@
       else if (speedLevel === 'medium') speedLevel = 'fast';
       else speedLevel = 'slow';
       localStorage.setItem('ninja_speed_level', speedLevel);
-      updateSpeedBtn();
+      updateSpeedUI();
     });
 
     function updateMuteBtn() {
@@ -778,6 +890,15 @@
         document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
         card.classList.add('active');
         ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    document.querySelectorAll('[data-speed]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        speedLevel = card.getAttribute('data-speed');
+        localStorage.setItem('ninja_speed_level', speedLevel);
+        updateSpeedUI();
       });
     });
 
@@ -922,7 +1043,7 @@
       const w = p.canvas.width;
       const h = p.canvas.height;
 
-      const launch = getPhysicsVelocity();
+      const launch = getPhysicsParams();
 
       // 15% chance to spawn a Bomb 💣
       const isBomb = Math.random() < 0.15;
@@ -931,10 +1052,12 @@
       const startX = w * 0.2 + Math.random() * (w * 0.6);
       const startY = h + 40;
 
-      // Calculate horizontal velocity to steer towards center
+      // Calculate horizontal velocity to steer towards center gently
       const centerX = w / 2;
-      const startVx = (centerX - startX) * 0.015 + (Math.random() * 2 - 1);
-      const startVy = launch.vy + (Math.random() * 2 - 1);
+      const baseVx = (centerX - startX) * 0.003; 
+      const cappedVx = Math.max(-1.5, Math.min(1.5, baseVx)); 
+      const startVx = cappedVx + (Math.random() * 0.8 - 0.4);
+      const startVy = launch.vy + (Math.random() * 0.8 - 0.4);
 
       if (isBomb) {
         p.fruits.push({
@@ -1020,6 +1143,13 @@
       }
 
       document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+
+      const gameSpeedLabels = {
+        'slow': 'Sekin',
+        'medium': 'O\'rtacha',
+        'fast': 'Tez'
+      };
+      document.getElementById('info-speed').textContent = `Tezlik: ${gameSpeedLabels[speedLevel]}`;
 
       // Generate task
       currentQuest = generateTask();
@@ -1295,11 +1425,18 @@
     }
 
     // Main animation loop
+    let lastTime = 0;
     function startGameLoop() {
-      function tick() {
+      lastTime = performance.now();
+      function tick(timestamp) {
         if (isGameOver) return;
+        if (!timestamp) timestamp = performance.now();
 
-        const launch = getPhysicsVelocity();
+        let dt = (timestamp - lastTime) / 16.666;
+        if (dt > 4.0) dt = 4.0;
+        lastTime = timestamp;
+
+        const launch = getPhysicsParams();
         const spawnLimit = getLaunchFrequency();
 
         players.forEach((p, idx) => {
@@ -1309,7 +1446,7 @@
           const h = p.canvas.height;
 
           // 1. Spawning waves timer
-          p.spawnTimer++;
+          p.spawnTimer += dt;
           if (p.spawnTimer >= spawnLimit) {
             p.spawnTimer = 0;
             // Spawn 1 fruit, and 50% chance to spawn an extra fruit
@@ -1322,10 +1459,10 @@
             const fruit = p.fruits[i];
             
             // Gravity parabolic fall
-            fruit.vy += launch.grav;
-            fruit.x += fruit.vx;
-            fruit.y += fruit.vy;
-            fruit.rotation += fruit.rotVel;
+            fruit.vy += launch.grav * dt;
+            fruit.x += fruit.vx * dt;
+            fruit.y += fruit.vy * dt;
+            fruit.rotation += fruit.rotVel * dt;
 
             // Remove if falls off the bottom screen boundary
             if (fruit.y > h + 60) {
@@ -1336,11 +1473,11 @@
           // 3. Physics update: Split flying fruit halves slices
           for (let i = p.slices.length - 1; i >= 0; i--) {
             const sl = p.slices[i];
-            sl.vy += 0.22; // split gravity fall
-            sl.x += sl.vx;
-            sl.y += sl.vy;
-            sl.rot += sl.rotVel;
-            sl.alpha -= 0.015;
+            sl.vy += 0.22 * dt; // split gravity fall
+            sl.x += sl.vx * dt;
+            sl.y += sl.vy * dt;
+            sl.rot += sl.rotVel * dt;
+            sl.alpha -= 0.015 * dt;
 
             if (sl.y > h + 60 || sl.alpha <= 0) {
               p.slices.splice(i, 1);
@@ -1350,10 +1487,10 @@
           // 4. Update canvas splash particles
           for (let i = p.particles.length - 1; i >= 0; i--) {
             const part = p.particles[i];
-            part.x += part.vx;
-            part.y += part.vy;
-            part.vy += 0.15; // gravity fall
-            part.alpha -= 0.02;
+            part.x += part.vx * dt;
+            part.y += part.vy * dt;
+            part.vy += 0.15 * dt; // gravity fall
+            part.alpha -= 0.02 * dt;
 
             if (part.alpha <= 0) {
               p.particles.splice(i, 1);
@@ -1363,7 +1500,7 @@
 
           // 5. Fade out draw trails history
           p.trail.forEach((pt, tIdx) => {
-            pt.alpha -= 0.08;
+            pt.alpha -= 0.08 * dt;
           });
           p.trail = p.trail.filter(pt => pt.alpha > 0);
 
@@ -1375,31 +1512,38 @@
           p.fruits.forEach(fruit => {
             if (fruit.sliced) return;
 
+            // 1. Draw fruit emoji/graphic (rotated)
             ctx.save();
             ctx.translate(fruit.x, fruit.y);
             ctx.rotate(fruit.rotation);
-            
-            // Draw math text bubble above fruit center
-            ctx.font = "bold 1.25rem Fredoka";
-            const textWidth = ctx.measureText(fruit.isBomb ? "💣" : fruit.display).width;
-            
-            ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-            ctx.strokeStyle = fruit.isBomb ? "#ffffff" : fruit.color;
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.roundRect(-textWidth/2 - 8, -68, textWidth + 16, 32, 10);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = "#ffffff";
-            ctx.textAlign = "center";
-            ctx.fillText(fruit.isBomb ? "💣" : fruit.display, 0, -45);
-
-            // Draw fruit circle backing or emoji
             ctx.font = "3.2rem Fredoka";
             ctx.shadowBlur = 12;
             ctx.shadowColor = fruit.isBomb ? "#ffffff" : fruit.color;
+            ctx.textAlign = "center";
             ctx.fillText(fruit.isBomb ? "💣" : fruit.emoji, 0, 10);
+            ctx.restore();
+
+            // 2. Draw math text bubble above fruit center (UPRIGHT - not rotated!)
+            ctx.save();
+            ctx.translate(fruit.x, fruit.y);
+            ctx.font = "bold 1.45rem Fredoka"; // Slightly larger font size for maximum visibility
+            const textStr = fruit.isBomb ? "💣" : String(fruit.display);
+            const textWidth = ctx.measureText(textStr).width;
+            
+            // Draw glassmorphic badge backing
+            ctx.fillStyle = "rgba(15, 23, 42, 0.95)"; // Darker background for high contrast
+            ctx.strokeStyle = fruit.isBomb ? "#ffffff" : fruit.color;
+            ctx.lineWidth = 3.0;
+            ctx.beginPath();
+            ctx.roundRect(-textWidth/2 - 12, -70, textWidth + 24, 36, 12);
+            ctx.fill();
+            ctx.stroke();
+
+            // Draw text
+            ctx.fillStyle = "#ffffff";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(textStr, 0, -52);
             ctx.restore();
           });
 

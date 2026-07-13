@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tengsizlik Dino Yugurishi — Inequality Dino Run</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-cyan: #06b6d4;
+      --accent-magenta: #d946ef;
+      --accent-yellow: #fbbf24;
+      --success-green: #10b981;
+      --danger-red: #ef4444;
+      --glass-bg: rgba(10, 15, 30, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: #0d1510;
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Prehistoric Backdrops */
+    .dino-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #16241a 0%, #0d1510 100%);
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .sun-light {
+      position: absolute;
+      top: -10%;
+      left: -10%;
+      width: 50%;
+      height: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Screens setup */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Menu Panels */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 30px 40px;
+      text-align: center;
+      max-width: 620px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 45px rgba(16, 185, 129, 0.15);
+      backdrop-filter: blur(20px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .logo-area {
+      margin-bottom: 25px;
+    }
+
+    .logo-title {
+      font-size: 3.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--success-green) 0%, var(--accent-yellow) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(16, 185, 129, 0.25);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--success-green);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .speed-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 12px 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    /* Active States with custom glows based on categories */
+    .opt-card[data-mode="single"].active {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+      border-color: var(--success-green);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.35);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-mode="split"].active {
+      background: linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(219, 70, 239, 0.15) 100%);
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 25px rgba(234, 179, 8, 0.35);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="4-5"].active {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #f8fafc;
+      box-shadow: 0 0 20px rgba(248, 250, 252, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="6-7"].active {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: var(--success-green);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="8-9"].active {
+      background: rgba(14, 165, 233, 0.08);
+      border-color: #0ea5e9;
+      box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="10"].active {
+      background: rgba(217, 70, 239, 0.08);
+      border-color: var(--accent-magenta);
+      box-shadow: 0 0 20px rgba(217, 70, 239, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-speed="slow"].active {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: var(--success-green);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-speed="medium"].active {
+      background: rgba(251, 191, 36, 0.08);
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-speed="fast"].active {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: var(--danger-red);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--success-green) 0%, var(--accent-yellow) 100%);
+      background-size: 200% auto;
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary:hover {
+      background-position: right center;
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 15px 35px rgba(16, 185, 129, 0.6);
+    }
+
+    .btn-primary:active {
+      transform: translateY(-1px) scale(0.99);
+    }
+
+    /* Top right controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--success-green);
+    }
+
+    /* Gameplay Screen Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(10, 18, 12, 0.9);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Target Equation Bubble */
+    .equation-bubble {
+      background: rgba(15, 23, 42, 0.85);
+      border: 2px solid rgba(16, 185, 129, 0.4);
+      padding: 12px 30px;
+      border-radius: 20px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #ffffff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(16, 185, 129, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      animation: greenPulse 2s infinite alternate;
+    }
+
+    @keyframes greenPulse {
+      0% { border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 0 15px rgba(16, 185, 129, 0.1); }
+      100% { border-color: rgba(234, 179, 8, 0.6); box-shadow: 0 0 25px rgba(234, 179, 8, 0.25); }
+    }
+
+    .eq-placeholder {
+      display: inline-block;
+      min-width: 45px;
+      height: 45px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      text-align: center;
+      line-height: 41px;
+      font-weight: 700;
+      color: var(--success-green);
+    }
+
+    /* Play Tracks Layout */
+    .arena-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .arena-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.12);
+    }
+
+    /* HUD Bar */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      z-index: 40;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(10, 18, 12, 0.6), transparent);
+    }
+
+    .hud-label {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--success-green);
+      text-shadow: 0 2px 5px rgba(0,0,0,0.7);
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 5px;
+      font-size: 1.4rem;
+    }
+
+    .heart-icon {
+      color: #ef4444;
+      filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .heart-icon.lost {
+      color: #334155;
+      filter: none;
+      transform: scale(0.85);
+    }
+
+    /* Dino canvas */
+    .dino-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+
+    /* Controls overlay */
+    .interaction-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+      background: transparent;
+    }
+
+    /* Helper badge */
+    .keyboard-helper {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--glass-border);
+      color: #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      pointer-events: none;
+      z-index: 30;
+      opacity: 0.65;
+    }
+
+    /* Flash damage screen */
+    .damage-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-overlay.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeContainer 0.4s ease-in-out;
+    }
+
+    @keyframes shakeContainer {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* Game Over Container */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(20px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--danger-red);
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.25rem;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Parallax forest backdrop -->
+  <div class="dino-backdrop">
+    <div class="sun-light"></div>
+  </div>
+
+  <canvas id="confetti-canvas" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index:99; pointer-events:none;"></canvas>
+
+  <div class="setup-header-btns">
+    <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+    <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+  </div>
+
+  <!-- MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Dino Yugurishi</h1>
+        <p class="logo-subtitle">Yo'laklar poygasi va qadimgi tengsizlik darvozalari</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Darvozalarni to'g'ri tanlab yuguring</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Dinozavrlar musobaqasi</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi (Ninza Darajalari)</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Oq belbog' • Sonlarni Solishtirish</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Yashil belbog' • Qo'shish & Ayirish</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Ko'k belbog' • Ko'paytirish</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10+ Yosh</div>
+            <div class="opt-card-desc">Qora belbog' • Tub & Bo'lish</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Tezligi (Jang Tezligi)</h3>
+        <div class="speed-grid">
+          <div class="opt-card" data-speed="slow">
+            <div class="opt-card-title">🐌 Sekin</div>
+            <div class="opt-card-desc">Toshbaqa usuli</div>
+          </div>
+          <div class="opt-card active" data-speed="medium">
+            <div class="opt-card-title">⚡ O'rtacha</div>
+            <div class="opt-card-desc">Ninza usuli</div>
+          </div>
+          <div class="opt-card" data-speed="fast">
+            <div class="opt-card-title">🚀 Tez</div>
+            <div class="opt-card-desc">Chaqmoq usuli</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">⚔️ Poygani Boshlash</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Bosh sahifa</button>
+      
+      <div class="equation-bubble" id="shared-quest">
+        <span id="eq-left">0</span>
+        <span class="eq-placeholder" id="eq-sign">?</span>
+        <span id="eq-right">0</span>
+      </div>
+      
+      <div class="game-info">
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+        <span class="divider">|</span>
+        <span id="info-speed">Tezlik: O'rtacha</span>
+      </div>
+    </div>
+
+    <!-- Active game tracks container -->
+    <div class="arena-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Ball: 0 / 15</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="heart-icon">❤️</span>
+            <span class="heart-icon">❤️</span>
+            <span class="heart-icon">❤️</span>
+          </div>
+        </div>
+
+        <div class="player-section" style="flex:1; position:relative;">
+          <canvas class="dino-canvas" id="canvas-p1"></canvas>
+          <div class="interaction-overlay" id="trigger-p1"></div>
+          
+          <span class="keyboard-helper">W/S - Yo'lakni O'zgartirish | Bosish orqali boshqarish</span>
+          <div class="damage-overlay" id="flash-p1"></div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Ball: 0 / 15</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="heart-icon">❤️</span>
+            <span class="heart-icon">❤️</span>
+            <span class="heart-icon">❤️</span>
+          </div>
+        </div>
+
+        <div class="player-section" style="flex:1; position:relative;">
+          <canvas class="dino-canvas" id="canvas-p2"></canvas>
+          <div class="interaction-overlay" id="trigger-p2"></div>
+
+          <span class="keyboard-helper">↑/↓ - Yo'lakni O'zgartirish | Bosish orqali boshqarish</span>
+          <div class="damage-overlay" id="flash-p2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Siz Yutdingiz!</h2>
+      <div class="game-stats" id="gameover-details">
+        Muvaffaqiyatli masofalar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Yugurish</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synth for Dino jump, crash and point sounds
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'jump') {
+        // Dino jump sound: frequency sweep up fast
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(450, now + 0.15);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'pass') {
+        // High-pitched success sound
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.setValueAtTime(780, now + 0.08);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      } else if (type === 'crash') {
+        // Low dull impact thud
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.linearRampToValueAtTime(30, now + 0.4);
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Configs
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('dino_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Parallax background items
+    let sceneryCloud = [];
+
+    // Player instances
+    const players = [
+      {
+        score: 0,
+        lives: 3,
+        active: true,
+        // Dino state
+        laneIdx: 1, // 0: Top, 1: Middle, 2: Bottom
+        visualY: 0, // smoothly eases towards lane y coordinate
+        obstacles: [], // descending math gates
+        particles: [],
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        triggerDom: null,
+        nextGateSpawnTimer: 0,
+        runningFrame: 0
+      },
+      {
+        score: 0,
+        lives: 3,
+        active: false,
+        laneIdx: 1,
+        visualY: 0,
+        obstacles: [],
+        particles: [],
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        triggerDom: null,
+        nextGateSpawnTimer: 0,
+        runningFrame: 0
+      }
+    ];
+
+    let currentQuest = {
+      val1: 0,
+      val2: 0,
+      sign: '?', // correct sign: '<', '>', or '='
+      expr1: "",
+      expr2: ""
+    };
+
+    function getScrollSpeed() {
+      if (speedLevel === 'slow') return 1.8;
+      if (speedLevel === 'fast') return 4.8;
+      return 3.0; // medium
+    }
+
+    function getGateInterval() {
+      if (speedLevel === 'slow') return 250;
+      if (speedLevel === 'fast') return 130;
+      return 180;
+    }
+
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+
+    function updateSpeedUI() {
+      const speedLabels = {
+        'slow': '🐌 Tezlik: Sekin',
+        'medium': '⚡ Tezlik: O\'rtacha',
+        'fast': '🚀 Tezlik: Tez'
+      };
+      speedBtn.textContent = speedLabels[speedLevel];
+
+      const inGameSpeed = document.getElementById('info-speed');
+      if (inGameSpeed) {
+        const gameLabels = {
+          'slow': 'Sekin',
+          'medium': 'O\'rtacha',
+          'fast': 'Tez'
+        };
+        inGameSpeed.textContent = `Tezlik: ${gameLabels[speedLevel]}`;
+      }
+
+      document.querySelectorAll('[data-speed]').forEach(card => {
+        if (card.getAttribute('data-speed') === speedLevel) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
+    }
+    updateSpeedUI();
+
+    speedBtn.addEventListener('click', () => {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('dino_speed_level', speedLevel);
+      updateSpeedUI();
+    });
+
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+      if (!isMuted) playSound('click');
+    });
+
+    // Menu selections
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    document.querySelectorAll('[data-speed]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        speedLevel = card.getAttribute('data-speed');
+        localStorage.setItem('dino_speed_level', speedLevel);
+        updateSpeedUI();
+      });
+    });
+
+    // Navigation triggers
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Mathematical problem generator
+    function generateInequalityQuest() {
+      let val1 = 0, val2 = 0;
+      let expr1 = "", expr2 = "";
+
+      if (ageGroup === '4-5') {
+        val1 = Math.floor(Math.random() * 8) + 1; // 1-8
+        val2 = Math.floor(Math.random() * 8) + 1;
+        expr1 = `${val1}`;
+        expr2 = `${val2}`;
+      } 
+      else if (ageGroup === '6-7') {
+        // Addition & subtraction
+        if (Math.random() < 0.5) {
+          const a = Math.floor(Math.random() * 8) + 1;
+          const b = Math.floor(Math.random() * 8) + 1;
+          val1 = a + b;
+          expr1 = `${a}+${b}`;
+          val2 = Math.floor(Math.random() * 15) + 2;
+          expr2 = `${val2}`;
+        } else {
+          const a = Math.floor(Math.random() * 12) + 4;
+          const b = Math.floor(Math.random() * a);
+          val1 = a - b;
+          expr1 = `${a}-${b}`;
+          const c = Math.floor(Math.random() * 7) + 1;
+          const d = Math.floor(Math.random() * 7) + 1;
+          val2 = c + d;
+          expr2 = `${c}+${d}`;
+        }
+      } 
+      else if (ageGroup === '8-9') {
+        // Multiplication and division
+        if (Math.random() < 0.5) {
+          const a = Math.floor(Math.random() * 6) + 2; // 2-7
+          const b = Math.floor(Math.random() * 6) + 2;
+          val1 = a * b;
+          expr1 = `${a}×${b}`;
+          val2 = Math.floor(Math.random() * 35) + 5;
+          expr2 = `${val2}`;
+        } else {
+          const a = Math.floor(Math.random() * 6) + 2;
+          const b = Math.floor(Math.random() * 6) + 2;
+          val1 = a * b;
+          expr1 = `${a}×${b}`;
+          const c = Math.floor(Math.random() * 5) + 2;
+          const d = Math.floor(Math.random() * 5) + 2;
+          val2 = c * d;
+          expr2 = `${c}×${d}`;
+        }
+      } 
+      else {
+        // 10+ Yosh: Division & fractions & expressions
+        const a = Math.floor(Math.random() * 7) + 4;
+        const b = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+        val1 = a;
+        expr1 = `${a * b}÷${b}`;
+
+        const c = Math.floor(Math.random() * 6) + 2;
+        const d = Math.floor(Math.random() * 6) + 2;
+        val2 = c * d - Math.floor(Math.random() * 4);
+        expr2 = `${c}×${d}-${val2 - (c*d)}`;
+      }
+
+      let sign = '=';
+      if (val1 < val2) sign = '<';
+      else if (val1 > val2) sign = '>';
+
+      return { val1, val2, sign, expr1, expr2 };
+    }
+
+    // Portal group class generator
+    function spawnPortalGates(w) {
+      // Shuffle signs
+      const signs = ['<', '>', '='];
+      for (let i = signs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [signs[i], signs[j]] = [signs[j], signs[i]];
+      }
+
+      return {
+        x: w + 100, // Spawn offscreen to the right
+        width: 70,
+        speed: getScrollSpeed(),
+        // Assign to three lanes (0: Top, 1: Middle, 2: Bottom)
+        gates: [
+          { label: signs[0], laneIdx: 0, color: signs[0] === '<' ? '#0ea5e9' : (signs[0] === '>' ? '#d946ef' : '#fbbf24') },
+          { label: signs[1], laneIdx: 1, color: signs[1] === '<' ? '#0ea5e9' : (signs[1] === '>' ? '#d946ef' : '#fbbf24') },
+          { label: signs[2], laneIdx: 2, color: signs[2] === '<' ? '#0ea5e9' : (signs[2] === '>' ? '#d946ef' : '#fbbf24') }
+        ]
+      };
+    }
+
+    // Initialize layout canvases
+    function initPlayers() {
+      players.forEach((p, idx) => {
+        p.canvas = document.getElementById(`canvas-p${idx + 1}`);
+        p.ctx = p.canvas ? p.canvas.getContext('2d') : null;
+        p.scoreLabel = document.getElementById(`score-label-p${idx + 1}`);
+        p.livesContainer = document.getElementById(`lives-p${idx + 1}`);
+        p.fieldDom = p.canvas ? p.canvas.parentElement : null;
+        p.triggerDom = document.getElementById(`trigger-p${idx + 1}`);
+      });
+    }
+
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active && p.canvas && p.fieldDom) {
+          p.canvas.width = p.fieldDom.offsetWidth;
+          p.canvas.height = p.fieldDom.offsetHeight;
+        }
+      });
+    }
+
+    function generateClouds(w) {
+      sceneryCloud = [];
+      for (let i = 0; i < 6; i++) {
+        sceneryCloud.push({
+          x: Math.random() * w,
+          y: Math.random() * 80 + 30,
+          w: Math.random() * 80 + 60,
+          h: Math.random() * 25 + 15,
+          speed: Math.random() * 0.3 + 0.1
+        });
+      }
+    }
+
+    // Play Game Setup
+    function startGame() {
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      initPlayers();
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+      updateSpeedUI();
+
+      // Reset Players state
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+
+        p.score = 0;
+        p.lives = 3;
+        p.laneIdx = 1;
+        p.visualY = 0;
+        p.obstacles = [];
+        p.particles = [];
+        p.nextGateSpawnTimer = 30;
+
+        p.scoreLabel.textContent = `Ball: 0 / 15`;
+        updateLivesUI(idx);
+      });
+
+      // Show first quest
+      nextQuest();
+
+      setTimeout(() => {
+        resizeCanvases();
+        generateClouds(window.innerWidth);
+      }, 150);
+
+      initAudio();
+      startGameLoop();
+    }
+
+    function nextQuest() {
+      currentQuest = generateInequalityQuest();
+      document.getElementById('eq-left').textContent = currentQuest.expr1;
+      document.getElementById('eq-right').textContent = currentQuest.expr2;
+      document.getElementById('eq-sign').textContent = '?';
+    }
+
+    function updateLivesUI(pIdx) {
+      const hearts = players[pIdx].livesContainer.querySelectorAll('.heart-icon');
+      hearts.forEach((h, i) => {
+        if (i < players[pIdx].lives) {
+          h.classList.remove('lost');
+        } else {
+          h.classList.add('lost');
+        }
+      });
+    }
+
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const section = document.getElementById(`player-${pIdx + 1}-section`);
+      playSound('crash');
+      
+      flash.classList.add('active');
+      section.classList.add('shake');
+      setTimeout(() => flash.classList.remove('active'), 200);
+      setTimeout(() => section.classList.remove('shake'), 400);
+    }
+
+    function spawnExplosion(pIdx, x, y, color) {
+      const count = 25;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 4 + 1;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: Math.random() * 5 + 3,
+          color: color || '#10b981',
+          alpha: 1.0,
+          decay: Math.random() * 0.04 + 0.02
+        });
+      }
+    }
+
+    // Process player passing a portal
+    function handlePortalPass(pIdx, passedGateGroup) {
+      const p = players[pIdx];
+      // Find the gate corresponding to the lane the player is currently in
+      const alignedGate = passedGateGroup.gates.find(g => g.laneIdx === p.laneIdx);
+      if (!alignedGate) return;
+
+      const isCorrect = alignedGate.label === currentQuest.sign;
+
+      if (isCorrect) {
+        p.score += 1;
+        p.scoreLabel.textContent = `Ball: ${p.score} / 15`;
+        playSound('pass');
+        const laneY = getLaneCenterY(p.canvas.height, p.laneIdx);
+        spawnExplosion(pIdx, 140, laneY, alignedGate.color);
+        
+        // Temporarily reveal correct sign in the header bubble
+        document.getElementById('eq-sign').textContent = currentQuest.sign;
+        document.getElementById('eq-sign').style.color = '#10b981';
+
+        setTimeout(() => {
+          document.getElementById('eq-sign').style.color = 'var(--success-green)';
+          nextQuest();
+        }, 600);
+      } 
+      else {
+        p.lives = Math.max(0, p.lives - 1);
+        updateLivesUI(pIdx);
+        triggerDamageEffect(pIdx);
+      }
+
+      checkGameStatus();
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        } else if (players[0].score >= 15) {
+          endGame('won');
+        }
+      } else {
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          if (players[0].score > players[1].score) endGame('p1');
+          else if (players[1].score > players[0].score) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2');
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1');
+        }
+        else if (players[0].score >= 15) {
+          endGame('p1');
+        }
+        else if (players[1].score >= 15) {
+          endGame('p2');
+        }
+      }
+    }
+
+    function endGame(status) {
+      isGameOver = true;
+      cancelAnimationFrame(mainGameLoop);
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      if (status === 'won') {
+        title.className = 'win-text';
+        title.textContent = 'G\'alaba! Yugurish Chempioni!';
+        details.innerHTML = `Dinozavringiz barcha qadimiy darvozalardan o'tdi!<br>Ball: <strong>${players[0].score}</strong>`;
+        startConfetti();
+      } else if (status === 'lost') {
+        title.className = 'lose-text';
+        title.textContent = 'Jang Tugadi';
+        details.innerHTML = `Dinozavringiz toqqa yoki noto'g'ri belgiga urildi.<br>Ball: <strong>${players[0].score}</strong>`;
+        stopConfetti();
+      } else if (status === 'p1') {
+        title.className = 'win-text';
+        title.textContent = '1-O\'yinchi G\'olib!';
+        details.innerHTML = `P1 aniq hisoblab birinchi poygachiga aylandi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else if (status === 'p2') {
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `P2 aniq hisoblab birinchi poygachiga aylandi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else {
+        title.className = 'win-text';
+        title.textContent = 'Durang!';
+        details.innerHTML = `Dinozavrlar shiddatli va tengma-teng yugurishdi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        stopConfetti();
+      }
+    }
+
+    function getLaneCenterY(canvasH, laneIdx) {
+      const topOffset = 100;
+      const playableH = canvasH - topOffset - 60;
+      const step = playableH / 3;
+      return topOffset + (step * laneIdx) + (step / 2);
+    }
+
+    // Playback loop
+    let lastTime = 0;
+    function startGameLoop() {
+      lastTime = performance.now();
+      function tick(timestamp) {
+        if (isGameOver) return;
+        if (!timestamp) timestamp = performance.now();
+
+        let dt = (timestamp - lastTime) / 16.666;
+        if (dt > 4.0) dt = 4.0;
+        lastTime = timestamp;
+
+        // Background clouds parallax scrolling
+        sceneryCloud.forEach(cloud => {
+          cloud.x -= cloud.speed * dt;
+          if (cloud.x + cloud.w < 0) {
+            cloud.x = window.innerWidth + 10;
+            cloud.y = Math.random() * 80 + 30;
+          }
+        });
+
+        players.forEach((p, idx) => {
+          if (!p.active) return;
+
+          const w = p.canvas.width;
+          const h = p.canvas.height;
+          const ctx = p.ctx;
+
+          ctx.clearRect(0, 0, w, h);
+
+          // 1. Render scenic backdrop elements (Parallax)
+          // Sky Clouds
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+          sceneryCloud.forEach(cloud => {
+            const relX = (cloud.x + (idx * w)) % w;
+            ctx.beginPath();
+            ctx.roundRect(relX, cloud.y, cloud.w, cloud.h, 15);
+            ctx.fill();
+          });
+
+          // Draw the three running path lanes (roads)
+          const topOffset = 100;
+          const playableH = h - topOffset - 60;
+          const laneHeight = playableH / 3;
+
+          for (let l = 0; l < 3; l++) {
+            const laneCenterY = getLaneCenterY(h, l);
+            
+            // Draw horizontal lane track lines
+            ctx.strokeStyle = p.laneIdx === l ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255, 255, 255, 0.03)';
+            ctx.lineWidth = p.laneIdx === l ? 5 : 2;
+            ctx.beginPath();
+            ctx.moveTo(0, laneCenterY);
+            ctx.lineTo(w, laneCenterY);
+            ctx.stroke();
+
+            // Draw glowing outline inside active track
+            if (p.laneIdx === l) {
+              ctx.save();
+              ctx.shadowBlur = 10;
+              ctx.shadowColor = 'var(--success-green)';
+              ctx.fillStyle = 'rgba(16, 185, 129, 0.04)';
+              ctx.fillRect(0, laneCenterY - laneHeight/2 + 5, w, laneHeight - 10);
+              ctx.restore();
+            }
+          }
+
+          // 2. Periodic gate spawning timer
+          p.nextGateSpawnTimer -= dt;
+          if (p.nextGateSpawnTimer <= 0) {
+            p.nextGateSpawnTimer = getGateInterval();
+            p.obstacles.push(spawnPortalGates(w));
+          }
+
+          // 3. Move & Render obstacle gates
+          for (let i = p.obstacles.length - 1; i >= 0; i--) {
+            const gateGroup = p.obstacles[i];
+            gateGroup.x -= getScrollSpeed() * dt;
+
+            // Remove if moves offscreen left
+            if (gateGroup.x + gateGroup.width < 0) {
+              p.obstacles.splice(i, 1);
+              continue;
+            }
+
+            // Draw gate group columns
+            gateGroup.gates.forEach(gate => {
+              const ly = getLaneCenterY(h, gate.laneIdx);
+
+              ctx.save();
+              // Glowing gate posts
+              ctx.strokeStyle = gate.color;
+              ctx.lineWidth = 4;
+              ctx.shadowBlur = 12;
+              ctx.shadowColor = gate.color;
+
+              // Left & Right posts
+              ctx.beginPath();
+              ctx.moveTo(gateGroup.x, ly - 35);
+              ctx.lineTo(gateGroup.x, ly + 35);
+              ctx.moveTo(gateGroup.x + gateGroup.width, ly - 35);
+              ctx.lineTo(gateGroup.x + gateGroup.width, ly + 35);
+              ctx.stroke();
+
+              // Portal field glow
+              ctx.globalAlpha = 0.06;
+              ctx.fillStyle = gate.color;
+              ctx.fillRect(gateGroup.x + 2, ly - 32, gateGroup.width - 4, 64);
+
+              // Comparison Label
+              ctx.globalAlpha = 1.0;
+              ctx.fillStyle = '#ffffff';
+              ctx.font = 'bold 1.8rem Fredoka';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(gate.label, gateGroup.x + gateGroup.width / 2, ly);
+
+              ctx.restore();
+            });
+
+            // Collision check: Dino passes gate group horizontal position
+            const dinoFrontX = 140;
+            if (gateGroup.x <= dinoFrontX && gateGroup.x + gateGroup.width >= dinoFrontX - 10) {
+              // Trigger checks and delete
+              p.obstacles.splice(i, 1);
+              handlePortalPass(idx, gateGroup);
+            }
+          }
+
+          // 4. Update & Draw Particles
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx * dt;
+            part.y += part.vy * dt;
+            part.alpha -= part.decay * dt;
+
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+
+          // 5. Dinosaur Y Position interpolation
+          const targetY = getLaneCenterY(h, p.laneIdx);
+          if (p.visualY === 0) p.visualY = targetY;
+          p.visualY += (targetY - p.visualY) * 0.15 * dt;
+
+          // Dinosaur running sprite simulation frame
+          p.runningFrame += 0.15 * dt;
+          const legSwing = Math.sin(p.runningFrame) * 8;
+
+          // 6. Draw Dinosaur
+          ctx.save();
+          ctx.translate(100, p.visualY);
+
+          // Dino color scheme
+          const skinColor = idx === 0 ? '#10b981' : '#fbbf24';
+          const scaleColor = idx === 0 ? '#047857' : '#d97706';
+
+          // Tail
+          ctx.fillStyle = skinColor;
+          ctx.beginPath();
+          ctx.moveTo(-25, 0);
+          ctx.quadraticCurveTo(-45, -15, -45, -30);
+          ctx.quadraticCurveTo(-38, -10, -25, -10);
+          ctx.closePath();
+          ctx.fill();
+
+          // Legs & Feet (animated leg swing)
+          ctx.fillStyle = scaleColor;
+          ctx.fillRect(-15 + legSwing, -10, 8, 25); // Back leg
+          ctx.fillRect(2 - legSwing, -10, 8, 25);  // Front leg
+
+          // Body
+          ctx.fillStyle = skinColor;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = skinColor;
+          ctx.beginPath();
+          ctx.arc(-5, -12, 22, 0, Math.PI * 2); // Main torso circle
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          // Back spikes
+          ctx.fillStyle = scaleColor;
+          for (let s = 0; s < 3; s++) {
+            ctx.beginPath();
+            ctx.moveTo(-22 + s * 8, -25);
+            ctx.lineTo(-18 + s * 8, -35);
+            ctx.lineTo(-14 + s * 8, -25);
+            ctx.closePath();
+            ctx.fill();
+          }
+
+          // Long Neck & Head
+          ctx.fillStyle = skinColor;
+          ctx.beginPath();
+          ctx.moveTo(8, -15);
+          ctx.lineTo(25, -38);
+          ctx.lineTo(45, -38);
+          ctx.lineTo(35, -20);
+          ctx.lineTo(10, -5);
+          ctx.closePath();
+          ctx.fill();
+
+          // Big round friendly eye
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(32, -32, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#000000';
+          ctx.beginPath();
+          ctx.arc(34, -32, 3, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Cute smile
+          ctx.strokeStyle = scaleColor;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(35, -26, 4, 0, Math.PI);
+          ctx.stroke();
+
+          ctx.restore();
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    // Keyboard & click interaction handlers
+    function setupInteraction() {
+      const bindControls = (pIdx) => {
+        const p = players[pIdx];
+        const trigger = p.triggerDom;
+        if (!trigger) return;
+
+        trigger.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          const rect = trigger.getBoundingClientRect();
+          const clickY = e.clientY - rect.top;
+          
+          // Determine which lane was clicked
+          const laneH = rect.height / 3;
+          let selectedLane = 1;
+          if (clickY < laneH) selectedLane = 0;
+          else if (clickY > laneH * 2) selectedLane = 2;
+
+          if (p.laneIdx !== selectedLane) {
+            p.laneIdx = selectedLane;
+            playSound('jump');
+          }
+        });
+
+        // Touch event mapping
+        trigger.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          const rect = trigger.getBoundingClientRect();
+          const clickY = e.touches[0].clientY - rect.top;
+          
+          const laneH = rect.height / 3;
+          let selectedLane = 1;
+          if (clickY < laneH) selectedLane = 0;
+          else if (clickY > laneH * 2) selectedLane = 2;
+
+          if (p.laneIdx !== selectedLane) {
+            p.laneIdx = selectedLane;
+            playSound('jump');
+          }
+        }, { passive: false });
+      };
+
+      bindControls(0);
+      bindControls(1);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (isGameOver) return;
+
+      // P1 key binds: W (up), S (down)
+      if (players[0].active) {
+        if (e.key.toLowerCase() === 'w') {
+          if (players[0].laneIdx > 0) {
+            players[0].laneIdx -= 1;
+            playSound('jump');
+          }
+        } else if (e.key.toLowerCase() === 's') {
+          if (players[0].laneIdx < 2) {
+            players[0].laneIdx += 1;
+            playSound('jump');
+          }
+        }
+      }
+
+      // P2 key binds: ArrowUp (up), ArrowDown (down)
+      if (players[1].active) {
+        if (e.key === 'ArrowUp') {
+          if (players[1].laneIdx > 0) {
+            players[1].laneIdx -= 1;
+            playSound('jump');
+          }
+        } else if (e.key === 'ArrowDown') {
+          if (players[1].laneIdx < 2) {
+            players[1].laneIdx += 1;
+            playSound('jump');
+          }
+        }
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti Engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#10b981', '#fbbf24', '#0ea5e9', '#d946ef', '#ef4444'];
+      for (let i = 0; i < 80; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 5 + 3,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 8 - 4,
+          tiltAngleIncremental: Math.random() * 0.05 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 10;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 8 - 4;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    function safeInit() {
+      initPlayers();
+      setupInteraction();
+      resizeCanvases();
+    }
+
+    window.addEventListener('load', safeInit);
+    document.addEventListener('DOMContentLoaded', safeInit);
+  </script>
+</body>
+</html>

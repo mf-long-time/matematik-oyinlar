@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tengsizlik Qal'a Himoyasi — Inequality Castle Defense</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-cyan: #06b6d4;
+      --accent-magenta: #d946ef;
+      --accent-yellow: #fbbf24;
+      --success-green: #10b981;
+      --danger-red: #ef4444;
+      --glass-bg: rgba(10, 15, 30, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --font-family: 'Fredoka', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: #0f172a;
+      color: #f8fafc;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Mystic night castle backdrop */
+    .castle-backdrop {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #020617 0%, #0f172a 100%);
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .moon {
+      position: absolute;
+      top: 10%;
+      right: 10%;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle, #fef08a 0%, transparent 80%);
+      opacity: 0.15;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Screens setup */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Menu Panels */
+    .menu-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 30px 40px;
+      text-align: center;
+      max-width: 620px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 45px rgba(217, 70, 239, 0.15);
+      backdrop-filter: blur(20px);
+      animation: floatPanel 6s ease-in-out infinite;
+    }
+
+    @keyframes floatPanel {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .logo-area {
+      margin-bottom: 25px;
+    }
+
+    .logo-title {
+      font-size: 3.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-magenta) 0%, var(--primary-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 35px rgba(217, 70, 239, 0.25);
+      letter-spacing: -1px;
+    }
+
+    .logo-subtitle {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      margin-top: 5px;
+    }
+
+    .menu-section {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .menu-section-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent-magenta);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .speed-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 12px 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .opt-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    /* Active States with custom glows based on categories */
+    .opt-card[data-mode="single"].active {
+      background: linear-gradient(135deg, rgba(217, 70, 239, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+      border-color: var(--accent-magenta);
+      box-shadow: 0 0 25px rgba(217, 70, 239, 0.35);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-mode="split"].active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%);
+      border-color: var(--primary-cyan);
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.35);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="4-5"].active {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #f8fafc;
+      box-shadow: 0 0 20px rgba(248, 250, 252, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="6-7"].active {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: var(--success-green);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="8-9"].active {
+      background: rgba(14, 165, 233, 0.08);
+      border-color: #0ea5e9;
+      box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-age="10"].active {
+      background: rgba(217, 70, 239, 0.08);
+      border-color: var(--accent-magenta);
+      box-shadow: 0 0 20px rgba(217, 70, 239, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-speed="slow"].active {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: var(--success-green);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-speed="medium"].active {
+      background: rgba(251, 191, 36, 0.08);
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card[data-speed="fast"].active {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: var(--danger-red);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .opt-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    .opt-card-desc {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: var(--font-family);
+      width: 100%;
+      padding: 16px;
+      border-radius: 20px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-magenta) 0%, var(--primary-cyan) 100%);
+      background-size: 200% auto;
+      color: #ffffff;
+      box-shadow: 0 8px 25px rgba(217, 70, 239, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary:hover {
+      background-position: right center;
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 15px 35px rgba(217, 70, 239, 0.6);
+    }
+
+    .btn-primary:active {
+      transform: translateY(-1px) scale(0.99);
+    }
+
+    /* Top right controls */
+    .setup-header-btns {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn-icon {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--glass-border);
+      color: #f8fafc;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-magenta);
+    }
+
+    /* Gameplay Screen Layout */
+    #game-screen {
+      padding: 0;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .game-header {
+      width: 100%;
+      height: 70px;
+      background: rgba(10, 15, 30, 0.9);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .game-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .divider {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Target Equation Bubble */
+    .equation-bubble {
+      background: rgba(15, 23, 42, 0.85);
+      border: 2px solid rgba(217, 70, 239, 0.4);
+      padding: 12px 30px;
+      border-radius: 20px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #ffffff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(217, 70, 239, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      animation: magicPulse 2s infinite alternate;
+    }
+
+    @keyframes magicPulse {
+      0% { border-color: rgba(217, 70, 239, 0.4); box-shadow: 0 0 15px rgba(217, 70, 239, 0.1); }
+      100% { border-color: rgba(6, 182, 212, 0.6); box-shadow: 0 0 25px rgba(6, 182, 212, 0.25); }
+    }
+
+    /* Play Tracks Layout */
+    .arena-wrapper {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .arena-wrapper.split-screen {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .player-section {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-section:nth-child(2) {
+      border-left: 2px dashed rgba(255, 255, 255, 0.12);
+    }
+
+    /* HUD Bar */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 25px;
+      z-index: 40;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(15, 23, 42, 0.6), transparent);
+    }
+
+    .hud-label {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--accent-magenta);
+      text-shadow: 0 2px 5px rgba(0,0,0,0.7);
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 5px;
+      font-size: 1.4rem;
+    }
+
+    .heart-icon {
+      color: #ef4444;
+      filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .heart-icon.lost {
+      color: #334155;
+      filter: none;
+      transform: scale(0.85);
+    }
+
+    /* Defense canvas */
+    .defense-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+
+    /* Controls overlay */
+    .interaction-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+      background: transparent;
+      cursor: crosshair;
+    }
+
+    /* Helper badge */
+    .keyboard-helper {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--glass-border);
+      color: #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      pointer-events: none;
+      z-index: 30;
+      opacity: 0.65;
+    }
+
+    /* Flash damage screen */
+    .damage-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(239, 68, 68, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 35;
+      transition: opacity 0.15s ease-out;
+    }
+
+    .damage-overlay.active {
+      opacity: 1;
+    }
+
+    .shake {
+      animation: shakeContainer 0.4s ease-in-out;
+    }
+
+    @keyframes shakeContainer {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* Game Over Container */
+    .gameover-container {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 45px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(20px);
+    }
+
+    .win-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--success-green);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+      margin-bottom: 10px;
+    }
+
+    .lose-text {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--danger-red);
+      text-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
+      margin-bottom: 10px;
+    }
+
+    .game-stats {
+      margin: 25px 0;
+      font-size: 1.25rem;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Undersea scenery backdrops -->
+  <div class="castle-backdrop">
+    <div class="moon"></div>
+  </div>
+
+  <canvas id="confetti-canvas" style="position: absolute; top:0; left:0; width:100%; height:100%; z-index:99; pointer-events:none;"></canvas>
+
+  <div class="setup-header-btns">
+    <button id="speed-toggle-btn" class="btn-icon">⚡ Tezlik: O'rtacha</button>
+    <button id="mute-btn" class="btn-icon">🔊 Ovoz: On</button>
+  </div>
+
+  <!-- MENU SCREEN -->
+  <div id="setup-screen" class="screen active">
+    <div class="menu-container">
+      <div class="logo-area">
+        <h1 class="logo-title">Qal'a Himoyasi</h1>
+        <p class="logo-subtitle">Sehrgar qal'asi va tengsiz orklar to'qnashuvi</p>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Rejimi</h3>
+        <div class="card-grid">
+          <div class="opt-card active" data-mode="single">
+            <div class="opt-card-title">👤 Yakka o'yinchi</div>
+            <div class="opt-card-desc">Qal'ani barcha yovuz kuchlardan himoya qiling</div>
+          </div>
+          <div class="opt-card" data-mode="split">
+            <div class="opt-card-title">👥 Ikki o'yinchi</div>
+            <div class="opt-card-desc">Sehrgarlar mudofaa jangi</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">Yosh Toifasi (Ninza Darajalari)</h3>
+        <div class="card-grid">
+          <div class="opt-card" data-age="4-5">
+            <div class="opt-card-title">🐣 4-5 Yosh</div>
+            <div class="opt-card-desc">Oq belbog' • Sonlarni Solishtirish</div>
+          </div>
+          <div class="opt-card active" data-age="6-7">
+            <div class="opt-card-title">🦊 6-7 Yosh</div>
+            <div class="opt-card-desc">Yashil belbog' • Qo'shish & Ayirish</div>
+          </div>
+          <div class="opt-card" data-age="8-9">
+            <div class="opt-card-title">🦁 8-9 Yosh</div>
+            <div class="opt-card-desc">Ko'k belbog' • Ko'paytirish</div>
+          </div>
+          <div class="opt-card" data-age="10">
+            <div class="opt-card-title">🦅 10+ Yosh</div>
+            <div class="opt-card-desc">Qora belbog' • Tub & Bo'lish</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h3 class="menu-section-title">O'yin Tezligi (Jang Tezligi)</h3>
+        <div class="speed-grid">
+          <div class="opt-card" data-speed="slow">
+            <div class="opt-card-title">🐌 Sekin</div>
+            <div class="opt-card-desc">Toshbaqa usuli</div>
+          </div>
+          <div class="opt-card active" data-speed="medium">
+            <div class="opt-card-title">⚡ O'rtacha</div>
+            <div class="opt-card-desc">Ninza usuli</div>
+          </div>
+          <div class="opt-card" data-speed="fast">
+            <div class="opt-card-title">🚀 Tez</div>
+            <div class="opt-card-desc">Chaqmoq usuli</div>
+          </div>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary">⚔️ Mudofaani Boshlash</button>
+    </div>
+  </div>
+
+  <!-- GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <button id="back-btn" class="btn-icon">🏠 Bosh sahifa</button>
+      
+      <div class="equation-bubble" id="shared-quest">
+        Qal'a &gt; 10
+      </div>
+      
+      <div class="game-info">
+        <span id="info-mode">Yakka O'yinchi</span>
+        <span class="divider">|</span>
+        <span id="info-age">Yosh: 6-7</span>
+        <span class="divider">|</span>
+        <span id="info-speed">Tezlik: O'rtacha</span>
+      </div>
+    </div>
+
+    <!-- Active game tracks container -->
+    <div class="arena-wrapper" id="tracks-wrapper">
+      
+      <!-- PLAYER 1 SECTION -->
+      <div class="player-section" id="player-1-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p1">Ball: 0 / 15</div>
+          <div class="lives-indicator" id="lives-p1">
+            <span class="heart-icon">❤️</span>
+            <span class="heart-icon">❤️</span>
+            <span class="heart-icon">❤️</span>
+          </div>
+        </div>
+
+        <div class="player-section" style="flex:1; position:relative;">
+          <canvas class="defense-canvas" id="canvas-p1"></canvas>
+          <div class="interaction-overlay" id="trigger-p1"></div>
+          
+          <span class="keyboard-helper">Tengsizlikka to'g'ri keluvchi raqamli orklarni bosing!</span>
+          <div class="damage-overlay" id="flash-p1"></div>
+        </div>
+      </div>
+
+      <!-- PLAYER 2 SECTION -->
+      <div class="player-section" id="player-2-section">
+        <div class="player-hud">
+          <div class="hud-label" id="score-label-p2">Ball: 0 / 15</div>
+          <div class="lives-indicator" id="lives-p2">
+            <span class="heart-icon">❤️</span>
+            <span class="heart-icon">❤️</span>
+            <span class="heart-icon">❤️</span>
+          </div>
+        </div>
+
+        <div class="player-section" style="flex:1; position:relative;">
+          <canvas class="defense-canvas" id="canvas-p2"></canvas>
+          <div class="interaction-overlay" id="trigger-p2"></div>
+
+          <span class="keyboard-helper">Tengsizlikka to'g'ri keluvchi raqamli orklarni bosing!</span>
+          <div class="damage-overlay" id="flash-p2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <h2 id="gameover-title" class="win-text">Qal'a Himoyalandi!</h2>
+      <div class="game-stats" id="gameover-details">
+        Himoyalangan hujumlar: 0
+      </div>
+      <button id="restart-btn" class="btn btn-primary">🔄 Qayta Himoyalash</button>
+      <button id="menu-btn" class="btn btn-primary" style="background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); margin-top: 10px;">🏠 Bosh Menyu</button>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio Synthesizer for magic spells and blast sounds
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (isMuted) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'shoot') {
+        // High magic sweep
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.12);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.linearRampToValueAtTime(0.005, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'pass') {
+        // Double success chime
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(550, now);
+        osc.frequency.setValueAtTime(820, now + 0.08);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+        osc.start(now);
+        osc.stop(now + 0.22);
+      } else if (type === 'crash') {
+        // Deep tower crash thud
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.linearRampToValueAtTime(25, now + 0.4);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    // Configs
+    let gameMode = 'single';
+    let ageGroup = '6-7';
+    let speedLevel = localStorage.getItem('qala_speed_level') || 'medium';
+    let isGameOver = false;
+    let mainGameLoop = null;
+
+    // Glowing stars backdrop
+    let backgroundStars = [];
+
+    // Player instances
+    const players = [
+      {
+        score: 0,
+        lives: 3,
+        active: true,
+        enemies: [], // enemies array
+        spells: [], // flying fireballs spells
+        particles: [],
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        triggerDom: null,
+        nextSpawnTimer: 0
+      },
+      {
+        score: 0,
+        lives: 3,
+        active: false,
+        enemies: [],
+        spells: [],
+        particles: [],
+        canvas: null,
+        ctx: null,
+        scoreLabel: null,
+        livesContainer: null,
+        fieldDom: null,
+        triggerDom: null,
+        nextSpawnTimer: 0
+      }
+    ];
+
+    let currentQuest = {
+      targetNum: 0,
+      sign: '>', // '>', '<', or '='
+      text: ""
+    };
+
+    function getMarchSpeed() {
+      if (speedLevel === 'slow') return 0.8;
+      if (speedLevel === 'fast') return 2.2;
+      return 1.4; // medium
+    }
+
+    function getSpawnInterval() {
+      if (speedLevel === 'slow') return 180;
+      if (speedLevel === 'fast') return 90;
+      return 130; // medium
+    }
+
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    const muteBtn = document.getElementById('mute-btn');
+
+    function updateSpeedUI() {
+      const speedLabels = {
+        'slow': '🐌 Tezlik: Sekin',
+        'medium': '⚡ Tezlik: O\'rtacha',
+        'fast': '🚀 Tezlik: Tez'
+      };
+      speedBtn.textContent = speedLabels[speedLevel];
+
+      const inGameSpeed = document.getElementById('info-speed');
+      if (inGameSpeed) {
+        const gameLabels = {
+          'slow': 'Sekin',
+          'medium': 'O\'rtacha',
+          'fast': 'Tez'
+        };
+        inGameSpeed.textContent = `Tezlik: ${gameLabels[speedLevel]}`;
+      }
+
+      document.querySelectorAll('[data-speed]').forEach(card => {
+        if (card.getAttribute('data-speed') === speedLevel) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
+    }
+    updateSpeedUI();
+
+    speedBtn.addEventListener('click', () => {
+      playSound('click');
+      if (speedLevel === 'slow') speedLevel = 'medium';
+      else if (speedLevel === 'medium') speedLevel = 'fast';
+      else speedLevel = 'slow';
+      localStorage.setItem('qala_speed_level', speedLevel);
+      updateSpeedUI();
+    });
+
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      muteBtn.textContent = isMuted ? '🔇 Ovoz: Off' : '🔊 Ovoz: On';
+      if (!isMuted) playSound('click');
+    });
+
+    // Menu selections
+    document.querySelectorAll('[data-mode]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-mode]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        gameMode = card.getAttribute('data-mode');
+      });
+    });
+
+    document.querySelectorAll('[data-age]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('[data-age]').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        ageGroup = card.getAttribute('data-age');
+      });
+    });
+
+    document.querySelectorAll('[data-speed]').forEach(card => {
+      card.addEventListener('click', () => {
+        playSound('click');
+        speedLevel = card.getAttribute('data-speed');
+        localStorage.setItem('qala_speed_level', speedLevel);
+        updateSpeedUI();
+      });
+    });
+
+    // Navigation triggers
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      returnToMenu();
+    });
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
+    });
+
+    function returnToMenu() {
+      cancelAnimationFrame(mainGameLoop);
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('setup-screen').classList.add('active');
+    }
+
+    // Mathematical problem generator for inequality target
+    function generateInequalityQuest() {
+      let targetNum = 0;
+      const signs = ['>', '<'];
+      const sign = signs[Math.floor(Math.random() * signs.length)];
+
+      if (ageGroup === '4-5') {
+        targetNum = Math.floor(Math.random() * 6) + 2; // 2-7
+      } 
+      else if (ageGroup === '6-7') {
+        targetNum = Math.floor(Math.random() * 12) + 6; // 6-17
+      } 
+      else if (ageGroup === '8-9') {
+        targetNum = Math.floor(Math.random() * 25) + 10; // 10-34
+      } 
+      else {
+        targetNum = Math.floor(Math.random() * 45) + 20; // 20-64
+      }
+
+      const text = `Nishon: Ork raqami ${sign} ${targetNum}`;
+
+      return { targetNum, sign, text };
+    }
+
+    // Generate value for marching enemy
+    function generateEnemyValue() {
+      const target = currentQuest.targetNum;
+      const satisfies = Math.random() < 0.5;
+
+      let val = 0;
+
+      if (currentQuest.sign === '>') {
+        if (satisfies) {
+          val = target + Math.floor(Math.random() * 10) + 1;
+        } else {
+          val = Math.max(1, target - Math.floor(Math.random() * target));
+        }
+      } 
+      else { // '<'
+        if (satisfies) {
+          val = Math.max(1, target - Math.floor(Math.random() * target) - 1);
+        } else {
+          val = target + Math.floor(Math.random() * 10);
+        }
+      }
+
+      return val;
+    }
+
+    // Spawn walking enemy
+    function spawnDefenseEnemy(pIdx) {
+      const p = players[pIdx];
+      const w = p.canvas.width;
+      const h = p.canvas.height;
+
+      const yLanes = [160, 230, 300];
+      const selectedY = yLanes[Math.floor(Math.random() * yLanes.length)];
+
+      p.enemies.push({
+        x: w + 40,
+        y: selectedY,
+        vx: -getMarchSpeed(),
+        radius: 24,
+        val: generateEnemyValue(),
+        color: ['#10b981', '#3b82f6', '#ec4899', '#f59e0b'][Math.floor(Math.random() * 4)],
+        animFrame: Math.random() * Math.PI
+      });
+    }
+
+    // Initialize layout canvases
+    function initPlayers() {
+      players.forEach((p, idx) => {
+        p.canvas = document.getElementById(`canvas-p${idx + 1}`);
+        p.ctx = p.canvas ? p.canvas.getContext('2d') : null;
+        p.scoreLabel = document.getElementById(`score-label-p${idx + 1}`);
+        p.livesContainer = document.getElementById(`lives-p${idx + 1}`);
+        p.fieldDom = p.canvas ? p.canvas.parentElement : null;
+        p.triggerDom = document.getElementById(`trigger-p${idx + 1}`);
+      });
+    }
+
+    function resizeCanvases() {
+      players.forEach(p => {
+        if (p.active && p.canvas && p.fieldDom) {
+          p.canvas.width = p.fieldDom.offsetWidth;
+          p.canvas.height = p.fieldDom.offsetHeight;
+        }
+      });
+    }
+
+    function generateStars(w, h) {
+      backgroundStars = [];
+      for (let i = 0; i < 25; i++) {
+        backgroundStars.push({
+          x: Math.random() * w,
+          y: Math.random() * (h * 0.4),
+          r: Math.random() * 1.5 + 0.5,
+          alpha: Math.random() * 0.5 + 0.3
+        });
+      }
+    }
+
+    // Play Game Setup
+    function startGame() {
+      isGameOver = false;
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+
+      const trackWrapper = document.getElementById('tracks-wrapper');
+      const p2Section = document.getElementById('player-2-section');
+
+      initPlayers();
+
+      if (gameMode === 'single') {
+        players[0].active = true;
+        players[1].active = false;
+        p2Section.style.display = 'none';
+        trackWrapper.classList.remove('split-screen');
+        document.getElementById('info-mode').textContent = 'Yakka O\'yinchi';
+      } else {
+        players[0].active = true;
+        players[1].active = true;
+        p2Section.style.display = 'flex';
+        trackWrapper.classList.add('split-screen');
+        document.getElementById('info-mode').textContent = 'Ikki O\'yinchi';
+      }
+
+      document.getElementById('info-age').textContent = `Yosh: ${ageGroup}`;
+      updateSpeedUI();
+
+      // Reset Players state
+      players.forEach((p, idx) => {
+        if (!p.active) return;
+
+        p.score = 0;
+        p.lives = 3;
+        p.enemies = [];
+        p.spells = [];
+        p.particles = [];
+        p.nextSpawnTimer = 0;
+
+        p.scoreLabel.textContent = `Ball: 0 / 15`;
+        updateLivesUI(idx);
+      });
+
+      // Show first quest
+      nextQuest();
+
+      setTimeout(() => {
+        resizeCanvases();
+        generateStars(window.innerWidth, window.innerHeight);
+      }, 150);
+
+      initAudio();
+      startGameLoop();
+    }
+
+    function nextQuest() {
+      currentQuest = generateInequalityQuest();
+      document.getElementById('shared-quest').textContent = currentQuest.text;
+    }
+
+    function updateLivesUI(pIdx) {
+      const hearts = players[pIdx].livesContainer.querySelectorAll('.heart-icon');
+      hearts.forEach((h, i) => {
+        if (i < players[pIdx].lives) {
+          h.classList.remove('lost');
+        } else {
+          h.classList.add('lost');
+        }
+      });
+    }
+
+    function triggerDamageEffect(pIdx) {
+      const flash = document.getElementById(`flash-p${pIdx + 1}`);
+      const section = document.getElementById(`player-${pIdx + 1}-section`);
+      playSound('crash');
+      
+      flash.classList.add('active');
+      section.classList.add('shake');
+      setTimeout(() => flash.classList.remove('active'), 200);
+      setTimeout(() => section.classList.remove('shake'), 400);
+    }
+
+    function spawnSpellExplosion(pIdx, x, y, color) {
+      const count = 20;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 4 + 2;
+        players[pIdx].particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: Math.random() * 5 + 3,
+          color: color || '#d946ef',
+          alpha: 1.0,
+          decay: Math.random() * 0.04 + 0.02
+        });
+      }
+    }
+
+    // Process shooting an enemy
+    function handleEnemyBlast(pIdx, enemy) {
+      const p = players[pIdx];
+
+      // Validate matching inequality
+      let matched = false;
+      if (currentQuest.sign === '>') {
+        matched = enemy.val > currentQuest.targetNum;
+      } else {
+        matched = enemy.val < currentQuest.targetNum;
+      }
+
+      if (matched) {
+        p.score += 1;
+        p.scoreLabel.textContent = `Ball: ${p.score} / 15`;
+        playSound('pass');
+        spawnSpellExplosion(pIdx, enemy.x, enemy.y, enemy.color);
+        nextQuest();
+      } 
+      else {
+        // Wrong target hit! Castle takes damage
+        p.lives = Math.max(0, p.lives - 1);
+        updateLivesUI(pIdx);
+        triggerDamageEffect(pIdx);
+        spawnSpellExplosion(pIdx, enemy.x, enemy.y, '#ef4444');
+      }
+
+      checkGameStatus();
+    }
+
+    function checkGameStatus() {
+      if (isGameOver) return;
+
+      if (gameMode === 'single') {
+        if (players[0].lives <= 0) {
+          endGame('lost');
+        } else if (players[0].score >= 15) {
+          endGame('won');
+        }
+      } else {
+        if (players[0].lives <= 0 && players[1].lives <= 0) {
+          if (players[0].score > players[1].score) endGame('p1');
+          else if (players[1].score > players[0].score) endGame('p2');
+          else endGame('tie');
+        }
+        else if (players[0].lives <= 0) {
+          endGame('p2');
+        }
+        else if (players[1].lives <= 0) {
+          endGame('p1');
+        }
+        else if (players[0].score >= 15) {
+          endGame('p1');
+        }
+        else if (players[1].score >= 15) {
+          endGame('p2');
+        }
+      }
+    }
+
+    function endGame(status) {
+      isGameOver = true;
+      cancelAnimationFrame(mainGameLoop);
+
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('gameover-screen').classList.add('active');
+
+      const title = document.getElementById('gameover-title');
+      const details = document.getElementById('gameover-details');
+
+      if (status === 'won') {
+        title.className = 'win-text';
+        title.textContent = 'Qal\'a Himoyalandi!';
+        details.innerHTML = `Mudofaa mukammal yakunlandi va yovuz kuchlar chekindi!<br>Ball: <strong>${players[0].score}</strong>`;
+        startConfetti();
+      } else if (status === 'lost') {
+        title.className = 'lose-text';
+        title.textContent = 'Darvoza Quladi';
+        details.innerHTML = `Yovuz kuchlar mudofaani yorib o'tishdi.<br>Ball: <strong>${players[0].score}</strong>`;
+        stopConfetti();
+      } else if (status === 'p1') {
+        title.className = 'win-text';
+        title.textContent = '1-O\'yinchi G\'olib!';
+        details.innerHTML = `P1 portallarni mukammal aniqlab g'oliblikka erishdi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else if (status === 'p2') {
+        title.className = 'win-text';
+        title.textContent = '2-O\'yinchi G\'olib!';
+        details.innerHTML = `P2 portallarni mukammal aniqlab g'oliblikka erishdi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        startConfetti();
+      } else {
+        title.className = 'win-text';
+        title.textContent = 'Durang!';
+        details.innerHTML = `Mudofaa teng kuchli sehrgarlar orqali saqlandi!<br>P1 ball: <strong>${players[0].score}</strong> | P2 ball: <strong>${players[1].score}</strong>`;
+        stopConfetti();
+      }
+    }
+
+    // Playback loop
+    let lastTime = 0;
+    function startGameLoop() {
+      lastTime = performance.now();
+      function tick(timestamp) {
+        if (isGameOver) return;
+        if (!timestamp) timestamp = performance.now();
+
+        let dt = (timestamp - lastTime) / 16.666;
+        if (dt > 4.0) dt = 4.0;
+        lastTime = timestamp;
+
+        // Twinkling stars update
+        backgroundStars.forEach(s => {
+          s.alpha += (Math.random() * 0.1 - 0.05) * dt;
+          s.alpha = Math.max(0.2, Math.min(0.8, s.alpha));
+        });
+
+        players.forEach((p, idx) => {
+          if (!p.active) return;
+
+          const w = p.canvas.width;
+          const h = p.canvas.height;
+          const ctx = p.ctx;
+
+          ctx.clearRect(0, 0, w, h);
+
+          // Render local background stars
+          ctx.fillStyle = '#ffffff';
+          backgroundStars.forEach(s => {
+            ctx.save();
+            ctx.globalAlpha = s.alpha;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          });
+
+          // 1. Spawn timer
+          p.nextSpawnTimer -= dt;
+          if (p.nextSpawnTimer <= 0) {
+            p.nextSpawnTimer = getSpawnInterval();
+            spawnDefenseEnemy(idx);
+          }
+
+          // 2. Update and Draw Spells
+          for (let i = p.spells.length - 1; i >= 0; i--) {
+            const spell = p.spells[i];
+            spell.x += spell.vx * dt;
+
+            // Remove if offscreen right
+            if (spell.x > w + 20) {
+              p.spells.splice(i, 1);
+              continue;
+            }
+
+            // Draw glowing spell
+            ctx.save();
+            ctx.fillStyle = '#e0f2fe';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#38bdf8';
+            ctx.beginPath();
+            ctx.arc(spell.x, spell.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Collision check: Spell hits enemy
+            for (let j = p.enemies.length - 1; j >= 0; j--) {
+              const enemy = p.enemies[j];
+              const dist = Math.hypot(spell.x - enemy.x, spell.y - enemy.y);
+              if (dist < enemy.radius + 10) {
+                p.spells.splice(i, 1);
+                p.enemies.splice(j, 1);
+                handleEnemyBlast(idx, enemy);
+                break;
+              }
+            }
+          }
+
+          // 3. Update & Draw Enemies
+          const castleWallX = 75;
+
+          for (let i = p.enemies.length - 1; i >= 0; i--) {
+            const enemy = p.enemies[i];
+            enemy.x += -getMarchSpeed() * dt;
+            enemy.animFrame += 0.08 * dt;
+
+            const walkSwing = Math.sin(enemy.animFrame) * 4;
+
+            // Collision check: Enemy reaches castle wall
+            if (enemy.x <= castleWallX) {
+              p.enemies.splice(i, 1);
+              
+              // Validate if the enemy was a correct target that reached wall
+              let matched = false;
+              if (currentQuest.sign === '>') {
+                matched = enemy.val > currentQuest.targetNum;
+              } else {
+                matched = enemy.val < currentQuest.targetNum;
+              }
+
+              if (matched) {
+                // If it matched, we should have killed it! Takes damage
+                p.lives = Math.max(0, p.lives - 1);
+                updateLivesUI(idx);
+                triggerDamageEffect(idx);
+              } 
+              else {
+                // Wrong target (doesn't match), simply vanishes harmlessly or hits wall with harmless puff
+                spawnSpellExplosion(idx, enemy.x, enemy.y, '#94a3b8');
+              }
+              checkGameStatus();
+              continue;
+            }
+
+            // Draw goblin enemy
+            ctx.save();
+            ctx.translate(enemy.x, enemy.y);
+
+            // Draw glowing matching shield
+            ctx.strokeStyle = enemy.color;
+            ctx.lineWidth = 3.5;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = enemy.color;
+
+            // Shield shape
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(0, 0, enemy.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.shadowBlur = 0;
+
+            // Draw shield number value (Upright!)
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 1.35rem Fredoka';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(enemy.val, 0, 0);
+
+            // Enemy head/ears outline
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            // Left ear
+            ctx.moveTo(-15, -20);
+            ctx.lineTo(-28, -25);
+            ctx.lineTo(-18, -12);
+            // Right ear
+            ctx.moveTo(15, -20);
+            ctx.lineTo(28, -25);
+            ctx.lineTo(18, -12);
+            ctx.fill();
+
+            // Tiny glowing red eyes on shield border top
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(-8, -12 + walkSwing, 2, 0, Math.PI * 2);
+            ctx.arc(8, -12 + walkSwing, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+          }
+
+          // 4. Update & Draw Particles
+          for (let i = p.particles.length - 1; i >= 0; i--) {
+            const part = p.particles[i];
+            part.x += part.vx * dt;
+            part.y += part.vy * dt;
+            part.alpha -= part.decay * dt;
+
+            if (part.alpha <= 0) {
+              p.particles.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = part.alpha;
+            ctx.fillStyle = part.color;
+            ctx.beginPath();
+            ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+
+          // 5. Draw Castle Tower wall on the left
+          ctx.save();
+          ctx.fillStyle = '#334155'; // castle grey
+          ctx.fillRect(0, 80, castleWallX, h - 80);
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(castleWallX - 10, 80, 10, h - 80);
+
+          // Tower battlements (crenellations)
+          ctx.fillStyle = '#475569';
+          for (let cy = 90; cy < h; cy += 40) {
+            ctx.fillRect(castleWallX - 10, cy, 15, 20);
+          }
+
+          // Wizard stands on top of castle tower center
+          const wizY = h / 2;
+          ctx.translate(35, wizY);
+
+          // Wizard robe
+          ctx.fillStyle = idx === 0 ? 'var(--accent-magenta)' : 'var(--primary-cyan)';
+          ctx.beginPath();
+          ctx.moveTo(-15, 25);
+          ctx.lineTo(0, -20);
+          ctx.lineTo(15, 25);
+          ctx.closePath();
+          ctx.fill();
+
+          // Hat
+          ctx.fillStyle = '#1e1b4b';
+          ctx.beginPath();
+          ctx.moveTo(-12, -20);
+          ctx.lineTo(0, -42);
+          ctx.lineTo(12, -20);
+          ctx.closePath();
+          ctx.fill();
+
+          // Wizard staff / weapon
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(12, 20);
+          ctx.lineTo(12, -18);
+          ctx.stroke();
+
+          // Glowing staff crystal
+          ctx.fillStyle = '#38bdf8';
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = '#38bdf8';
+          ctx.beginPath();
+          ctx.arc(12, -22, 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
+
+        });
+
+        mainGameLoop = requestAnimationFrame(tick);
+      }
+
+      mainGameLoop = requestAnimationFrame(tick);
+    }
+
+    // Interaction controls for launching spell magic
+    function setupInteraction() {
+      const bindControls = (pIdx) => {
+        const p = players[pIdx];
+        const trigger = p.triggerDom;
+        if (!trigger) return;
+
+        const launchSpellAt = (clientX, clientY) => {
+          if (isGameOver) return;
+          const rect = trigger.getBoundingClientRect();
+          const clickX = clientX - rect.left;
+          const clickY = clientY - rect.top;
+
+          // Wizard stands at x=35, wizY = height/2
+          const wizY = p.canvas.height / 2;
+
+          // Create a new spell moving from wizard hand towards clicked position
+          playSound('shoot');
+
+          const angle = Math.atan2(clickY - wizY, clickX - 35);
+          const speed = 10;
+
+          p.spells.push({
+            x: 50,
+            y: wizY - 15,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed
+          });
+        };
+
+        trigger.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          launchSpellAt(e.clientX, e.clientY);
+        });
+
+        trigger.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          launchSpellAt(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+      };
+
+      bindControls(0);
+      bindControls(1);
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      resizeConfetti();
+    });
+
+    // Confetti Engine
+    let confettiActive = false;
+    let confettiParticles = [];
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cCtx = confettiCanvas.getContext('2d');
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    function startConfetti() {
+      confettiActive = true;
+      confettiParticles = [];
+      resizeConfetti();
+
+      const colors = ['#d946ef', '#06b6d4', '#10b981', '#fbbf24', '#ef4444'];
+      for (let i = 0; i < 80; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+          r: Math.random() * 5 + 3,
+          d: Math.random() * confettiCanvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 8 - 4,
+          tiltAngleIncremental: Math.random() * 0.05 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      function drawConfetti() {
+        if (!confettiActive) return;
+        cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+        confettiParticles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2.5;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 10;
+
+          if (p.y > confettiCanvas.height) {
+            p.x = Math.random() * confettiCanvas.width;
+            p.y = -20;
+            p.tilt = Math.random() * 8 - 4;
+          }
+
+          cCtx.beginPath();
+          cCtx.lineWidth = p.r;
+          cCtx.strokeStyle = p.color;
+          cCtx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+          cCtx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+          cCtx.stroke();
+        });
+
+        requestAnimationFrame(drawConfetti);
+      }
+
+      drawConfetti();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+
+    function safeInit() {
+      initPlayers();
+      setupInteraction();
+      resizeCanvases();
+    }
+
+    window.addEventListener('load', safeInit);
+    document.addEventListener('DOMContentLoaded', safeInit);
+  </script>
+</body>
+</html>
