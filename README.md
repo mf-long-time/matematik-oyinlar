@@ -1,6 +1,6 @@
 # Matematik O'yinlar 🎮
 
-Bolalar uchun 24 ta interaktiv matematik o'yin platformasi.
+Bolalar uchun 30 ta interaktiv matematik o'yin platformasi.
 
 ## O'yinlar ro'yxati
 
@@ -36,6 +36,12 @@ Bolalar uchun 24 ta interaktiv matematik o'yin platformasi.
 - 🌉 Tengsizlik Ko'prik
 - 🏁 Tengsizlik Poygasi
 - ⚖️ Matematik Tarozi
+- 🐟 Tengsizlik Baliq
+- 🦖 Tengsizlik Dino
+- 🚀 Tengsizlik Kosmos
+- 💰 Tengsizlik Oltin
+- 🏰 Tengsizlik Qal'a
+- 🧺 Tengsizlik Savat
 
 ### 📐 Geometriya
 - 📐 Geometriya Shakllar
@@ -49,4 +55,4 @@ Bolalar uchun 24 ta interaktiv matematik o'yin platformasi.
 
 ## Ishga tushirish
 
-Saytni ochish: [matematik-oyinlar](https://YOUR_USERNAME.github.io/matematik-oyinlar/)
+Saytni ochish: [matematik-oyinlar](https://mf-long-time.github.io/matematik-oyinlar/)
