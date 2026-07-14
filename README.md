@@ -56,3 +56,12 @@ Bolalar uchun 30 ta interaktiv matematik o'yin platformasi.
 ## Ishga tushirish
 
 Saytni ochish: [matematik-oyinlar](https://mf-long-time.github.io/matematik-oyinlar/)
+
+## Muallif 👨‍💻
+
+**Tojiyev Ma'ruf Ruzikulovich**  
+*Kompyuter injinering mutaxassisi, PhD dotsent*
+
+8 yil ish stajiga ega tajribali mutaxassis. Dasturlash asoslari, Algoritmik tillar va dasturlash, Algoritmlar va ma'lumotlar tuzilmasi, Kompyuterli modellashtirish, Axborot xavfsizligi, hamda Kiberxavfsizlik asoslari kabi fanlardan dars berib kelmoqda. 
+
+Platforma bolalarni interaktiv va qiziqarli ta'lim muhitiga jalb qilish maqsadida yaratilgan.
